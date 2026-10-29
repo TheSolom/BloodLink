@@ -1,0 +1,68 @@
+name: bloodlink
+
+services:
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: bloodlink-sqlserver
+    restart: unless-stopped
+    environment:
+      ACCEPT_EULA: "Y"
+      MSSQL_SA_PASSWORD: "${SA_PASSWORD:-BloodLink!Password2026}"
+      MSSQL_PID: "Developer"
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    healthcheck:
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"${SA_PASSWORD:-BloodLink!Password2026}\" -C -Q 'SELECT 1' || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P \"${SA_PASSWORD:-BloodLink!Password2026}\" -Q 'SELECT 1'"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - bloodlink-network
+
+  rabbitmq:
+    image: masstransit/rabbitmq:latest
+    container_name: bloodlink-rabbitmq
+    restart: unless-stopped
+    environment:
+      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER:-guest}"
+      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS:-guest}"
+    ports:
+      - "5672:5672"     # AMQP
+      - "15672:15672"   # Management Web UI
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_port_connectivity"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+    networks:
+      - bloodlink-network
+
+  otel-lgtm:
+    image: grafana/otel-lgtm:latest
+    container_name: bloodlink-otel-lgtm
+    restart: unless-stopped
+    ports:
+      - "3000:3000"   # Grafana
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver
+    environment:
+      - OTEL_LGTM_LOG_LEVEL=INFO
+    volumes:
+      - otel-data:/data
+    networks:
+      - bloodlink-network
+
+volumes:
+  sqlserver-data:
+  rabbitmq-data:
+  otel-data:
+
+networks:
+  bloodlink-network:
+    driver: bridge

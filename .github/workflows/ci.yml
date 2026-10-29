@@ -1,0 +1,41 @@
+name: BloodLink CI
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+jobs:
+  build-and-test:
+    name: Build & Test (.NET 11)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: global.json
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: ${{ runner.os }}-nuget-${{ hashFiles('**/Directory.Packages.props', 'global.json') }}
+          restore-keys: |
+            ${{ runner.os }}-nuget-
+
+      - name: Restore dependencies
+        run: dotnet restore BloodLink.slnx
+
+      - name: Build solution
+        run: dotnet build BloodLink.slnx --configuration Release --no-restore
+
+      - name: Run unit & architecture tests
+        run: dotnet test BloodLink.slnx --configuration Release --no-build --verbosity normal --collect:"XPlat Code Coverage"

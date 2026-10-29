@@ -1,0 +1,54 @@
+# Build results
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+[Aa]rms/
+[Aa]rm64/
+build/
+*.nupkg
+*.snupkg
+
+# Visual Studio / VS Code / Rider
+.vs/
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+.idea/
+*.DotSettings.user
+
+# Testing & Coverage
+TestResults/
+*.trx
+coverage/
+*.cobertura.xml
+*.opencover.xml
+
+# Node & Frontend
+node_modules/
+dist/
+.wireit/
+*.tsbuildinfo
+coverage/
+
+# OS / Environment
+.DS_Store
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+*.env
+!.env.example
+
+# Kubernetes / Local temp
+*.local.yaml
+*.local.yml
+
+# Superpowers scratch
+.superpowers/

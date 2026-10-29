@@ -1,0 +1,10 @@
+<Solution>
+  <Folder Name="/shared/">
+    <Project Path="shared/BuildingBlocks.Domain/BuildingBlocks.Domain.csproj" />
+    <Project Path="shared/ServiceDefaults/ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/BuildingBlocks.UnitTests/BuildingBlocks.UnitTests.csproj" />
+    <Project Path="tests/Architecture.Tests/Architecture.Tests.csproj" />
+  </Folder>
+</Solution>
