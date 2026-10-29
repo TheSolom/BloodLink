@@ -63,7 +63,7 @@ The system is decomposed into three distinct bounded contexts:
 | **Runtime** | .NET 11 & C# 15 | Demonstrates cutting-edge runtime performance and modern C# features. |
 | **API Style** | Minimal APIs + Vertical Slices | High-cohesion feature folders; removes unnecessary controller indirection. |
 | **Domain Modeling** | Pure C# DDD Base Classes | `Entity<TId>`, `ValueObject`, `AggregateRoot<TId>` isolated from infrastructure. |
-| **Database & ORM** | SQL Server 2022 + EF Core 11 | Isolated database per service; robust relational model and concurrency tokens. |
+| **Database & ORM** | SQL Server 2025 + EF Core 11 | Isolated database per service; robust relational model and concurrency tokens. |
 | **Messaging** | RabbitMQ + MassTransit 8.x | Enterprise broker with transactional outbox, retries, and saga state machines (pinned to 8.x for Apache 2.0 license). |
 | **API Gateway** | YARP Reverse Proxy | High-performance, code-configured, reverse proxy gateway without ingress lock-in. |
 | **Observability** | OpenTelemetry + `grafana/otel-lgtm` | Unified, vendor-neutral traces, metrics, and logs in an all-in-one local stack. |
@@ -81,7 +81,7 @@ The system is decomposed into three distinct bounded contexts:
 
 ### 1. Start Local Infrastructure
 
-Start Microsoft SQL Server 2022, RabbitMQ (with delayed-message exchange), and the Grafana LGTM observability stack:
+Start Microsoft SQL Server 2025, RabbitMQ (with delayed-message exchange), and the Grafana LGTM observability stack:
 
 ```bash
 docker compose -f deploy/docker-compose.yml up -d

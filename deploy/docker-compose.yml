@@ -2,7 +2,7 @@ name: bloodlink
 
 services:
   sqlserver:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    image: mcr.microsoft.com/mssql/server:2025-CU10-ubuntu-24.04
     container_name: bloodlink-sqlserver
     restart: unless-stopped
     environment:
@@ -23,7 +23,7 @@ services:
       - bloodlink-network
 
   rabbitmq:
-    image: masstransit/rabbitmq:latest
+    image: masstransit/rabbitmq:4.3.1
     container_name: bloodlink-rabbitmq
     restart: unless-stopped
     environment:
@@ -44,7 +44,7 @@ services:
       - bloodlink-network
 
   otel-lgtm:
-    image: grafana/otel-lgtm:latest
+    image: grafana/otel-lgtm:0.38.1
     container_name: bloodlink-otel-lgtm
     restart: unless-stopped
     ports:

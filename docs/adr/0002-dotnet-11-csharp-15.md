@@ -27,7 +27,7 @@ We adopt **.NET 11 (SDK version `11.0.100-rc.3.26522.148`)** and **C# 15 (`LangV
 | **Testcontainers** | **PASS** | `Testcontainers.MsSql` `4.16.0` and `Testcontainers.RabbitMq` `4.16.0` verified. |
 | **Testing Suite** | **PASS** | `xUnit` 2.9.3, `Shouldly` 4.3.0, `Respawn` 6.2.1, `Bogus` 35.6.3, `NetArchTest.eNhancedEdition` 1.4.5 verified. |
 | **Mapping & Validation** | **PASS** | `Riok.Mapperly` 4.3.1 (Apache 2.0), `FluentValidation` 12.2.0 (Apache 2.0) verified. |
-| **Local Infrastructure** | **PASS** | Docker Compose validated with SQL Server 2022, RabbitMQ (delayed message exchange), and `grafana/otel-lgtm`. |
+| **Local Infrastructure** | **PASS** | Docker Compose validated with SQL Server 2025 (`2025-CU10-ubuntu-24.04`), RabbitMQ 4.3.1 (delayed message exchange), and `grafana/otel-lgtm` 0.38.1. |
 
 ## Licensing Verification (Checked 2026-10-29)
 
