@@ -6,18 +6,13 @@ namespace BloodLink.BuildingBlocks.UnitTests;
 
 public class AggregateRootTests
 {
-    private record SampleDomainEvent(Guid EventId, DateTimeOffset OccurredOn, string Note) : IDomainEvent;
+    private record SampleDomainEvent(Guid EventId, DateTimeOffset OccurredOn, string Note)
+        : IDomainEvent;
 
-    private sealed class SampleAggregate : AggregateRoot<Guid>
+    private sealed class SampleAggregate(Guid id) : AggregateRoot<Guid>(id)
     {
-        public SampleAggregate(Guid id) : base(id)
-        {
-        }
-
-        public void DoSomething(string note)
-        {
+        public void DoSomething(string note) =>
             AddDomainEvent(new SampleDomainEvent(Guid.NewGuid(), DateTimeOffset.UtcNow, note));
-        }
     }
 
     [Fact]

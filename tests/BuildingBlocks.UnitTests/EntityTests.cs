@@ -6,22 +6,12 @@ namespace BloodLink.BuildingBlocks.UnitTests;
 
 public class EntityTests
 {
-    private sealed class TestEntity : Entity<Guid>
+    private sealed class TestEntity(Guid id, string name) : Entity<Guid>(id)
     {
-        public string Name { get; set; }
-
-        public TestEntity(Guid id, string name) : base(id)
-        {
-            Name = name;
-        }
+        public string Name { get; set; } = name;
     }
 
-    private sealed class AnotherEntity : Entity<Guid>
-    {
-        public AnotherEntity(Guid id) : base(id)
-        {
-        }
-    }
+    private sealed class AnotherEntity(Guid id) : Entity<Guid>(id) { }
 
     [Fact]
     public void Equals_WhenSameIdAndType_ReturnsTrue()

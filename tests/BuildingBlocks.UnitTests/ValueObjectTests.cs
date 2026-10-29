@@ -6,16 +6,10 @@ namespace BloodLink.BuildingBlocks.UnitTests;
 
 public class ValueObjectTests
 {
-    private sealed class GeoLocation : ValueObject
+    private sealed class GeoLocation(double latitude, double longitude) : ValueObject
     {
-        public double Latitude { get; }
-        public double Longitude { get; }
-
-        public GeoLocation(double latitude, double longitude)
-        {
-            Latitude = latitude;
-            Longitude = longitude;
-        }
+        public double Latitude { get; } = latitude;
+        public double Longitude { get; } = longitude;
 
         protected override IEnumerable<object?> GetEqualityComponents()
         {
@@ -24,16 +18,10 @@ public class ValueObjectTests
         }
     }
 
-    private sealed class DifferentValueObject : ValueObject
+    private sealed class DifferentValueObject(double latitude, double longitude) : ValueObject
     {
-        public double Latitude { get; }
-        public double Longitude { get; }
-
-        public DifferentValueObject(double latitude, double longitude)
-        {
-            Latitude = latitude;
-            Longitude = longitude;
-        }
+        public double Latitude { get; } = latitude;
+        public double Longitude { get; } = longitude;
 
         protected override IEnumerable<object?> GetEqualityComponents()
         {

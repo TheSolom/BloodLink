@@ -8,8 +8,10 @@ namespace BloodLink.Architecture.Tests;
 
 public class FoundationArchitectureTests
 {
-    private static readonly System.Reflection.Assembly DomainAssembly = typeof(IDomainEvent).Assembly;
-    private static readonly System.Reflection.Assembly ServiceDefaultsAssembly = typeof(Extensions).Assembly;
+    private static readonly System.Reflection.Assembly DomainAssembly =
+        typeof(IDomainEvent).Assembly;
+    private static readonly System.Reflection.Assembly ServiceDefaultsAssembly =
+        typeof(Extensions).Assembly;
 
     [Fact]
     public void BuildingBlocksDomain_ShouldNotHaveDependencyOnInfrastructureFrameworks()
@@ -20,16 +22,18 @@ public class FoundationArchitectureTests
             "Microsoft.EntityFrameworkCore",
             "MassTransit",
             "Microsoft.AspNetCore",
-            "BloodLink.ServiceDefaults"
+            "BloodLink.ServiceDefaults",
         };
 
-        var result = Types.InAssembly(DomainAssembly)
+        var result = Types
+            .InAssembly(DomainAssembly)
             .ShouldNot()
             .HaveDependencyOnAny(forbiddenDependencies)
             .GetResult();
 
         result.IsSuccessful.ShouldBeTrue(
-            $"BuildingBlocks.Domain must not depend on external frameworks: {string.Join(", ", result.FailingTypes?.Select(t => t.FullName) ?? [])}");
+            $"BuildingBlocks.Domain must not depend on external frameworks: {string.Join(", ", result.FailingTypes?.Select(t => t.FullName) ?? [])}"
+        );
     }
 
     [Fact]
@@ -37,17 +41,17 @@ public class FoundationArchitectureTests
     {
         // ServiceDefaults handles cross-cutting operational concerns (OTEL, Health checks)
         // and must never know about domain models or domain events.
-        var forbiddenDependencies = new[]
-        {
-            "BloodLink.BuildingBlocks.Domain"
-        };
+        var forbiddenDependencies = new[] { "BloodLink.BuildingBlocks.Domain" };
 
-        var result = Types.InAssembly(ServiceDefaultsAssembly)
+        var result = Types
+            .InAssembly(ServiceDefaultsAssembly)
             .ShouldNot()
             .HaveDependencyOnAny(forbiddenDependencies)
             .GetResult();
 
         result.IsSuccessful.ShouldBeTrue(
-            $"ServiceDefaults must not depend on Domain: {string.Join(", ", result.FailingTypes?.Select(t => t.FullName) ?? [])}");
+            $"ServiceDefaults must not depend on Domain: {string.Join(", ", result.FailingTypes?.Select(t => t.FullName) ?? [])}"
+        );
     }
 }
+
