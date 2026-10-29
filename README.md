@@ -62,7 +62,7 @@ The system is decomposed into three distinct bounded contexts:
 |---|---|---|
 | **Runtime** | .NET 11 & C# 15 | Demonstrates cutting-edge runtime performance and modern C# features. |
 | **API Style** | Minimal APIs + Vertical Slices | High-cohesion feature folders; removes unnecessary controller indirection. |
-| **Domain Modeling** | Pure C# DDD Base Classes | `Entity<TId>`, `ValueObject`, `AggregateRoot<TId>` isolated from infrastructure. |
+| **Domain Modeling** | Pure C# DDD Idioms | Entities (`Entity<TId>`, `AggregateRoot<TId>`), domain events, and native records for value objects. |
 | **Database & ORM** | SQL Server 2025 + EF Core 11 | Isolated database per service; robust relational model and concurrency tokens. |
 | **Messaging** | RabbitMQ + MassTransit 8.x | Enterprise broker with transactional outbox, retries, and saga state machines (pinned to 8.x for Apache 2.0 license). |
 | **API Gateway** | YARP Reverse Proxy | High-performance, code-configured, reverse proxy gateway without ingress lock-in. |
@@ -125,7 +125,7 @@ bloodlink/
 │   └── dispatch/                 # Dispatch service (vertical slices)
 ├── gateway/                      # YARP API Gateway
 ├── shared/                       # Shared reusable foundation libraries
-│   ├── BuildingBlocks.Domain/    # DDD base classes (Entity, ValueObject, etc.)
+│   ├── BuildingBlocks.Domain/    # DDD base types (Entity, AggregateRoot, DomainException, IDomainEvent)
 │   └── ServiceDefaults/          # OpenTelemetry, health checks, resilience
 ├── tests/                        # Test suites
 │   ├── Architecture.Tests/       # NetArchTest architectural boundaries

@@ -11,8 +11,10 @@ public class AggregateRootTests
 
     private sealed class SampleAggregate(Guid id) : AggregateRoot<Guid>(id)
     {
-        public void DoSomething(string note) =>
-            AddDomainEvent(new SampleDomainEvent(Guid.NewGuid(), DateTimeOffset.UtcNow, note));
+        public static void DoSomething(SampleAggregate aggregate, string note) =>
+            aggregate.AddDomainEvent(
+                new SampleDomainEvent(Guid.NewGuid(), DateTimeOffset.UtcNow, note)
+            );
     }
 
     [Fact]
@@ -20,7 +22,7 @@ public class AggregateRootTests
     {
         var aggregate = new SampleAggregate(Guid.NewGuid());
 
-        aggregate.DoSomething("Initial Event");
+        SampleAggregate.DoSomething(aggregate, "Initial Event");
 
         aggregate.DomainEvents.Count.ShouldBe(1);
         var evt = aggregate.DomainEvents.First() as SampleDomainEvent;
@@ -32,8 +34,8 @@ public class AggregateRootTests
     public void ClearDomainEvents_ReturnsBufferedEventsAndEmptiesCollection()
     {
         var aggregate = new SampleAggregate(Guid.NewGuid());
-        aggregate.DoSomething("Event 1");
-        aggregate.DoSomething("Event 2");
+        SampleAggregate.DoSomething(aggregate, "Event 1");
+        SampleAggregate.DoSomething(aggregate, "Event 2");
 
         IReadOnlyCollection<IDomainEvent> cleared = aggregate.ClearDomainEvents();
 
