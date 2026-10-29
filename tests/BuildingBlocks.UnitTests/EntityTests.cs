@@ -13,6 +13,12 @@ public class EntityTests
 
     private sealed class AnotherEntity(Guid id) : Entity<Guid>(id) { }
 
+    private sealed class TransientEntity : Entity<Guid>
+    {
+        public TransientEntity() : base() { }
+        public TransientEntity(Guid id) : base(id) { }
+    }
+
     [Fact]
     public void Equals_WhenSameIdAndType_ReturnsTrue()
     {
@@ -45,7 +51,7 @@ public class EntityTests
         var entity2 = new AnotherEntity(id);
 
         entity1.Equals(entity2).ShouldBeFalse();
-        (entity1 == entity2).ShouldBeFalse();
+        ((Entity<Guid>)entity1 == entity2).ShouldBeFalse();
     }
 
     [Fact]
@@ -66,5 +72,37 @@ public class EntityTests
 
         (left == right).ShouldBeTrue();
         (left != right).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void Equals_WhenBothTransientWithDefaultId_ReturnsFalse()
+    {
+        var entity1 = new TransientEntity();
+        var entity2 = new TransientEntity();
+
+        entity1.Equals(entity2).ShouldBeFalse();
+        (entity1 == entity2).ShouldBeFalse();
+        (entity1 != entity2).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void Equals_WhenSameTransientInstance_ReturnsTrue()
+    {
+        var entity = new TransientEntity();
+        var sameRef = entity;
+
+        entity.Equals(sameRef).ShouldBeTrue();
+        (entity == sameRef).ShouldBeTrue();
+    }
+
+    [Fact]
+    public void GetHashCode_WhenTransient_ReturnsConsistentInstanceHashCode()
+    {
+        var entity = new TransientEntity();
+
+        int hash1 = entity.GetHashCode();
+        int hash2 = entity.GetHashCode();
+
+        hash1.ShouldBe(hash2);
     }
 }
