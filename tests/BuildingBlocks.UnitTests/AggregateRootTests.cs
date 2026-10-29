@@ -35,7 +35,7 @@ public class AggregateRootTests
         aggregate.DoSomething("Event 1");
         aggregate.DoSomething("Event 2");
 
-        var cleared = aggregate.ClearDomainEvents();
+        IReadOnlyCollection<IDomainEvent> cleared = aggregate.ClearDomainEvents();
 
         cleared.Count.ShouldBe(2);
         aggregate.DomainEvents.ShouldBeEmpty();

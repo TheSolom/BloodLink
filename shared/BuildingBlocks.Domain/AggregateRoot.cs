@@ -29,7 +29,7 @@ public abstract class AggregateRoot<TId> : Entity<TId>
     /// </summary>
     public IReadOnlyCollection<IDomainEvent> ClearDomainEvents()
     {
-        var events = _domainEvents.ToArray();
+        IDomainEvent[] events = _domainEvents.ToArray();
         _domainEvents.Clear();
         return events;
     }

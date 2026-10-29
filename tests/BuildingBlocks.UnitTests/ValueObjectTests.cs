@@ -57,7 +57,7 @@ public class ValueObjectTests
     public void WithExpression_SupportsNonDestructiveMutation()
     {
         var original = new GeoLocation(40.7128, -74.0060);
-        var modified = original with { Latitude = 41.0 };
+        GeoLocation modified = original with { Latitude = 41.0 };
 
         modified.Latitude.ShouldBe(41.0);
         modified.Longitude.ShouldBe(-74.0060);

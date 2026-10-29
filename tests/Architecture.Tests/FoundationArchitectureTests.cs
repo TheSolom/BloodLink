@@ -25,7 +25,7 @@ public class FoundationArchitectureTests
             "BloodLink.ServiceDefaults",
         ];
 
-        var result = Types
+        TestResult result = Types
             .InAssembly(DomainAssembly)
             .ShouldNot()
             .HaveDependencyOnAny(forbiddenDependencies)
@@ -43,7 +43,7 @@ public class FoundationArchitectureTests
         // and must never know about domain models or domain events.
         string[] forbiddenDependencies = ["BloodLink.BuildingBlocks.Domain"];
 
-        var result = Types
+        TestResult result = Types
             .InAssembly(ServiceDefaultsAssembly)
             .ShouldNot()
             .HaveDependencyOnAny(forbiddenDependencies)
