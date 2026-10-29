@@ -6,29 +6,9 @@ namespace BloodLink.BuildingBlocks.UnitTests;
 
 public class ValueObjectTests
 {
-    private sealed class GeoLocation(double latitude, double longitude) : ValueObject
-    {
-        public double Latitude { get; } = latitude;
-        public double Longitude { get; } = longitude;
+    private sealed record GeoLocation(double Latitude, double Longitude) : ValueObject;
 
-        protected override IEnumerable<object?> GetEqualityComponents()
-        {
-            yield return Latitude;
-            yield return Longitude;
-        }
-    }
-
-    private sealed class DifferentValueObject(double latitude, double longitude) : ValueObject
-    {
-        public double Latitude { get; } = latitude;
-        public double Longitude { get; } = longitude;
-
-        protected override IEnumerable<object?> GetEqualityComponents()
-        {
-            yield return Latitude;
-            yield return Longitude;
-        }
-    }
+    private sealed record DifferentValueObject(double Latitude, double Longitude) : ValueObject;
 
     [Fact]
     public void Equals_WhenSameValues_ReturnsTrue()
@@ -70,5 +50,18 @@ public class ValueObjectTests
 
         loc.Equals(null).ShouldBeFalse();
         (loc == null).ShouldBeFalse();
+        (null == loc).ShouldBeFalse();
+    }
+
+    [Fact]
+    public void WithExpression_SupportsNonDestructiveMutation()
+    {
+        var original = new GeoLocation(40.7128, -74.0060);
+        var modified = original with { Latitude = 41.0 };
+
+        modified.Latitude.ShouldBe(41.0);
+        modified.Longitude.ShouldBe(-74.0060);
+        original.Latitude.ShouldBe(40.7128); // original unchanged
+        (original == modified).ShouldBeFalse();
     }
 }

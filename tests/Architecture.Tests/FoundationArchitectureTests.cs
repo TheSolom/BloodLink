@@ -17,13 +17,13 @@ public class FoundationArchitectureTests
     public void BuildingBlocksDomain_ShouldNotHaveDependencyOnInfrastructureFrameworks()
     {
         // Domain building blocks must stay purely in C# standard library with no EF, ASP.NET Core, or MassTransit
-        var forbiddenDependencies = new[]
-        {
+        string[] forbiddenDependencies =
+        [
             "Microsoft.EntityFrameworkCore",
             "MassTransit",
             "Microsoft.AspNetCore",
             "BloodLink.ServiceDefaults",
-        };
+        ];
 
         var result = Types
             .InAssembly(DomainAssembly)
@@ -41,7 +41,7 @@ public class FoundationArchitectureTests
     {
         // ServiceDefaults handles cross-cutting operational concerns (OTEL, Health checks)
         // and must never know about domain models or domain events.
-        var forbiddenDependencies = new[] { "BloodLink.BuildingBlocks.Domain" };
+        string[] forbiddenDependencies = ["BloodLink.BuildingBlocks.Domain"];
 
         var result = Types
             .InAssembly(ServiceDefaultsAssembly)
