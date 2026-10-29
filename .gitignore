@@ -52,3 +52,7 @@ ehthumbs.db
 
 # Superpowers scratch
 .superpowers/
+
+# Local agent artifacts
+.agents/
+skills-lock.json
