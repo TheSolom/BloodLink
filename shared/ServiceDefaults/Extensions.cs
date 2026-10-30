@@ -1,13 +1,5 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using OpenTelemetry;
-using OpenTelemetry.Exporter;
-using OpenTelemetry.Metrics;
-using OpenTelemetry.Trace;
 
 namespace BloodLink.ServiceDefaults;
 
@@ -82,17 +74,34 @@ public static class Extensions
         string? structuredEndpoint = builder.Configuration["OpenTelemetry:Endpoint"];
         string? fallbackEndpoint = builder.Configuration["OTEL_EXPORTER_OTLP_ENDPOINT"];
 
-        string? endpointStr = !string.IsNullOrWhiteSpace(structuredEndpoint)
-            ? structuredEndpoint.Trim()
-            : (!string.IsNullOrWhiteSpace(fallbackEndpoint) ? fallbackEndpoint.Trim() : null);
+        string? endpointStr;
+
+        if (!string.IsNullOrWhiteSpace(structuredEndpoint))
+        {
+            endpointStr = structuredEndpoint.Trim();
+        }
+        else if (!string.IsNullOrWhiteSpace(fallbackEndpoint))
+        {
+            endpointStr = fallbackEndpoint.Trim();
+        }
+        else
+        {
+            endpointStr = null;
+        }
 
         if (endpointStr is not null)
         {
-            if (!Uri.TryCreate(endpointStr, UriKind.Absolute, out Uri? endpointUri) ||
-                (endpointUri.Scheme != Uri.UriSchemeHttp && endpointUri.Scheme != Uri.UriSchemeHttps))
+            if (
+                !Uri.TryCreate(endpointStr, UriKind.Absolute, out Uri? endpointUri)
+                || (
+                    endpointUri.Scheme != Uri.UriSchemeHttp
+                    && endpointUri.Scheme != Uri.UriSchemeHttps
+                )
+            )
             {
                 throw new InvalidOperationException(
-                    $"The configured OpenTelemetry endpoint '{endpointStr}' is invalid. It must be an absolute HTTP or HTTPS URL.");
+                    $"The configured OpenTelemetry endpoint '{endpointStr}' is invalid. It must be an absolute HTTP or HTTPS URL."
+                );
             }
 
             builder.Services.Configure<OtlpExporterOptions>(options =>
