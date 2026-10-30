@@ -53,6 +53,5 @@ ehthumbs.db
 # Superpowers scratch
 .superpowers/
 
-# Local agent artifacts
+# Local agent artifacts (skills restored via `npx skills experimental_install`)
 .agents/
-skills-lock.json
