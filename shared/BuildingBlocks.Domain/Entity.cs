@@ -4,21 +4,16 @@ namespace BloodLink.BuildingBlocks.Domain;
 /// Base class for domain entities with explicit identity.
 /// Entities are compared by their runtime type and identifier.
 /// </summary>
-public abstract class Entity<TId> : IEquatable<Entity<TId>>
+public abstract class Entity<TId>(TId id) : IEquatable<Entity<TId>>
     where TId : notnull
 {
-    public TId Id { get; protected set; } = default!;
-
-    protected Entity(TId id)
-    {
-        ArgumentNullException.ThrowIfNull(id);
-        Id = id;
-    }
+    public TId Id { get; protected init; } = id ?? throw new ArgumentNullException(nameof(id));
 
     /// <summary>
     /// Required for EF Core materialization.
     /// </summary>
-    protected Entity() { }
+    protected Entity()
+        : this(default!) { }
 
     public bool Equals(Entity<TId>? other)
     {
@@ -32,7 +27,7 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
             return true;
         }
 
-        if (GetRealType(GetType()) != GetRealType(other.GetType()))
+        if (GetType() != other.GetType())
         {
             return false;
         }
@@ -47,18 +42,13 @@ public abstract class Entity<TId> : IEquatable<Entity<TId>>
 
     public override bool Equals(object? obj) => obj is Entity<TId> other && Equals(other);
 
-    public override int GetHashCode() =>
-        // Stable throughout the entity lifecycle.
-        GetRealType(GetType()).GetHashCode();
+    public override int GetHashCode() => HashCode.Combine(GetType(), Id);
 
     public static bool operator ==(Entity<TId>? left, Entity<TId>? right) =>
-        left is null ? right is null : left.Equals(right);
+        left?.Equals(right) ?? right is null;
 
     public static bool operator !=(Entity<TId>? left, Entity<TId>? right) => !(left == right);
 
     private bool IsTransient() => EqualityComparer<TId>.Default.Equals(Id, default!);
-
-    private static Type GetRealType(Type type) =>
-        type.Namespace == "Castle.Proxies" ? type.BaseType ?? type : type;
 }
 
