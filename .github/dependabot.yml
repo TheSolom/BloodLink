@@ -1,0 +1,50 @@
+version: 2
+updates:
+  # .NET NuGet dependencies (managed centrally in Directory.Packages.props)
+  - package-ecosystem: "nuget"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      dotnet-core:
+        patterns:
+          - "Microsoft.*"
+          - "System.*"
+      testing:
+        patterns:
+          - "xunit*"
+          - "Shouldly"
+          - "Bogus"
+          - "Respawn"
+          - "Testcontainers*"
+          - "NetArchTest*"
+          - "coverlet*"
+      observability:
+        patterns:
+          - "OpenTelemetry*"
+
+  # GitHub Actions workflows (.github/workflows)
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+    groups:
+      actions:
+        patterns:
+          - "*"
+
+  # Docker Compose dependencies (deploy/docker-compose.yml)
+  - package-ecosystem: "docker-compose"
+    directory: "/deploy"
+    schedule:
+      interval: "weekly"
+    groups:
+      compose-services:
+        patterns:
+          - "*"
+
+  # Dockerfiles (for service images across the monorepo)
+  - package-ecosystem: "docker"
+    directory: "/"
+    schedule:
+      interval: "weekly"
