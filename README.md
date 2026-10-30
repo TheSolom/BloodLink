@@ -79,18 +79,23 @@ The system is decomposed into three distinct bounded contexts:
 - [.NET 11 SDK](https://dotnet.microsoft.com/download/dotnet/11.0) (pinned via `global.json`)
 - [Docker Desktop](https://www.docker.com/) (or Docker engine with Compose)
 
-### 1. Start Local Infrastructure
+### 1. Configure and Start Local Infrastructure
+
+Copy the example environment file and configure local credentials:
+
+```bash
+cp deploy/.env.example deploy/.env
+```
 
 Start Microsoft SQL Server 2025, RabbitMQ (with delayed-message exchange), and the Grafana LGTM observability stack:
 
 ```bash
-docker compose -f deploy/docker-compose.yml up -d
+docker compose --env-file deploy/.env -f deploy/docker-compose.yml up -d
 ```
 
-- **RabbitMQ Management UI:** [http://localhost:15672](http://localhost:15672) (User: `guest` / Pass: `guest`)
+- **RabbitMQ Management UI:** [http://localhost:15672](http://localhost:15672) (User: `bloodlink_app` / Pass: configured in `deploy/.env`)
 - **Grafana Observability UI:** [http://localhost:3000](http://localhost:3000)
-- **SQL Server:** `localhost:1433` (User: `sa` / Pass: `BloodLink!Password2026`)
-
+- **SQL Server:** `localhost:1433` (User: `sa` / Pass: configured in `deploy/.env`)
 ### 2. Build the Solution
 
 ```bash
