@@ -105,9 +105,20 @@ Execute unit, architecture, and foundation tests across the solution:
 dotnet test BloodLink.slnx
 ```
 
+### 4. Agent Skills Restoration
+
+Workspace agent skills are locked in `skills-lock.json` and gitignored. To restore them on a fresh clone:
+
+```bash
+npx skills experimental_install
+```
+
 ---
 
-## Architectural Decision Records (ADRs)
+## Project Documentation & Architectural Decisions
+
+- [Project Plan](docs/project-plan.md) (comprehensive architecture, domain design, and 20-week timeline)
+- [Architecture Specifications](docs/architecture.md)
 
 - [ADR-0001: Three Services, Not Six](docs/adr/0001-three-services-not-six.md)
 - [ADR-0002: .NET 11 and C# 15 STS for Portfolio & Engineering Modernity](docs/adr/0002-dotnet-11-csharp-15.md)
@@ -134,10 +145,12 @@ bloodlink/
 │   └── docker-compose.yml        # SQL Server, RabbitMQ, otel-lgtm
 ├── docs/
 │   ├── adr/                      # Architectural Decision Records
-│   └── architecture.md           # Architecture specifications & diagrams
+│   ├── architecture.md           # Architecture specifications & diagrams
+│   └── project-plan.md           # Master project plan & phased roadmap
 ├── .github/workflows/            # GitHub Actions CI pipeline
 ├── global.json                   # Pinned .NET 11 SDK
 ├── Directory.Build.props          # Central MSBuild properties
 ├── Directory.Packages.props       # Central Package Management (CPM)
+├── skills-lock.json              # Agent skills dependency lockfile
 └── .editorconfig                 # Unified code formatting and style
 ```
