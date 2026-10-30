@@ -7,14 +7,14 @@ services:
     restart: unless-stopped
     environment:
       ACCEPT_EULA: "Y"
-      MSSQL_SA_PASSWORD: "${SA_PASSWORD:-BloodLink!Password2026}"
+      MSSQL_SA_PASSWORD: "${SQL_PASSWORD:?SQL_PASSWORD is required}"
       MSSQL_PID: "Developer"
     ports:
       - "1433:1433"
     volumes:
       - sqlserver-data:/var/opt/mssql
     healthcheck:
-      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"${SA_PASSWORD:-BloodLink!Password2026}\" -C -Q 'SELECT 1' || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P \"${SA_PASSWORD:-BloodLink!Password2026}\" -Q 'SELECT 1'"]
+      test: ["CMD-SHELL", "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' || /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P \"$$MSSQL_SA_PASSWORD\" -Q 'SELECT 1'"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -27,8 +27,8 @@ services:
     container_name: bloodlink-rabbitmq
     restart: unless-stopped
     environment:
-      RABBITMQ_DEFAULT_USER: "${RABBITMQ_USER:-guest}"
-      RABBITMQ_DEFAULT_PASS: "${RABBITMQ_PASS:-guest}"
+      RABBITMQ_DEFAULT_USER: "${RABBIT_USER:?RABBIT_USER is required}"
+      RABBITMQ_DEFAULT_PASS: "${RABBIT_PASSWORD:?RABBIT_PASSWORD is required}"
     ports:
       - "5672:5672"     # AMQP
       - "15672:15672"   # Management Web UI
