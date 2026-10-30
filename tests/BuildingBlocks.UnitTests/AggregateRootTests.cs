@@ -44,11 +44,10 @@ public class AggregateRootTests
     }
 
     [Fact]
-    public void AggregateRoot_ImplementsIAggregateRootAndIHasDomainEvents()
+    public void AggregateRoot_ImplementsIHasDomainEvents()
     {
         var aggregate = new SampleAggregate(Guid.NewGuid());
 
-        aggregate.ShouldBeAssignableTo<IAggregateRoot>();
         aggregate.ShouldBeAssignableTo<IHasDomainEvents>();
     }
 

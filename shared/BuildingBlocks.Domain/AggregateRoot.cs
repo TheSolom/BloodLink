@@ -4,7 +4,7 @@ namespace BloodLink.BuildingBlocks.Domain;
 /// Base class for aggregate roots. Aggregate roots manage transactional consistency
 /// and publish domain events representing facts that occurred within their boundary.
 /// </summary>
-public abstract class AggregateRoot<TId>(TId id) : Entity<TId>(id), IAggregateRoot
+public abstract class AggregateRoot<TId>(TId id) : Entity<TId>(id), IHasDomainEvents
     where TId : notnull
 {
     private readonly List<IDomainEvent> _domainEvents = [];
