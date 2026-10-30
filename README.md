@@ -117,7 +117,7 @@ npx skills experimental_install
 
 ## Project Documentation & Architectural Decisions
 
-- [Project Plan](docs/project-plan.md) (comprehensive architecture, domain design, and 20-week timeline)
+
 - [Architecture Specifications](docs/architecture.md)
 
 - [ADR-0001: Three Services, Not Six](docs/adr/0001-three-services-not-six.md)
@@ -145,8 +145,8 @@ bloodlink/
 │   └── docker-compose.yml        # SQL Server, RabbitMQ, otel-lgtm
 ├── docs/
 │   ├── adr/                      # Architectural Decision Records
-│   ├── architecture.md           # Architecture specifications & diagrams
-│   └── project-plan.md           # Master project plan & phased roadmap
+│   └── architecture.md           # Architecture specifications & diagrams
+
 ├── .github/workflows/            # GitHub Actions CI pipeline
 ├── global.json                   # Pinned .NET 11 SDK
 ├── Directory.Build.props          # Central MSBuild properties

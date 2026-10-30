@@ -60,7 +60,7 @@ public class FoundationArchitectureTests
     [Fact(Skip = "Pending implementation of service domain projects (Inventory.Domain, Requests.Domain) in Phase 2.")]
     public void DomainProjects_ShouldNotReferenceEFCore_MassTransit_AspNetCore_OrServiceDefaults()
     {
-        // Plan section 12, rules 2 & 3:
+        // Boundary rules:
         // *.Domain projects reference no EF Core, no MassTransit, and no ASP.NET Core.
         // They may reference only BuildingBlocks.Domain and standard C# BCL.
         // *.Domain projects do not reference ServiceDefaults.
@@ -69,14 +69,14 @@ public class FoundationArchitectureTests
     [Fact(Skip = "Pending implementation of service contracts projects (*.Contracts) in Phase 2.")]
     public void ContractsProjects_ShouldContainOnlyRecordsAndEnums_AndReferenceNothing()
     {
-        // Plan section 12, rule 5:
+        // Boundary rule:
         // *.Contracts projects contain only records and enums and reference nothing.
     }
 
     [Fact(Skip = "Pending implementation of service projects (Inventory, Requests, Dispatch) in Phase 2.")]
     public void Services_ShouldNeverReferenceOtherServicesApiOrDomain_OnlyContracts()
     {
-        // Plan section 12, rule 1:
+        // Boundary rule:
         // A service's *.Api and *.Domain projects never reference another service's *.Api or *.Domain.
         // They may reference only another service's *.Contracts.
     }
@@ -84,7 +84,7 @@ public class FoundationArchitectureTests
     [Fact(Skip = "Pending implementation of messaging infrastructure and sagas in Phase 4 & Phase 6.")]
     public void MassTransitTypes_ShouldOnlyBeReferencedByMessagingInfrastructureOrRequestsSagas()
     {
-        // Plan section 12, rule 4:
+        // Boundary rule:
         // Only Infrastructure/Messaging (and Requests.Api/Sagas) may reference MassTransit types.
     }
 }
