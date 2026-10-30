@@ -38,13 +38,17 @@ dist/
 *.tsbuildinfo
 coverage/
 
-# OS / Environment
+# OS / Environment & Local Secrets
 .DS_Store
 Thumbs.db
 ehthumbs.db
 [Dd]esktop.ini
 *.env
+deploy/.env
+!deploy/.env.example
 !.env.example
+**/appsettings.Development.json
+appsettings.Development.json
 
 # Kubernetes / Local temp
 *.local.yaml
