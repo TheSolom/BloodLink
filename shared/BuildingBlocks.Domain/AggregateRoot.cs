@@ -4,18 +4,18 @@ namespace BloodLink.BuildingBlocks.Domain;
 /// Base class for aggregate roots. Aggregate roots manage transactional consistency
 /// and publish domain events representing facts that occurred within their boundary.
 /// </summary>
-public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot
+public abstract class AggregateRoot<TId>(TId id) : Entity<TId>(id), IAggregateRoot
     where TId : notnull
 {
     private readonly List<IDomainEvent> _domainEvents = [];
 
-    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents;
+    public IReadOnlyCollection<IDomainEvent> DomainEvents => _domainEvents.AsReadOnly();
 
-    protected AggregateRoot(TId id)
-        : base(id) { }
-
+    /// <summary>
+    /// Required for EF Core materialization.
+    /// </summary>
     protected AggregateRoot()
-        : base() { }
+        : this(default!) { }
 
     protected void AddDomainEvent(IDomainEvent domainEvent)
     {
@@ -29,8 +29,9 @@ public abstract class AggregateRoot<TId> : Entity<TId>, IAggregateRoot
     /// </summary>
     public IReadOnlyCollection<IDomainEvent> ClearDomainEvents()
     {
-        IDomainEvent[] events = _domainEvents.ToArray();
+        IReadOnlyCollection<IDomainEvent> events = [.. _domainEvents];
         _domainEvents.Clear();
         return events;
     }
 }
+
