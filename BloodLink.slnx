@@ -3,6 +3,7 @@
     <Project Path="services/inventory/src/Inventory.Api/Inventory.Api.csproj" />
     <Project Path="services/inventory/src/Inventory.Contracts/Inventory.Contracts.csproj" />
     <Project Path="services/inventory/src/Inventory.Domain/Inventory.Domain.csproj" />
+    <Project Path="services/inventory/tests/Inventory.IntegrationTests/Inventory.IntegrationTests.csproj" />
     <Project Path="services/inventory/tests/Inventory.UnitTests/Inventory.UnitTests.csproj" />
   </Folder>
   <Folder Name="/shared/">

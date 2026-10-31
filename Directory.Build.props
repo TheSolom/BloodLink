@@ -15,6 +15,6 @@
   <PropertyGroup Condition="$(MSBuildProjectName.EndsWith('Tests'))">
     <IsPackable>false</IsPackable>
     <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
-    <NoWarn>$(NoWarn);CA1707;CA1852</NoWarn>
+    <NoWarn>$(NoWarn);CA1707;CA1852;CA1001;CA1711</NoWarn>
   </PropertyGroup>
 </Project>
