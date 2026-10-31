@@ -127,6 +127,19 @@ Execute all unit, integration, and architecture tests across the solution:
 dotnet test BloodLink.slnx
 ```
 
+### 6. Code Quality & Pre-commit Hooks
+
+The repository uses **Lefthook** to automatically format and lint staged changes on `git commit`:
+- **C# Backend:** Automatically formatted with **CSharpier** (`dotnet csharpier`)
+- **Frontend (`web/dashboard`):** Automatically linted and formatted with **Biome** (`biome check --write`)
+
+Restore local tools and register Git hooks from the repository root:
+
+```bash
+dotnet tool restore
+npm install
+```
+
 ---
 
 ## Project Documentation & Architectural Decisions
@@ -175,6 +188,8 @@ bloodlink/
 ├── global.json                   # Pinned .NET 11 SDK
 ├── Directory.Build.props          # Central MSBuild properties
 ├── Directory.Packages.props       # Central Package Management (CPM)
+├── lefthook.yml                  # Git pre-commit hooks (CSharpier + Biome)
+├── package.json                  # Root dev dependencies & lifecycle hooks
 ├── skills-lock.json              # Agent skills dependency lockfile
 └── .editorconfig                 # Unified code formatting and style
 ```
