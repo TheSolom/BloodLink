@@ -1,0 +1,8 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <RootNamespace>BloodLink.Inventory.Contracts</RootNamespace>
+    <AssemblyName>BloodLink.Inventory.Contracts</AssemblyName>
+  </PropertyGroup>
+
+</Project>

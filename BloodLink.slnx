@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/services/inventory/">
+    <Project Path="services/inventory/src/Inventory.Contracts/Inventory.Contracts.csproj" />
     <Project Path="services/inventory/src/Inventory.Domain/Inventory.Domain.csproj" />
     <Project Path="services/inventory/tests/Inventory.UnitTests/Inventory.UnitTests.csproj" />
   </Folder>
