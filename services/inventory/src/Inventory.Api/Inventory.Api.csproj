@@ -3,8 +3,8 @@
   <PropertyGroup>
     <RootNamespace>BloodLink.Inventory.Api</RootNamespace>
     <AssemblyName>BloodLink.Inventory.Api</AssemblyName>
-    <!-- Suppress style warnings for EF Core auto-generated migrations -->
-    <NoWarn>$(NoWarn);CA1707;CA1861</NoWarn>
+    <!-- Suppress style warnings for EF Core auto-generated migrations, logging, and Mapperly unmapped source members -->
+    <NoWarn>$(NoWarn);CA1707;CA1861;CA1848;RMG020</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>
