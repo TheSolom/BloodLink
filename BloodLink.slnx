@@ -1,4 +1,8 @@
 <Solution>
+  <Folder Name="/services/inventory/">
+    <Project Path="services/inventory/src/Inventory.Domain/Inventory.Domain.csproj" />
+    <Project Path="services/inventory/tests/Inventory.UnitTests/Inventory.UnitTests.csproj" />
+  </Folder>
   <Folder Name="/shared/">
     <Project Path="shared/BuildingBlocks.Domain/BuildingBlocks.Domain.csproj" />
     <Project Path="shared/ServiceDefaults/ServiceDefaults.csproj" />
