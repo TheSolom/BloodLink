@@ -1,0 +1,16 @@
+# Lefthook configuration for BloodLink polyglot repository
+# Documentation: https://lefthook.dev/
+
+pre-commit:
+  parallel: true
+  commands:
+    csharpier:
+      glob: "**/*.{cs,csx}"
+      run: dotnet csharpier format {staged_files}
+      stage_fixed: true
+
+    biome:
+      root: "web/dashboard/"
+      glob: "web/dashboard/**/*.{js,ts,jsx,tsx,json,jsonc}"
+      run: npx @biomejs/biome check --write --no-errors-on-unmatched {staged_files}
+      stage_fixed: true
