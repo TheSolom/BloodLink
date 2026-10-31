@@ -58,3 +58,6 @@ updates:
       frontend:
         patterns:
           - "*"
+        update-types:
+          - "minor"
+          - "patch"

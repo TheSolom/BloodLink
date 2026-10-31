@@ -84,15 +84,10 @@ jobs:
         working-directory: web/dashboard
         run: npm ci
 
-      - name: Biome check
+      - name: Run code quality and type check
         if: steps.filter.outputs.web == 'true'
         working-directory: web/dashboard
-        run: npm run biome:ci
-
-      - name: Type check (TypeScript)
-        if: steps.filter.outputs.web == 'true'
-        working-directory: web/dashboard
-        run: npx tsc --noEmit
+        run: npm run check
 
       - name: Run unit & component tests (Vitest)
         if: steps.filter.outputs.web == 'true'
@@ -103,3 +98,9 @@ jobs:
         if: steps.filter.outputs.web == 'true'
         working-directory: web/dashboard
         run: npm run build
+
+      - name: Security audit production dependencies
+        if: steps.filter.outputs.web == 'true'
+        working-directory: web/dashboard
+        run: npm audit --omit=dev || true
+        continue-on-error: true
