@@ -7,7 +7,7 @@ using BloodLink.ServiceDefaults;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 
-var builder = WebApplication.CreateBuilder(args);
+WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Service defaults (OpenTelemetry, HealthChecks, Resilience, Service Discovery)
 builder.AddServiceDefaults();
@@ -18,9 +18,9 @@ builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
 // Database & Persistence
-string connectionString = builder.Configuration.GetConnectionString("InventoryDb")
-    ?? builder.Configuration["INVENTORY_DB_CONNECTION_STRING"]
-    ?? "Server=localhost,1433;Database=BloodLink_Inventory;TrustServerCertificate=True;Integrated Security=True;";
+string connectionString =
+    builder.Configuration.GetConnectionString("InventoryConnection")
+    ?? throw new InvalidOperationException("Connection string 'InventoryConnection' not found.");
 
 builder.Services.AddDbContext<InventoryDbContext>(options =>
 {
@@ -36,16 +36,19 @@ builder.Services.AddScoped<GetAvailableStockHandler>();
 // Validation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
-var app = builder.Build();
+WebApplication app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
 // Apply migrations on startup ONLY in Development when explicitly configured
-if (app.Environment.IsDevelopment() && app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup"))
+if (
+    app.Environment.IsDevelopment()
+    && app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup")
+)
 {
-    using var scope = app.Services.CreateScope();
-    var dbContext = scope.ServiceProvider.GetRequiredService<InventoryDbContext>();
+    using IServiceScope scope = app.Services.CreateScope();
+    InventoryDbContext dbContext = scope.ServiceProvider.GetRequiredService<InventoryDbContext>();
     await dbContext.Database.MigrateAsync();
 }
 
@@ -62,5 +65,3 @@ app.MapReceiveDonation();
 app.MapGetAvailableStock();
 
 app.Run();
-
-public partial class Program;

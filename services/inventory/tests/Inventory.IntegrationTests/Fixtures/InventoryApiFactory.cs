@@ -12,7 +12,8 @@ namespace BloodLink.Inventory.IntegrationTests.Fixtures;
 
 public class InventoryApiFactory(DatabaseFixture databaseFixture) : WebApplicationFactory<Program>
 {
-    public FakeTimeProvider TimeProvider { get; } = new(new DateTimeOffset(2026, 10, 31, 12, 0, 0, TimeSpan.Zero));
+    public FakeTimeProvider TimeProvider { get; } =
+        new(new DateTimeOffset(2026, 10, 31, 12, 0, 0, TimeSpan.Zero));
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
@@ -36,8 +37,10 @@ public class InventoryApiFactory(DatabaseFixture databaseFixture) : WebApplicati
 
     public InventoryDbContext CreateDbContext()
     {
-        var optionsBuilder = new DbContextOptionsBuilder<InventoryDbContext>()
-            .UseSqlServer(databaseFixture.ConnectionString);
+        DbContextOptionsBuilder<InventoryDbContext> optionsBuilder =
+            new DbContextOptionsBuilder<InventoryDbContext>().UseSqlServer(
+                databaseFixture.ConnectionString
+            );
 
         return new InventoryDbContext(optionsBuilder.Options);
     }
@@ -50,15 +53,23 @@ public class InventoryApiFactory(DatabaseFixture databaseFixture) : WebApplicati
             {
                 next(app);
 
-                app.Use(async (context, nextMiddleware) =>
-                {
-                    if (context.Request.Path == "/test/throw-domain-exception" && context.Request.Method == "POST")
+                app.Use(
+                    async (context, nextMiddleware) =>
                     {
-                        throw new DomainException("Sample domain rule failure.", "sample.domain_rule_violated");
-                    }
+                        if (
+                            context.Request.Path == "/test/throw-domain-exception"
+                            && context.Request.Method == "POST"
+                        )
+                        {
+                            throw new DomainException(
+                                "Sample domain rule failure.",
+                                "sample.domain_rule_violated"
+                            );
+                        }
 
-                    await nextMiddleware();
-                });
+                        await nextMiddleware();
+                    }
+                );
             };
         }
     }

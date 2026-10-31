@@ -21,13 +21,18 @@ public class ProblemDetailsTests
     [Fact]
     public async Task Should_MapDomainException_To422ProblemDetails_WithStableCode()
     {
-        var response = await _client.PostAsync("/test/throw-domain-exception", null);
+        HttpResponseMessage response = await _client.PostAsync(
+            "/test/throw-domain-exception",
+            null
+        );
 
         response.StatusCode.ShouldBe(HttpStatusCode.UnprocessableEntity);
         response.Content.Headers.ContentType?.MediaType.ShouldBe("application/problem+json");
 
-        var doc = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
-        var root = doc.RootElement;
+        JsonDocument doc = await JsonDocument.ParseAsync(
+            await response.Content.ReadAsStreamAsync()
+        );
+        JsonElement root = doc.RootElement;
 
         root.GetProperty("status").GetInt32().ShouldBe(422);
         root.GetProperty("title").GetString().ShouldBe("Domain Rule Violation");
@@ -35,4 +40,3 @@ public class ProblemDetailsTests
         root.GetProperty("code").GetString().ShouldBe("sample.domain_rule_violated");
     }
 }
-

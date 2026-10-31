@@ -1,17 +1,23 @@
 using BloodLink.Inventory.Api.Infrastructure.Middleware;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
+using BloodLink.Inventory.Domain.Model.BloodBanks;
 using BloodLink.Inventory.Domain.Model.BloodUnits;
 using BloodLink.Inventory.Domain.ValueObjects;
-using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 
 namespace BloodLink.Inventory.Api.Features.Donations.ReceiveDonation;
 
 public class ReceiveDonationHandler(InventoryDbContext dbContext, TimeProvider timeProvider)
 {
-    public async Task<IResult> HandleAsync(ReceiveDonationRequest request, CancellationToken cancellationToken)
+    public async Task<IResult> HandleAsync(
+        ReceiveDonationRequest request,
+        CancellationToken cancellationToken
+    )
     {
-        var bank = await dbContext.BloodBanks.FindAsync([request.BloodBankId], cancellationToken);
+        BloodBank? bank = await dbContext.BloodBanks.FindAsync(
+            [request.BloodBankId],
+            cancellationToken
+        );
         if (bank is null)
         {
             return Results.Problem(
@@ -24,7 +30,7 @@ public class ReceiveDonationHandler(InventoryDbContext dbContext, TimeProvider t
 
         var donationNumber = DonationNumber.Create(request.DonationNumber);
         var bloodType = BloodType.Parse(request.BloodType);
-        if (!BloodComponentExtensions.TryParse(request.Component, out var component))
+        if (!BloodComponentExtensions.TryParse(request.Component, out BloodComponent component))
         {
             return Results.Problem(
                 statusCode: StatusCodes.Status400BadRequest,
@@ -77,7 +83,7 @@ public class ReceiveDonationHandler(InventoryDbContext dbContext, TimeProvider t
             );
         }
 
-        var response = ReceiveDonationMapper.ToResponse(unit);
+        ReceiveDonationResponse response = ReceiveDonationMapper.ToResponse(unit);
         return Results.Created($"/api/v1/stock/{response.Id}", response);
     }
 }

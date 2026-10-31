@@ -15,8 +15,11 @@ public class EntityTests
 
     private sealed class TransientEntity : Entity<Guid>
     {
-        public TransientEntity() : base() { }
-        public TransientEntity(Guid id) : base(id) { }
+        public TransientEntity()
+            : base() { }
+
+        public TransientEntity(Guid id)
+            : base(id) { }
     }
 
     [Fact]
@@ -89,7 +92,7 @@ public class EntityTests
     public void Equals_WhenSameTransientInstance_ReturnsTrue()
     {
         var entity = new TransientEntity();
-        var sameRef = entity;
+        TransientEntity sameRef = entity;
 
         entity.Equals(sameRef).ShouldBeTrue();
         (entity == sameRef).ShouldBeTrue();

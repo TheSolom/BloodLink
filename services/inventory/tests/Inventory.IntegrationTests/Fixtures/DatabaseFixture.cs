@@ -10,8 +10,9 @@ namespace BloodLink.Inventory.IntegrationTests.Fixtures;
 
 public class DatabaseFixture : IAsyncLifetime
 {
-    private readonly MsSqlContainer _msSqlContainer = new MsSqlBuilder("mcr.microsoft.com/mssql/server:2025-CU10-ubuntu-24.04")
-        .Build();
+    private readonly MsSqlContainer _msSqlContainer = new MsSqlBuilder(
+        "mcr.microsoft.com/mssql/server:2025-CU10-ubuntu-24.04"
+    ).Build();
 
     private DbConnection _dbConnection = null!;
     private Respawner _respawner = null!;
@@ -26,18 +27,21 @@ public class DatabaseFixture : IAsyncLifetime
         await _dbConnection.OpenAsync();
 
         // Run migrations against test container
-        var optionsBuilder = new DbContextOptionsBuilder<InventoryDbContext>()
-            .UseSqlServer(ConnectionString);
+        DbContextOptionsBuilder<InventoryDbContext> optionsBuilder =
+            new DbContextOptionsBuilder<InventoryDbContext>().UseSqlServer(ConnectionString);
 
         await using var dbContext = new InventoryDbContext(optionsBuilder.Options);
         await dbContext.Database.MigrateAsync();
 
         // Configure Respawn to reset only the inventory schema and preserve EF migrations history
-        _respawner = await Respawner.CreateAsync(_dbConnection, new RespawnerOptions
-        {
-            SchemasToInclude = ["inventory"],
-            TablesToIgnore = ["__EFMigrationsHistory"]
-        });
+        _respawner = await Respawner.CreateAsync(
+            _dbConnection,
+            new RespawnerOptions
+            {
+                SchemasToInclude = ["inventory"],
+                TablesToIgnore = ["__EFMigrationsHistory"],
+            }
+        );
     }
 
     public async Task ResetDatabaseAsync()
@@ -55,4 +59,3 @@ public class DatabaseFixture : IAsyncLifetime
         await _msSqlContainer.DisposeAsync();
     }
 }
-

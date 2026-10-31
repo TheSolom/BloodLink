@@ -31,8 +31,10 @@ public class FoundationArchitectureTests
     [Fact]
     public void BuildingBlocksDomain_ShouldNotHaveDependencyOnInfrastructureFrameworks()
     {
-        var types = BuildingBlocksDomainAssembly.GetExportedTypes();
-        types.ShouldNotBeEmpty("BuildingBlocks.Domain assembly must contain types to test non-vacuously.");
+        Type[] types = BuildingBlocksDomainAssembly.GetExportedTypes();
+        types.ShouldNotBeEmpty(
+            "BuildingBlocks.Domain assembly must contain types to test non-vacuously."
+        );
 
         string[] forbiddenDependencies =
         [
@@ -56,8 +58,10 @@ public class FoundationArchitectureTests
     [Fact]
     public void ServiceDefaults_ShouldNotDependOnDomainBuildingBlocks()
     {
-        var types = ServiceDefaultsAssembly.GetExportedTypes();
-        types.ShouldNotBeEmpty("ServiceDefaults assembly must contain types to test non-vacuously.");
+        Type[] types = ServiceDefaultsAssembly.GetExportedTypes();
+        types.ShouldNotBeEmpty(
+            "ServiceDefaults assembly must contain types to test non-vacuously."
+        );
 
         string[] forbiddenDependencies = ["BloodLink.BuildingBlocks.Domain"];
 
@@ -79,8 +83,10 @@ public class FoundationArchitectureTests
         // *.Domain projects reference no EF Core, no MassTransit, and no ASP.NET Core.
         // They may reference only BuildingBlocks.Domain and standard C# BCL.
         // *.Domain projects do not reference ServiceDefaults.
-        var types = InventoryDomainAssembly.GetExportedTypes();
-        types.ShouldNotBeEmpty("Inventory.Domain assembly must contain types to test non-vacuously.");
+        Type[] types = InventoryDomainAssembly.GetExportedTypes();
+        types.ShouldNotBeEmpty(
+            "Inventory.Domain assembly must contain types to test non-vacuously."
+        );
 
         string[] forbiddenDependencies =
         [
@@ -109,12 +115,15 @@ public class FoundationArchitectureTests
 
         foreach (var refName in referencedAssemblies)
         {
-            bool isAllowed = refName!.StartsWith("System", StringComparison.Ordinal) ||
-                             refName.StartsWith("Microsoft.NET", StringComparison.Ordinal) ||
-                             refName.Equals("mscorlib", StringComparison.Ordinal) ||
-                             refName.Equals("BloodLink.BuildingBlocks.Domain", StringComparison.Ordinal);
+            bool isAllowed =
+                refName!.StartsWith("System", StringComparison.Ordinal)
+                || refName.StartsWith("Microsoft.NET", StringComparison.Ordinal)
+                || refName.Equals("mscorlib", StringComparison.Ordinal)
+                || refName.Equals("BloodLink.BuildingBlocks.Domain", StringComparison.Ordinal);
 
-            isAllowed.ShouldBeTrue($"Inventory.Domain must only reference BuildingBlocks.Domain and BCL, but references '{refName}'.");
+            isAllowed.ShouldBeTrue(
+                $"Inventory.Domain must only reference BuildingBlocks.Domain and BCL, but references '{refName}'."
+            );
         }
     }
 
@@ -123,16 +132,23 @@ public class FoundationArchitectureTests
     {
         // Boundary rule:
         // *.Contracts projects contain only records and enums and reference nothing outside BCL.
-        var types = InventoryContractsAssembly.GetExportedTypes();
+        Type[] types = InventoryContractsAssembly.GetExportedTypes();
         types.ShouldNotBeEmpty("Inventory.Contracts must contain types to test non-vacuously.");
 
-        foreach (var type in types)
+        foreach (Type type in types)
         {
             bool isEnum = type.IsEnum;
-            bool isRecord = type.GetMethods().Any(m => m.Name == "<Clone>$") ||
-                            type.GetProperty("EqualityContract", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance) != null;
+            bool isRecord =
+                type.GetMethods().Any(m => m.Name == "<Clone>$")
+                || type.GetProperty(
+                    "EqualityContract",
+                    System.Reflection.BindingFlags.NonPublic
+                        | System.Reflection.BindingFlags.Instance
+                ) != null;
 
-            (isEnum || isRecord).ShouldBeTrue($"Contracts type {type.FullName} must be a record or an enum.");
+            (isEnum || isRecord).ShouldBeTrue(
+                $"Contracts type {type.FullName} must be a record or an enum."
+            );
         }
 
         string[] forbiddenDependencies =
@@ -164,15 +180,20 @@ public class FoundationArchitectureTests
 
         foreach (var refName in referencedAssemblies)
         {
-            bool isBcl = refName!.StartsWith("System", StringComparison.Ordinal) ||
-                         refName.StartsWith("Microsoft.NET", StringComparison.Ordinal) ||
-                         refName.Equals("mscorlib", StringComparison.Ordinal);
+            bool isBcl =
+                refName!.StartsWith("System", StringComparison.Ordinal)
+                || refName.StartsWith("Microsoft.NET", StringComparison.Ordinal)
+                || refName.Equals("mscorlib", StringComparison.Ordinal);
 
-            isBcl.ShouldBeTrue($"Inventory.Contracts must reference only BCL assemblies, but references '{refName}'.");
+            isBcl.ShouldBeTrue(
+                $"Inventory.Contracts must reference only BCL assemblies, but references '{refName}'."
+            );
         }
     }
 
-    [Fact(Skip = "Skipped in Phase 2: requires a second service (Requests.Api / Requests.Domain) to test cross-service boundary enforcement in Phase 5.")]
+    [Fact(
+        Skip = "Skipped in Phase 2: requires a second service (Requests.Api / Requests.Domain) to test cross-service boundary enforcement in Phase 5."
+    )]
     public void Services_ShouldNeverReferenceOtherServicesApiOrDomain_OnlyContracts()
     {
         // Boundary rule:
@@ -180,7 +201,9 @@ public class FoundationArchitectureTests
         // They may reference only another service's *.Contracts.
     }
 
-    [Fact(Skip = "Skipped in Phase 2: requires messaging infrastructure and sagas implementation in Phase 4 & Phase 6.")]
+    [Fact(
+        Skip = "Skipped in Phase 2: requires messaging infrastructure and sagas implementation in Phase 4 & Phase 6."
+    )]
     public void MassTransitTypes_ShouldOnlyBeReferencedByMessagingInfrastructureOrRequestsSagas()
     {
         // Boundary rule:

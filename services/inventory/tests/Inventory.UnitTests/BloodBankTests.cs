@@ -23,7 +23,9 @@ public class BloodBankTests
         bank.Location.ShouldBe(location);
 
         bank.DomainEvents.Count.ShouldBe(1);
-        var evt = bank.DomainEvents.First().ShouldBeOfType<BloodBankRegisteredDomainEvent>();
+        BloodBankRegisteredDomainEvent evt = bank
+            .DomainEvents.First()
+            .ShouldBeOfType<BloodBankRegisteredDomainEvent>();
         evt.BloodBankId.ShouldBe(id);
         evt.Name.ShouldBe(name);
         evt.Location.ShouldBe(location);
@@ -35,7 +37,7 @@ public class BloodBankTests
     [InlineData("   ")]
     public void Register_EmptyName_ThrowsDomainException(string? name)
     {
-        var ex = Should.Throw<DomainException>(() =>
+        DomainException ex = Should.Throw<DomainException>(() =>
             BloodBank.Register(Guid.NewGuid(), name!, GeoLocation.Create(0, 0))
         );
         ex.Code.ShouldBe("blood_bank.name_required");
@@ -45,7 +47,7 @@ public class BloodBankTests
     public void Register_NameExceeds200Characters_ThrowsDomainException()
     {
         var longName = new string('A', 201);
-        var ex = Should.Throw<DomainException>(() =>
+        DomainException ex = Should.Throw<DomainException>(() =>
             BloodBank.Register(Guid.NewGuid(), longName, GeoLocation.Create(0, 0))
         );
         ex.Code.ShouldBe("blood_bank.name_too_long");

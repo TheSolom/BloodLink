@@ -1,40 +1,47 @@
 using BloodLink.BuildingBlocks.Domain;
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 
 namespace BloodLink.Inventory.Api.Infrastructure.Middleware;
 
-public class GlobalExceptionHandler(IProblemDetailsService problemDetailsService, ILogger<GlobalExceptionHandler> logger) : IExceptionHandler
+public class GlobalExceptionHandler(
+    IProblemDetailsService problemDetailsService,
+    ILogger<GlobalExceptionHandler> logger
+) : IExceptionHandler
 {
     public async ValueTask<bool> TryHandleAsync(
         HttpContext httpContext,
         Exception exception,
-        CancellationToken cancellationToken)
+        CancellationToken cancellationToken
+    )
     {
         logger.LogError(exception, "Unhandled exception occurred: {Message}", exception.Message);
 
-        var (statusCode, title, code) = MapException(exception);
+        (int statusCode, string? title, string? code) = MapException(exception);
 
         var problemDetails = new ProblemDetails
         {
             Status = statusCode,
             Title = title,
             Detail = exception.Message,
-            Instance = httpContext.Request.Path
+            Instance = httpContext.Request.Path,
         };
 
         problemDetails.Extensions["code"] = code;
 
         httpContext.Response.StatusCode = statusCode;
 
-        if (await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
-        {
-            HttpContext = httpContext,
-            ProblemDetails = problemDetails
-        }))
+        if (
+            await problemDetailsService.TryWriteAsync(
+                new ProblemDetailsContext
+                {
+                    HttpContext = httpContext,
+                    ProblemDetails = problemDetails,
+                }
+            )
+        )
         {
             return true;
         }
@@ -60,13 +67,12 @@ public class GlobalExceptionHandler(IProblemDetailsService problemDetailsService
             );
         }
 
-        if (exception is DbUpdateException dbUpdateException && IsUniqueConstraintViolation(dbUpdateException))
+        if (
+            exception is DbUpdateException dbUpdateException
+            && IsUniqueConstraintViolation(dbUpdateException)
+        )
         {
-            return (
-                StatusCodes.Status409Conflict,
-                "Conflict",
-                "donation.duplicate"
-            );
+            return (StatusCodes.Status409Conflict, "Conflict", "donation.duplicate");
         }
 
         return (

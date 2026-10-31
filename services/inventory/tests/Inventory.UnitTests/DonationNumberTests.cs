@@ -31,7 +31,7 @@ public class DonationNumberTests
     [InlineData("DN_12345")] // Underscore not allowed, only hyphens
     public void Create_InvalidFormat_ThrowsDomainException(string? input)
     {
-        var ex = Should.Throw<DomainException>(() => DonationNumber.Create(input!));
+        DomainException ex = Should.Throw<DomainException>(() => DonationNumber.Create(input!));
         ex.Code.ShouldBe("donation_number.invalid");
     }
 

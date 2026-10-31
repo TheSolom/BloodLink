@@ -1,21 +1,25 @@
 using FluentValidation;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+using FluentValidation.Results;
 
 namespace BloodLink.Inventory.Api.Infrastructure.Filters;
 
 public class ValidationFilter<TRequest> : IEndpointFilter
     where TRequest : class
 {
-    public async ValueTask<object?> InvokeAsync(EndpointFilterInvocationContext context, EndpointFilterDelegate next)
+    public async ValueTask<object?> InvokeAsync(
+        EndpointFilterInvocationContext context,
+        EndpointFilterDelegate next
+    )
     {
-        var validator = context.HttpContext.RequestServices.GetService<IValidator<TRequest>>();
+        IValidator<TRequest>? validator = context.HttpContext.RequestServices.GetService<
+            IValidator<TRequest>
+        >();
         if (validator is null)
         {
             return await next(context);
         }
 
-        var request = context.Arguments.OfType<TRequest>().FirstOrDefault();
+        TRequest? request = context.Arguments.OfType<TRequest>().FirstOrDefault();
         if (request is null)
         {
             return Results.Problem(
@@ -26,14 +30,17 @@ public class ValidationFilter<TRequest> : IEndpointFilter
             );
         }
 
-        var validationResult = await validator.ValidateAsync(request, context.HttpContext.RequestAborted);
+        ValidationResult validationResult = await validator.ValidateAsync(
+            request,
+            context.HttpContext.RequestAborted
+        );
         if (!validationResult.IsValid)
         {
             var problemDetails = new HttpValidationProblemDetails(validationResult.ToDictionary())
             {
                 Status = StatusCodes.Status400BadRequest,
                 Title = "One or more validation errors occurred.",
-                Instance = context.HttpContext.Request.Path
+                Instance = context.HttpContext.Request.Path,
             };
 
             problemDetails.Extensions["code"] = "validation.failed";

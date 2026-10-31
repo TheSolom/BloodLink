@@ -18,7 +18,7 @@ public class BloodUnitTest
     [Fact]
     public void ReceiveDonation_RedCells_SetsCorrectExpiryAndRaisesEvent()
     {
-        var collectedAt = _now.AddDays(-1);
+        DateTimeOffset collectedAt = _now.AddDays(-1);
 
         var unit = BloodUnit.ReceiveDonation(
             _unitId,
@@ -42,7 +42,9 @@ public class BloodUnitTest
         unit.Version.ShouldBe(1);
 
         unit.DomainEvents.Count.ShouldBe(1);
-        var evt = unit.DomainEvents.First().ShouldBeOfType<UnitReceivedDomainEvent>();
+        UnitReceivedDomainEvent evt = unit
+            .DomainEvents.First()
+            .ShouldBeOfType<UnitReceivedDomainEvent>();
         evt.UnitId.ShouldBe(_unitId);
         evt.DonationNumber.ShouldBe(_donationNumber);
         evt.BloodType.ShouldBe(_bloodType);
@@ -55,7 +57,7 @@ public class BloodUnitTest
     [Fact]
     public void ReceiveDonation_Platelets_SetsCorrect5DaysExpiry()
     {
-        var collectedAt = _now.AddDays(-1);
+        DateTimeOffset collectedAt = _now.AddDays(-1);
 
         var unit = BloodUnit.ReceiveDonation(
             _unitId,
@@ -89,9 +91,9 @@ public class BloodUnitTest
     [Fact]
     public void ReceiveDonation_CollectedAtInFuture_ThrowsDomainException()
     {
-        var collectedInFuture = _now.AddTicks(1);
+        DateTimeOffset collectedInFuture = _now.AddTicks(1);
 
-        var ex = Should.Throw<DomainException>(() =>
+        DomainException ex = Should.Throw<DomainException>(() =>
             BloodUnit.ReceiveDonation(
                 _unitId,
                 _donationNumber,
@@ -109,9 +111,9 @@ public class BloodUnitTest
     public void ReceiveDonation_ComputedExpiryExactlyNow_ThrowsDomainException()
     {
         // For Platelets (5 days), collected 5 days ago means expiry == now
-        var collected5DaysAgo = _now.AddDays(-5);
+        DateTimeOffset collected5DaysAgo = _now.AddDays(-5);
 
-        var ex = Should.Throw<DomainException>(() =>
+        DomainException ex = Should.Throw<DomainException>(() =>
             BloodUnit.ReceiveDonation(
                 _unitId,
                 _donationNumber,
@@ -128,7 +130,7 @@ public class BloodUnitTest
     [Fact]
     public void ReceiveDonation_ComputedExpiryOneTickAfterNow_Succeeds()
     {
-        var collected = _now.AddDays(-5).AddTicks(1);
+        DateTimeOffset collected = _now.AddDays(-5).AddTicks(1);
 
         var unit = BloodUnit.ReceiveDonation(
             _unitId,
@@ -146,7 +148,7 @@ public class BloodUnitTest
     [Fact]
     public void Reserve_WhenAvailableAndNotExpired_TransitionsToReservedAndIncrementsVersion()
     {
-        var unit = CreateAvailableUnit();
+        BloodUnit unit = CreateAvailableUnit();
         var requestId = Guid.NewGuid();
 
         unit.Reserve(requestId, _now);
@@ -155,7 +157,7 @@ public class BloodUnitTest
         unit.CurrentReservationRequestId.ShouldBe(requestId);
         unit.Version.ShouldBe(2);
 
-        var evt = unit.DomainEvents.OfType<UnitReservedDomainEvent>().Single();
+        UnitReservedDomainEvent evt = unit.DomainEvents.OfType<UnitReservedDomainEvent>().Single();
         evt.UnitId.ShouldBe(unit.Id);
         evt.RequestId.ShouldBe(requestId);
     }
@@ -163,27 +165,31 @@ public class BloodUnitTest
     [Fact]
     public void Reserve_WhenAlreadyReserved_ThrowsDomainException()
     {
-        var unit = CreateAvailableUnit();
+        BloodUnit unit = CreateAvailableUnit();
         unit.Reserve(Guid.NewGuid(), _now);
 
-        var ex = Should.Throw<DomainException>(() => unit.Reserve(Guid.NewGuid(), _now));
+        DomainException ex = Should.Throw<DomainException>(() =>
+            unit.Reserve(Guid.NewGuid(), _now)
+        );
         ex.Code.ShouldBe("unit.not_available");
     }
 
     [Fact]
     public void Reserve_WhenExpired_ThrowsDomainException()
     {
-        var unit = CreateAvailableUnit();
-        var afterExpiry = unit.ExpiresAt.AddSeconds(1);
+        BloodUnit unit = CreateAvailableUnit();
+        DateTimeOffset afterExpiry = unit.ExpiresAt.AddSeconds(1);
 
-        var ex = Should.Throw<DomainException>(() => unit.Reserve(Guid.NewGuid(), afterExpiry));
+        DomainException ex = Should.Throw<DomainException>(() =>
+            unit.Reserve(Guid.NewGuid(), afterExpiry)
+        );
         ex.Code.ShouldBe("unit.expired");
     }
 
     [Fact]
     public void ReleaseReservation_WhenReservedBySameRequest_RevertsToAvailableAndIncrementsVersion()
     {
-        var unit = CreateAvailableUnit();
+        BloodUnit unit = CreateAvailableUnit();
         var requestId = Guid.NewGuid();
         unit.Reserve(requestId, _now);
 
@@ -193,7 +199,9 @@ public class BloodUnitTest
         unit.CurrentReservationRequestId.ShouldBeNull();
         unit.Version.ShouldBe(3);
 
-        var evt = unit.DomainEvents.OfType<UnitReservationReleasedDomainEvent>().Single();
+        UnitReservationReleasedDomainEvent evt = unit
+            .DomainEvents.OfType<UnitReservationReleasedDomainEvent>()
+            .Single();
         evt.UnitId.ShouldBe(unit.Id);
         evt.RequestId.ShouldBe(requestId);
     }
@@ -201,63 +209,69 @@ public class BloodUnitTest
     [Fact]
     public void ReleaseReservation_WhenNotReserved_ThrowsDomainException()
     {
-        var unit = CreateAvailableUnit();
+        BloodUnit unit = CreateAvailableUnit();
 
-        var ex = Should.Throw<DomainException>(() => unit.ReleaseReservation(Guid.NewGuid()));
+        DomainException ex = Should.Throw<DomainException>(() =>
+            unit.ReleaseReservation(Guid.NewGuid())
+        );
         ex.Code.ShouldBe("unit.invalid_reservation");
     }
 
     [Fact]
     public void ReleaseReservation_WhenMismatchedRequestId_ThrowsDomainException()
     {
-        var unit = CreateAvailableUnit();
+        BloodUnit unit = CreateAvailableUnit();
         unit.Reserve(Guid.NewGuid(), _now);
 
-        var ex = Should.Throw<DomainException>(() => unit.ReleaseReservation(Guid.NewGuid()));
+        DomainException ex = Should.Throw<DomainException>(() =>
+            unit.ReleaseReservation(Guid.NewGuid())
+        );
         ex.Code.ShouldBe("unit.invalid_reservation");
     }
 
     [Fact]
     public void Expire_WhenPastExpiryDate_TransitionsToExpiredAndIncrementsVersion()
     {
-        var unit = CreateAvailableUnit();
-        var expiryCheckTime = unit.ExpiresAt.AddMinutes(1);
+        BloodUnit unit = CreateAvailableUnit();
+        DateTimeOffset expiryCheckTime = unit.ExpiresAt.AddMinutes(1);
 
         unit.Expire(expiryCheckTime);
 
         unit.Status.ShouldBe(BloodUnitStatus.Expired);
         unit.Version.ShouldBe(2);
 
-        var evt = unit.DomainEvents.OfType<UnitExpiredDomainEvent>().Single();
+        UnitExpiredDomainEvent evt = unit.DomainEvents.OfType<UnitExpiredDomainEvent>().Single();
         evt.UnitId.ShouldBe(unit.Id);
     }
 
     [Fact]
     public void Expire_BeforeExpiryDate_ThrowsDomainException()
     {
-        var unit = CreateAvailableUnit();
+        BloodUnit unit = CreateAvailableUnit();
 
-        var ex = Should.Throw<DomainException>(() => unit.Expire(_now));
+        DomainException ex = Should.Throw<DomainException>(() => unit.Expire(_now));
         ex.Code.ShouldBe("unit.not_yet_expired");
     }
 
     [Fact]
     public void Expire_WhenAlreadyDelivered_ThrowsDomainException()
     {
-        var unit = CreateAvailableUnit();
+        BloodUnit unit = CreateAvailableUnit();
         var req = Guid.NewGuid();
         unit.Reserve(req, _now);
         unit.MarkInTransit(req);
         unit.MarkDelivered(req);
 
-        var ex = Should.Throw<DomainException>(() => unit.Expire(unit.ExpiresAt.AddDays(1)));
+        DomainException ex = Should.Throw<DomainException>(() =>
+            unit.Expire(unit.ExpiresAt.AddDays(1))
+        );
         ex.Code.ShouldBe("unit.cannot_expire_terminal");
     }
 
     [Fact]
     public void Discard_ValidReason_TransitionsToDiscardedAndIncrementsVersion()
     {
-        var unit = CreateAvailableUnit();
+        BloodUnit unit = CreateAvailableUnit();
 
         unit.Discard("Bag compromised");
 
@@ -268,16 +282,16 @@ public class BloodUnitTest
     [Fact]
     public void Discard_EmptyReason_ThrowsDomainException()
     {
-        var unit = CreateAvailableUnit();
+        BloodUnit unit = CreateAvailableUnit();
 
-        var ex = Should.Throw<DomainException>(() => unit.Discard(" "));
+        DomainException ex = Should.Throw<DomainException>(() => unit.Discard(" "));
         ex.Code.ShouldBe("unit.discard_reason_required");
     }
 
     [Fact]
     public void MarkInTransit_WhenReserved_TransitionsToInTransitAndRaisesEvent()
     {
-        var unit = CreateAvailableUnit();
+        BloodUnit unit = CreateAvailableUnit();
         var requestId = Guid.NewGuid();
         unit.Reserve(requestId, _now);
 
@@ -286,7 +300,9 @@ public class BloodUnitTest
         unit.Status.ShouldBe(BloodUnitStatus.InTransit);
         unit.Version.ShouldBe(3);
 
-        var evt = unit.DomainEvents.OfType<UnitDispatchedDomainEvent>().Single();
+        UnitDispatchedDomainEvent evt = unit
+            .DomainEvents.OfType<UnitDispatchedDomainEvent>()
+            .Single();
         evt.UnitId.ShouldBe(unit.Id);
         evt.RequestId.ShouldBe(requestId);
     }
@@ -294,16 +310,18 @@ public class BloodUnitTest
     [Fact]
     public void MarkInTransit_WhenNotReserved_ThrowsDomainException()
     {
-        var unit = CreateAvailableUnit();
+        BloodUnit unit = CreateAvailableUnit();
 
-        var ex = Should.Throw<DomainException>(() => unit.MarkInTransit(Guid.NewGuid()));
+        DomainException ex = Should.Throw<DomainException>(() =>
+            unit.MarkInTransit(Guid.NewGuid())
+        );
         ex.Code.ShouldBe("unit.not_reserved");
     }
 
     [Fact]
     public void MarkDelivered_WhenInTransit_TransitionsToDeliveredAndRaisesEvent()
     {
-        var unit = CreateAvailableUnit();
+        BloodUnit unit = CreateAvailableUnit();
         var requestId = Guid.NewGuid();
         unit.Reserve(requestId, _now);
         unit.MarkInTransit(requestId);
@@ -313,7 +331,9 @@ public class BloodUnitTest
         unit.Status.ShouldBe(BloodUnitStatus.Delivered);
         unit.Version.ShouldBe(4);
 
-        var evt = unit.DomainEvents.OfType<UnitDeliveredDomainEvent>().Single();
+        UnitDeliveredDomainEvent evt = unit
+            .DomainEvents.OfType<UnitDeliveredDomainEvent>()
+            .Single();
         evt.UnitId.ShouldBe(unit.Id);
         evt.RequestId.ShouldBe(requestId);
     }
@@ -321,11 +341,11 @@ public class BloodUnitTest
     [Fact]
     public void MarkDelivered_WhenNotInTransit_ThrowsDomainException()
     {
-        var unit = CreateAvailableUnit();
+        BloodUnit unit = CreateAvailableUnit();
         var requestId = Guid.NewGuid();
         unit.Reserve(requestId, _now);
 
-        var ex = Should.Throw<DomainException>(() => unit.MarkDelivered(requestId));
+        DomainException ex = Should.Throw<DomainException>(() => unit.MarkDelivered(requestId));
         ex.Code.ShouldBe("unit.not_in_transit");
     }
 

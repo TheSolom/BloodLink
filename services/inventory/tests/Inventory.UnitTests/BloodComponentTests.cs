@@ -1,4 +1,3 @@
-using BloodLink.BuildingBlocks.Domain;
 using BloodLink.Inventory.Domain.ValueObjects;
 using Shouldly;
 using Xunit;
@@ -24,7 +23,10 @@ public class BloodComponentTests
     [InlineData("redcells", BloodComponent.RedCells)]
     [InlineData("Platelets", BloodComponent.Platelets)]
     [InlineData("platelets", BloodComponent.Platelets)]
-    public void TryParse_ValidComponent_ReturnsTrueAndCorrectEnum(string input, BloodComponent expected)
+    public void TryParse_ValidComponent_ReturnsTrueAndCorrectEnum(
+        string input,
+        BloodComponent expected
+    )
     {
         bool success = BloodComponentExtensions.TryParse(input, out BloodComponent component);
 

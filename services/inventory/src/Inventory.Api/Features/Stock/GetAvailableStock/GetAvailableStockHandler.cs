@@ -7,21 +7,30 @@ namespace BloodLink.Inventory.Api.Features.Stock.GetAvailableStock;
 
 public class GetAvailableStockHandler(InventoryDbContext dbContext, TimeProvider timeProvider)
 {
-    public async Task<GetAvailableStockResponse> HandleAsync(GetAvailableStockQuery query, CancellationToken cancellationToken)
+    public async Task<GetAvailableStockResponse> HandleAsync(
+        GetAvailableStockQuery query,
+        CancellationToken cancellationToken
+    )
     {
         DateTimeOffset now = timeProvider.GetUtcNow();
 
         // Baseline: Available status and not yet expired
-        var unitsQuery = dbContext.BloodUnits
-            .AsNoTracking()
+        IQueryable<BloodUnit> unitsQuery = dbContext
+            .BloodUnits.AsNoTracking()
             .Where(u => u.Status == BloodUnitStatus.Available && u.ExpiresAt > now);
 
-        if (!string.IsNullOrWhiteSpace(query.BloodType) && BloodType.TryParse(query.BloodType, out var bloodType))
+        if (
+            !string.IsNullOrWhiteSpace(query.BloodType)
+            && BloodType.TryParse(query.BloodType, out BloodType? bloodType)
+        )
         {
             unitsQuery = unitsQuery.Where(u => u.BloodType == bloodType);
         }
 
-        if (!string.IsNullOrWhiteSpace(query.Component) && BloodComponentExtensions.TryParse(query.Component, out var component))
+        if (
+            !string.IsNullOrWhiteSpace(query.Component)
+            && BloodComponentExtensions.TryParse(query.Component, out BloodComponent component)
+        )
         {
             unitsQuery = unitsQuery.Where(u => u.Component == component);
         }
@@ -39,7 +48,7 @@ public class GetAvailableStockHandler(InventoryDbContext dbContext, TimeProvider
         int totalCount = await unitsQuery.CountAsync(cancellationToken);
 
         int skip = (query.Page - 1) * query.PageSize;
-        var items = await unitsQuery
+        List<StockItemDto> items = await unitsQuery
             .OrderBy(u => u.ExpiresAt)
             .ThenBy(u => u.Id)
             .Skip(skip)

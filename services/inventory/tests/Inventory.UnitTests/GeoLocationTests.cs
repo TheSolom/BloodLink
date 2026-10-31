@@ -27,7 +27,7 @@ public class GeoLocationTests
     [InlineData(0, 180.001)]
     public void Create_OutOfRangeCoordinates_ThrowsDomainException(double lat, double lon)
     {
-        var ex = Should.Throw<DomainException>(() => GeoLocation.Create(lat, lon));
+        DomainException ex = Should.Throw<DomainException>(() => GeoLocation.Create(lat, lon));
         ex.Code.ShouldBe("geo_location.out_of_range");
     }
 

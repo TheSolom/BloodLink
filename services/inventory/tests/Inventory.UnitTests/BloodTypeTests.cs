@@ -16,7 +16,11 @@ public class BloodTypeTests
     [InlineData("AB-", AboType.AB, RhFactor.Negative)]
     [InlineData("O+", AboType.O, RhFactor.Positive)]
     [InlineData("O-", AboType.O, RhFactor.Negative)]
-    public void TryParse_ValidCode_ReturnsTrueAndCorrectBloodType(string input, AboType expectedAbo, RhFactor expectedRh)
+    public void TryParse_ValidCode_ReturnsTrueAndCorrectBloodType(
+        string input,
+        AboType expectedAbo,
+        RhFactor expectedRh
+    )
     {
         bool success = BloodType.TryParse(input, out BloodType? bloodType);
 
@@ -57,7 +61,7 @@ public class BloodTypeTests
     [Fact]
     public void Parse_InvalidCode_ThrowsDomainException()
     {
-        var ex = Should.Throw<DomainException>(() => BloodType.Parse("XYZ"));
+        DomainException ex = Should.Throw<DomainException>(() => BloodType.Parse("XYZ"));
         ex.Code.ShouldBe("blood_type.invalid");
     }
 
