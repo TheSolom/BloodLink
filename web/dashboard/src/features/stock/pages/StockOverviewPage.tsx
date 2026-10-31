@@ -1,10 +1,10 @@
+import { CircleAlert, Droplet, RefreshCw } from "lucide-react";
+import * as React from "react";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 import { Skeleton } from "@/shared/ui/skeleton";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/shared/ui/table";
-import { AlertCircle, Droplet, RefreshCw } from "lucide-react";
-import * as React from "react";
 import { useAvailableStock } from "../api/queries";
 
 export function StockOverviewPage() {
@@ -124,7 +124,7 @@ export function StockOverviewPage() {
           role="alert"
           className="flex items-center gap-3 p-4 rounded-lg bg-red-50 border border-red-200 text-red-800"
         >
-          <AlertCircle className="h-5 w-5 shrink-0 text-red-600" />
+          <CircleAlert className="h-5 w-5 shrink-0 text-red-600" />
           <div>
             <h2 className="font-semibold text-sm">Failed to load blood stock</h2>
             <p className="text-sm mt-0.5">
