@@ -133,11 +133,12 @@ The repository uses **Lefthook** to automatically format and lint staged changes
 - **C# Backend:** Automatically formatted with **CSharpier** (`dotnet csharpier`)
 - **Frontend (`web/dashboard`):** Automatically linted and formatted with **Biome** (`biome check --write`)
 
-Restore local tools and register Git hooks from the repository root:
+Restore local tools, install dependencies, and register Git hooks:
 
 ```bash
 dotnet tool restore
 npm install
+npm --prefix web/dashboard ci
 ```
 
 ---

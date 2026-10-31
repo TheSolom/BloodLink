@@ -2,7 +2,7 @@
 # Documentation: https://lefthook.dev/
 
 pre-commit:
-  parallel: true
+  parallel: false
   commands:
     csharpier:
       glob: "**/*.{cs,csx}"
