@@ -12,9 +12,7 @@
   "paths": {
     "/api/v1/banks": {
       "post": {
-        "tags": [
-          "BloodLink.Inventory.Api"
-        ],
+        "tags": ["BloodLink.Inventory.Api"],
         "summary": "Registers a new blood bank",
         "operationId": "RegisterBloodBank",
         "requestBody": {
@@ -53,9 +51,7 @@
     },
     "/api/v1/donations": {
       "post": {
-        "tags": [
-          "BloodLink.Inventory.Api"
-        ],
+        "tags": ["BloodLink.Inventory.Api"],
         "summary": "Records receipt of a donated blood unit",
         "operationId": "ReceiveDonation",
         "requestBody": {
@@ -124,9 +120,7 @@
     },
     "/api/v1/stock": {
       "get": {
-        "tags": [
-          "BloodLink.Inventory.Api"
-        ],
+        "tags": ["BloodLink.Inventory.Api"],
         "summary": "Retrieves available, non-expired blood stock",
         "operationId": "GetAvailableStock",
         "parameters": [
@@ -165,10 +159,7 @@
             "in": "query",
             "schema": {
               "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
+              "type": ["integer", "string"],
               "format": "int32",
               "default": 1
             }
@@ -178,10 +169,7 @@
             "in": "query",
             "schema": {
               "pattern": "^-?(?:0|[1-9]\\d*)$",
-              "type": [
-                "integer",
-                "string"
-              ],
+              "type": ["integer", "string"],
               "format": "int32",
               "default": 20
             }
@@ -215,12 +203,7 @@
   "components": {
     "schemas": {
       "GetAvailableStockResponse": {
-        "required": [
-          "items",
-          "page",
-          "pageSize",
-          "totalCount"
-        ],
+        "required": ["items", "page", "pageSize", "totalCount"],
         "type": "object",
         "properties": {
           "items": {
@@ -231,26 +214,17 @@
           },
           "page": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
+            "type": ["integer", "string"],
             "format": "int32"
           },
           "pageSize": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
+            "type": ["integer", "string"],
             "format": "int32"
           },
           "totalCount": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "integer",
-              "string"
-            ],
+            "type": ["integer", "string"],
             "format": "int32"
           }
         }
@@ -259,37 +233,21 @@
         "type": "object",
         "properties": {
           "type": {
-            "type": [
-              "null",
-              "string"
-            ]
+            "type": ["null", "string"]
           },
           "title": {
-            "type": [
-              "null",
-              "string"
-            ]
+            "type": ["null", "string"]
           },
           "status": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "null",
-              "integer",
-              "string"
-            ],
+            "type": ["null", "integer", "string"],
             "format": "int32"
           },
           "detail": {
-            "type": [
-              "null",
-              "string"
-            ]
+            "type": ["null", "string"]
           },
           "instance": {
-            "type": [
-              "null",
-              "string"
-            ]
+            "type": ["null", "string"]
           },
           "errors": {
             "type": "object",
@@ -306,48 +264,26 @@
         "type": "object",
         "properties": {
           "type": {
-            "type": [
-              "null",
-              "string"
-            ]
+            "type": ["null", "string"]
           },
           "title": {
-            "type": [
-              "null",
-              "string"
-            ]
+            "type": ["null", "string"]
           },
           "status": {
             "pattern": "^-?(?:0|[1-9]\\d*)$",
-            "type": [
-              "null",
-              "integer",
-              "string"
-            ],
+            "type": ["null", "integer", "string"],
             "format": "int32"
           },
           "detail": {
-            "type": [
-              "null",
-              "string"
-            ]
+            "type": ["null", "string"]
           },
           "instance": {
-            "type": [
-              "null",
-              "string"
-            ]
+            "type": ["null", "string"]
           }
         }
       },
       "ReceiveDonationRequest": {
-        "required": [
-          "bloodBankId",
-          "donationNumber",
-          "bloodType",
-          "component",
-          "collectedAt"
-        ],
+        "required": ["bloodBankId", "donationNumber", "bloodType", "component", "collectedAt"],
         "type": "object",
         "properties": {
           "bloodBankId": {
@@ -413,11 +349,7 @@
         }
       },
       "RegisterBloodBankRequest": {
-        "required": [
-          "name",
-          "latitude",
-          "longitude"
-        ],
+        "required": ["name", "latitude", "longitude"],
         "type": "object",
         "properties": {
           "name": {
@@ -425,29 +357,18 @@
           },
           "latitude": {
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
-            "type": [
-              "number",
-              "string"
-            ],
+            "type": ["number", "string"],
             "format": "double"
           },
           "longitude": {
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
-            "type": [
-              "number",
-              "string"
-            ],
+            "type": ["number", "string"],
             "format": "double"
           }
         }
       },
       "RegisterBloodBankResponse": {
-        "required": [
-          "id",
-          "name",
-          "latitude",
-          "longitude"
-        ],
+        "required": ["id", "name", "latitude", "longitude"],
         "type": "object",
         "properties": {
           "id": {
@@ -459,18 +380,12 @@
           },
           "latitude": {
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
-            "type": [
-              "number",
-              "string"
-            ],
+            "type": ["number", "string"],
             "format": "double"
           },
           "longitude": {
             "pattern": "^-?(?:0|[1-9]\\d*)(?:\\.\\d+)?(?:[eE][+-]?\\d+)?$",
-            "type": [
-              "number",
-              "string"
-            ],
+            "type": ["number", "string"],
             "format": "double"
           }
         }

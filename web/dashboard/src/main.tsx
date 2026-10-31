@@ -1,7 +1,7 @@
-import { App } from "@/app/App";
-import { Providers } from "@/app/providers";
 import * as React from "react";
 import * as ReactDOM from "react-dom/client";
+import { App } from "@/app/App";
+import { Providers } from "@/app/providers";
 import "@/index.css";
 
 const rootElement = document.getElementById("root");

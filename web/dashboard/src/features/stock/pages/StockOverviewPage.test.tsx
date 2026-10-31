@@ -1,8 +1,8 @@
-import { Providers, createQueryClient } from "@/app/providers";
-import { server } from "@/test/setup";
 import { render, screen } from "@testing-library/react";
-import { http, HttpResponse } from "msw";
+import { HttpResponse, http } from "msw";
 import { describe, expect, it } from "vitest";
+import { createQueryClient, Providers } from "@/app/providers";
+import { server } from "@/test/setup";
 import { StockOverviewPage } from "./StockOverviewPage";
 
 function renderWithProviders() {

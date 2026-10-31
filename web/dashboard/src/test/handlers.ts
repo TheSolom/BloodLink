@@ -1,5 +1,5 @@
+import { HttpResponse, http } from "msw";
 import type { GetAvailableStockResponse } from "@/shared/api/client";
-import { http, HttpResponse } from "msw";
 
 export const mockStockResponse: GetAvailableStockResponse = {
   items: [
