@@ -11,6 +11,8 @@
     "build": "tsc -b && vite build",
     "preview": "vite preview",
     "check": "biome check --write . && tsc --noEmit",
+    "ci": "biome ci . && tsc --noEmit",
+    "biome:ci": "biome ci .",
     "lint": "biome lint .",
     "format": "biome format --write .",
     "test": "vitest run",

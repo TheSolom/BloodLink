@@ -53,3 +53,53 @@ jobs:
             **/TestResults/*.trx
             **/TestResults/**/coverage.cobertura.xml
           retention-days: 14
+
+  web:
+    name: Web Dashboard (React & Vite)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Check for web changes
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: filter
+        with:
+          filters: |
+            web:
+              - 'web/**'
+              - '.github/workflows/ci.yml'
+
+      - name: Setup Node.js
+        if: steps.filter.outputs.web == 'true'
+        uses: actions/setup-node@1e60f639196014664a7e158fe7a52f4f1f50acba # v4.0.3
+        with:
+          node-version-file: 'web/dashboard/.nvmrc'
+          cache: 'npm'
+          cache-dependency-path: 'web/dashboard/package-lock.json'
+
+      - name: Install dependencies
+        if: steps.filter.outputs.web == 'true'
+        working-directory: web/dashboard
+        run: npm ci
+
+      - name: Biome check
+        if: steps.filter.outputs.web == 'true'
+        working-directory: web/dashboard
+        run: npm run biome:ci
+
+      - name: Type check (TypeScript)
+        if: steps.filter.outputs.web == 'true'
+        working-directory: web/dashboard
+        run: npx tsc --noEmit
+
+      - name: Run unit & component tests (Vitest)
+        if: steps.filter.outputs.web == 'true'
+        working-directory: web/dashboard
+        run: npm test
+
+      - name: Build production bundle
+        if: steps.filter.outputs.web == 'true'
+        working-directory: web/dashboard
+        run: npm run build

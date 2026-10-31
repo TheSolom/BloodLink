@@ -48,3 +48,13 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+
+  # Frontend npm dependencies (web/dashboard)
+  - package-ecosystem: "npm"
+    directory: "/web/dashboard"
+    schedule:
+      interval: "weekly"
+    groups:
+      frontend:
+        patterns:
+          - "*"
