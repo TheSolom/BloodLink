@@ -1,4 +1,4 @@
-import { StockOverviewPage } from "@/features/stock/pages/StockOverviewPage";
+import { StockOverviewPage } from "@/features/stock";
 
 export function App() {
     return (
