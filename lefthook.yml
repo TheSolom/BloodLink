@@ -9,8 +9,8 @@ pre-commit:
       run: dotnet csharpier format {staged_files}
       stage_fixed: true
 
-    biome:
+    oxc:
       root: "web/dashboard/"
       glob: "web/dashboard/**/*.{js,ts,jsx,tsx,json,jsonc}"
-      run: npx @biomejs/biome check --write --no-errors-on-unmatched {staged_files}
+      run: npx oxfmt --write --no-error-on-unmatched-pattern {staged_files} && npx oxlint --no-error-on-unmatched-pattern {staged_files}
       stage_fixed: true

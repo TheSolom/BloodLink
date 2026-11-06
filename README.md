@@ -131,7 +131,7 @@ dotnet test BloodLink.slnx
 
 The repository uses **Lefthook** to automatically format and lint staged changes on `git commit`:
 - **C# Backend:** Automatically formatted with **CSharpier** (`dotnet csharpier`)
-- **Frontend (`web/dashboard`):** Automatically linted and formatted with **Biome** (`biome check --write`)
+- **Frontend (`web/dashboard`):** Automatically linted and formatted with **Oxc** (`oxlint` + `oxfmt`)
 
 Restore local tools, install dependencies, and register Git hooks:
 
@@ -189,7 +189,7 @@ bloodlink/
 ├── global.json                   # Pinned .NET 11 SDK
 ├── Directory.Build.props          # Central MSBuild properties
 ├── Directory.Packages.props       # Central Package Management (CPM)
-├── lefthook.yml                  # Git pre-commit hooks (CSharpier + Biome)
+├── lefthook.yml                  # Git pre-commit hooks (CSharpier + Oxc)
 ├── package.json                  # Root dev dependencies & lifecycle hooks
 ├── skills-lock.json              # Agent skills dependency lockfile
 └── .editorconfig                 # Unified code formatting and style
