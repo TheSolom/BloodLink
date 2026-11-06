@@ -1,5 +1,6 @@
 using BloodLink.Inventory.Api.Features.BloodBanks.RegisterBloodBank;
 using BloodLink.Inventory.Api.Features.Donations.ReceiveDonation;
+using BloodLink.Inventory.Api.Features.Reservations.ReleaseUnits;
 using BloodLink.Inventory.Api.Features.Reservations.ReserveUnits;
 using BloodLink.Inventory.Api.Features.Stock.GetAvailableStock;
 using BloodLink.Inventory.Api.Infrastructure.Middleware;
@@ -34,6 +35,7 @@ builder.Services.AddScoped<RegisterBloodBankHandler>();
 builder.Services.AddScoped<ReceiveDonationHandler>();
 builder.Services.AddScoped<GetAvailableStockHandler>();
 builder.Services.AddScoped<ReserveUnitsHandler>();
+builder.Services.AddScoped<ReleaseUnitsHandler>();
 
 // Validation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
@@ -66,5 +68,6 @@ app.MapRegisterBloodBank();
 app.MapReceiveDonation();
 app.MapGetAvailableStock();
 app.MapReserveUnits();
+app.MapReleaseUnits();
 
 app.Run();
