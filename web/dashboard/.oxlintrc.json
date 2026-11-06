@@ -8,6 +8,10 @@
         {
             "name": "@tanstack/query",
             "specifier": "@tanstack/eslint-plugin-query"
+        },
+        {
+            "name": "sonarjs",
+            "specifier": "eslint-plugin-sonarjs"
         }
     ],
     "rules": {
@@ -16,7 +20,21 @@
         "jsx-a11y/prefer-tag-over-role": "off",
         "@tanstack/query/exhaustive-deps": "error",
         "@tanstack/query/stable-query-client": "error",
-        "@tanstack/query/no-rest-destructuring": "warn"
+        "@tanstack/query/no-rest-destructuring": "warn",
+        "sonarjs/no-all-duplicated-branches": "error",
+        "sonarjs/no-element-overwrite": "error",
+        "sonarjs/no-identical-conditions": "error",
+        "sonarjs/no-identical-expressions": "error",
+        "sonarjs/no-duplicated-branches": "error",
+        "sonarjs/no-redundant-boolean": "error",
+        "sonarjs/prefer-single-boolean-return": "error",
+        "sonarjs/no-inverted-boolean-check": "error",
+        "sonarjs/no-useless-catch": "error",
+        "sonarjs/no-nested-assignment": "error",
+        "sonarjs/no-small-switch": "error",
+        "sonarjs/no-unused-collection": "error",
+        "sonarjs/no-collapsible-if": "warn",
+        "sonarjs/prefer-immediate-return": "warn"
     },
     "ignorePatterns": [
         "dist/**",
