@@ -1,5 +1,6 @@
 using BloodLink.Inventory.Api.Features.BloodBanks.RegisterBloodBank;
 using BloodLink.Inventory.Api.Features.Donations.ReceiveDonation;
+using BloodLink.Inventory.Api.Features.Expiry.ExpireUnits;
 using BloodLink.Inventory.Api.Features.Reservations.ReleaseUnits;
 using BloodLink.Inventory.Api.Features.Reservations.ReserveUnits;
 using BloodLink.Inventory.Api.Features.Stock.GetAvailableStock;
@@ -36,6 +37,13 @@ builder.Services.AddScoped<ReceiveDonationHandler>();
 builder.Services.AddScoped<GetAvailableStockHandler>();
 builder.Services.AddScoped<ReserveUnitsHandler>();
 builder.Services.AddScoped<ReleaseUnitsHandler>();
+builder.Services.AddScoped<ExpireUnitsHandler>();
+
+// Expiry Background Service
+builder.Services.Configure<ExpireUnitsOptions>(
+    builder.Configuration.GetSection(ExpireUnitsOptions.SectionName)
+);
+builder.Services.AddHostedService<ExpireUnitsBackgroundService>();
 
 // Validation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
