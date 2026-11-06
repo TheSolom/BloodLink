@@ -7,10 +7,44 @@ public class InventoryDbContextFactory : IDesignTimeDbContextFactory<InventoryDb
 {
     public InventoryDbContext CreateDbContext(string[] args)
     {
+        string basePath = Directory.GetCurrentDirectory();
+
+        // Support running EF CLI commands from either the solution root or project directory.
+        if (!File.Exists(Path.Combine(basePath, "appsettings.Development.json")))
+        {
+            string projectFolder = Path.Combine(
+                basePath,
+                "services",
+                "inventory",
+                "src",
+                "Inventory.Api"
+            );
+            if (File.Exists(Path.Combine(projectFolder, "appsettings.Development.json")))
+            {
+                basePath = projectFolder;
+            }
+        }
+
+        string environment =
+            Environment.GetEnvironmentVariable("ASPNETCORE_ENVIRONMENT")
+            ?? Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT")
+            ?? "Development";
+
+        IConfigurationRoot configuration = new ConfigurationBuilder()
+            .SetBasePath(basePath)
+            .AddJsonFile("appsettings.json", optional: true, reloadOnChange: false)
+            .AddJsonFile($"appsettings.{environment}.json", optional: true, reloadOnChange: false)
+            .AddEnvironmentVariables()
+            .Build();
+
+        string connectionString =
+            configuration.GetConnectionString("InventoryMigrationsConnection")
+            ?? throw new InvalidOperationException(
+                $"Could not find connection string 'InventoryMigrationsConnection' in configuration at '{basePath}' for environment '{environment}'."
+            );
+
         var optionsBuilder = new DbContextOptionsBuilder<InventoryDbContext>();
-        optionsBuilder.UseSqlServer(
-            "Server=localhost,1433;Database=BloodLink_Inventory;User Id=sa;Password=dummy_for_migrations_only;TrustServerCertificate=True;"
-        );
+        optionsBuilder.UseSqlServer(connectionString);
 
         return new InventoryDbContext(optionsBuilder.Options);
     }
