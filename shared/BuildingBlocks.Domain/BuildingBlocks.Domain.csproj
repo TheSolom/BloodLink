@@ -1,8 +1,6 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
-  <PropertyGroup>
-    <RootNamespace>BloodLink.BuildingBlocks.Domain</RootNamespace>
-    <AssemblyName>BloodLink.BuildingBlocks.Domain</AssemblyName>
-  </PropertyGroup>
-
+    <PropertyGroup>
+        <RootNamespace>BloodLink.BuildingBlocks.Domain</RootNamespace>
+        <AssemblyName>BloodLink.BuildingBlocks.Domain</AssemblyName>
+    </PropertyGroup>
 </Project>

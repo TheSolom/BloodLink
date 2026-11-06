@@ -10,4 +10,3 @@ public class FakeTimeProvider(DateTimeOffset initialTime) : TimeProvider
 
     public void Advance(TimeSpan timeSpan) => _utcNow = _utcNow.Add(timeSpan);
 }
-

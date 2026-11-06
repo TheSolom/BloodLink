@@ -17,12 +17,18 @@ public sealed record GeoLocation
     {
         if (latitude is < -90.0 or > 90.0)
         {
-            throw new DomainException($"Latitude {latitude} is outside valid range [-90, 90].", "geo_location.out_of_range");
+            throw new DomainException(
+                $"Latitude {latitude} is outside valid range [-90, 90].",
+                "geo_location.out_of_range"
+            );
         }
 
         if (longitude is < -180.0 or > 180.0)
         {
-            throw new DomainException($"Longitude {longitude} is outside valid range [-180, 180].", "geo_location.out_of_range");
+            throw new DomainException(
+                $"Longitude {longitude} is outside valid range [-180, 180].",
+                "geo_location.out_of_range"
+            );
         }
 
         return new GeoLocation(latitude, longitude);

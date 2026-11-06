@@ -12,19 +12,16 @@ public class BloodBankConfiguration : IEntityTypeConfiguration<BloodBank>
 
         builder.HasKey(b => b.Id);
 
-        builder.Property(b => b.Name)
-            .IsRequired()
-            .HasMaxLength(200);
+        builder.Property(b => b.Name).IsRequired().HasMaxLength(200);
 
-        builder.OwnsOne(b => b.Location, loc =>
-        {
-            loc.Property(l => l.Latitude)
-                .HasColumnName("Latitude")
-                .IsRequired();
+        builder.OwnsOne(
+            b => b.Location,
+            loc =>
+            {
+                loc.Property(l => l.Latitude).HasColumnName("Latitude").IsRequired();
 
-            loc.Property(l => l.Longitude)
-                .HasColumnName("Longitude")
-                .IsRequired();
-        });
+                loc.Property(l => l.Longitude).HasColumnName("Longitude").IsRequired();
+            }
+        );
     }
 }

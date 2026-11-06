@@ -7,8 +7,10 @@ public class RegisterBloodBankValidator : AbstractValidator<RegisterBloodBankReq
     public RegisterBloodBankValidator()
     {
         RuleFor(x => x.Name)
-            .NotEmpty().WithMessage("Name is required.")
-            .MaximumLength(200).WithMessage("Name cannot exceed 200 characters.");
+            .NotEmpty()
+            .WithMessage("Name is required.")
+            .MaximumLength(200)
+            .WithMessage("Name cannot exceed 200 characters.");
 
         RuleFor(x => x.Latitude)
             .InclusiveBetween(-90.0, 90.0)

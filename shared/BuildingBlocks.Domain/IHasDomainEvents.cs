@@ -15,4 +15,3 @@ public interface IHasDomainEvents
     /// </summary>
     IReadOnlyCollection<IDomainEvent> ClearDomainEvents();
 }
-

@@ -51,4 +51,3 @@ public class DomainEventTests
         modified.OccurredOn.ShouldBe(original.OccurredOn);
     }
 }
-
