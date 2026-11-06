@@ -58,6 +58,12 @@ updates:
       frontend:
         patterns:
           - "*"
+        # Exclude oxlint and oxfmt from automatic grouped updates:
+        # oxfmt is pre-1.0 and formatting rules can shift between releases.
+        # Both tools are pinned to exact versions and upgraded manually with deliberate verification.
+        exclude-patterns:
+          - "oxlint"
+          - "oxfmt"
         update-types:
           - "minor"
           - "patch"

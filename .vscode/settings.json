@@ -1,3 +1,29 @@
 {
-  "dotnet.defaultSolution": "BloodLink.slnx"
+  "dotnet.defaultSolution": "BloodLink.slnx",
+  "oxc.configPath": "web/dashboard/.oxlintrc.json",
+  "oxc.fmt.configPath": "web/dashboard/.oxfmtrc.json",
+  "oxc.path.oxlint": "./web/dashboard/node_modules/.bin/oxlint",
+  "oxc.path.oxfmt": "./web/dashboard/node_modules/.bin/oxfmt",
+  "editor.formatOnSave": true,
+  "[javascript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[typescript]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[javascriptreact]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[typescriptreact]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[json]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "[jsonc]": {
+    "editor.defaultFormatter": "oxc.oxc-vscode"
+  },
+  "editor.codeActionsOnSave": {
+    "source.fixAll.oxc": "explicit"
+  }
 }

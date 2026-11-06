@@ -1,0 +1,18 @@
+{
+  "$schema": "./node_modules/oxfmt/configuration_schema.json",
+  "tabWidth": 4,
+  "useTabs": false,
+  "printWidth": 100,
+  "semi": true,
+  "singleQuote": false,
+  "sortImports": true,
+  "ignorePatterns": [
+    "dist/**",
+    "src/shared/api/generated/**",
+    "src/shared/ui/**",
+    "openapi.json",
+    "package-lock.json",
+    "*.tsbuildinfo",
+    "tsbuildinfo"
+  ]
+}
