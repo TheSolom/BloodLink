@@ -44,7 +44,7 @@ services:
       - bloodlink-network
 
   otel-lgtm:
-    image: grafana/otel-lgtm:0.38.1
+    image: grafana/otel-lgtm:0.39.0
     container_name: bloodlink-otel-lgtm
     restart: unless-stopped
     ports:
