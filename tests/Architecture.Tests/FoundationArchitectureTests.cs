@@ -107,13 +107,13 @@ public class FoundationArchitectureTests
         );
 
         // Also assert that references are limited to BuildingBlocks.Domain and BCL
-        var referencedAssemblies = InventoryDomainAssembly
+        string?[] referencedAssemblies = InventoryDomainAssembly
             .GetReferencedAssemblies()
             .Select(a => a.Name)
             .Where(name => name != null)
             .ToArray();
 
-        foreach (var refName in referencedAssemblies)
+        foreach (string? refName in referencedAssemblies)
         {
             bool isAllowed =
                 refName!.StartsWith("System", StringComparison.Ordinal)
@@ -173,13 +173,13 @@ public class FoundationArchitectureTests
             $"Inventory.Contracts must not depend on external libraries: {string.Join(", ", result.FailingTypes?.Select(t => t.FullName) ?? [])}"
         );
 
-        var referencedAssemblies = InventoryContractsAssembly
+        string?[] referencedAssemblies = InventoryContractsAssembly
             .GetReferencedAssemblies()
             .Select(a => a.Name)
             .Where(name => name != null)
             .ToArray();
 
-        foreach (var refName in referencedAssemblies)
+        foreach (string? refName in referencedAssemblies)
         {
             bool isBcl =
                 refName!.StartsWith("System", StringComparison.Ordinal)

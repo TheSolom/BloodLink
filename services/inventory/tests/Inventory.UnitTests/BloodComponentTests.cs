@@ -7,16 +7,12 @@ namespace BloodLink.Inventory.UnitTests;
 public class BloodComponentTests
 {
     [Fact]
-    public void RedCells_Has42DaysShelfLife()
-    {
+    public void RedCells_Has42DaysShelfLife() =>
         BloodComponent.RedCells.GetShelfLife().ShouldBe(TimeSpan.FromDays(42));
-    }
 
     [Fact]
-    public void Platelets_Has5DaysShelfLife()
-    {
+    public void Platelets_Has5DaysShelfLife() =>
         BloodComponent.Platelets.GetShelfLife().ShouldBe(TimeSpan.FromDays(5));
-    }
 
     [Theory]
     [InlineData("RedCells", BloodComponent.RedCells)]

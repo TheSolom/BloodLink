@@ -13,7 +13,7 @@ public class BloodBankTests
     public void Register_ValidDetails_CreatesBloodBankAndRaisesEvent()
     {
         var id = Guid.NewGuid();
-        var name = "City Central Blood Bank";
+        string name = "City Central Blood Bank";
         var location = GeoLocation.Create(40.7128, -74.0060);
 
         var bank = BloodBank.Register(id, name, location);
@@ -46,7 +46,7 @@ public class BloodBankTests
     [Fact]
     public void Register_NameExceeds200Characters_ThrowsDomainException()
     {
-        var longName = new string('A', 201);
+        string longName = new string('A', 201);
         DomainException ex = Should.Throw<DomainException>(() =>
             BloodBank.Register(Guid.NewGuid(), longName, GeoLocation.Create(0, 0))
         );
