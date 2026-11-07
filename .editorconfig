@@ -77,3 +77,9 @@ indent_size = 2
 
 [*.md]
 trim_trailing_whitespace = false
+
+[web/**]
+end_of_line = lf
+
+[*.{js,jsx,ts,tsx,html,css}]
+end_of_line = lf

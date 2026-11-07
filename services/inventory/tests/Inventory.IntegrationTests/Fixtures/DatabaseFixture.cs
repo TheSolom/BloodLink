@@ -44,10 +44,7 @@ public class DatabaseFixture : IAsyncLifetime
         );
     }
 
-    public async Task ResetDatabaseAsync()
-    {
-        await _respawner.ResetAsync(_dbConnection);
-    }
+    public async Task ResetDatabaseAsync() => await _respawner.ResetAsync(_dbConnection);
 
     public async Task DisposeAsync()
     {
