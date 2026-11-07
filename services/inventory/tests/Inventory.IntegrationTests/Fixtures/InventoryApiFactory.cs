@@ -17,6 +17,11 @@ public class InventoryApiFactory(DatabaseFixture databaseFixture) : WebApplicati
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
+        builder.UseSetting(
+            "ConnectionStrings:InventoryConnection",
+            databaseFixture.ConnectionString
+        );
+
         builder.ConfigureTestServices(services =>
         {
             // Replace DbContext configuration with the container connection string
