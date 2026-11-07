@@ -110,6 +110,22 @@ public class ReserveUnitsHandler(
         }
         catch (DbUpdateConcurrencyException ex)
         {
+            dbContext.ChangeTracker.Clear();
+            var current = await dbContext
+                .BloodUnits.AsNoTracking()
+                .Where(u => request.UnitIds.Contains(u.Id))
+                .ToListAsync(cancellationToken);
+            if (
+                current.Count == request.UnitIds.Count
+                && current.All(u =>
+                    u.Status == BloodUnitStatus.Reserved
+                    && u.CurrentReservationRequestId == request.RequestId
+                )
+            )
+            {
+                return Results.Ok(new ReserveUnitsResponse(request.RequestId, request.UnitIds));
+            }
+
             if (logger.IsEnabled(LogLevel.Warning))
             {
                 logger.LogWarning(
