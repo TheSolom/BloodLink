@@ -58,6 +58,8 @@ public class ExpireUnitsHandler(
             {
                 logger.LogWarning(ex, "Concurrency conflict during expiration sweep");
             }
+
+            return 0;
         }
 
         if (logger.IsEnabled(LogLevel.Information) && expiredCount > 0)
