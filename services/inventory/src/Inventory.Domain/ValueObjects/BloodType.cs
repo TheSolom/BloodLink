@@ -69,7 +69,10 @@ public sealed record BloodType
     {
         if (!TryParse(input, out BloodType? bloodType))
         {
-            throw new DomainException($"'{input}' is not a valid blood type code.", "blood_type.invalid");
+            throw new DomainException(
+                $"'{input}' is not a valid blood type code.",
+                "blood_type.invalid"
+            );
         }
 
         return bloodType;
@@ -83,7 +86,7 @@ public sealed record BloodType
             AboType.B => "B",
             AboType.AB => "AB",
             AboType.O => "O",
-            _ => throw new InvalidOperationException("Unsupported ABO type.")
+            _ => throw new InvalidOperationException("Unsupported ABO type."),
         };
 
         string rhStr = Rh == RhFactor.Positive ? "+" : "-";

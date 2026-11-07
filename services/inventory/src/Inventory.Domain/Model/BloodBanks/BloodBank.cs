@@ -28,17 +28,16 @@ public class BloodBank : AggregateRoot<Guid>
         string trimmedName = name.Trim();
         if (trimmedName.Length > 200)
         {
-            throw new DomainException("Blood bank name cannot exceed 200 characters.", "blood_bank.name_too_long");
+            throw new DomainException(
+                "Blood bank name cannot exceed 200 characters.",
+                "blood_bank.name_too_long"
+            );
         }
 
         ArgumentNullException.ThrowIfNull(location);
 
         var bank = new BloodBank(id, trimmedName, location);
-        bank.AddDomainEvent(new BloodBankRegisteredDomainEvent(
-            id,
-            trimmedName,
-            location
-        ));
+        bank.AddDomainEvent(new BloodBankRegisteredDomainEvent(id, trimmedName, location));
 
         return bank;
     }

@@ -15,18 +15,26 @@ public class GetAvailableStockValidator : AbstractValidator<GetAvailableStockQue
             .InclusiveBetween(1, 100)
             .WithMessage("Page size must be between 1 and 100.");
 
-        When(x => !string.IsNullOrWhiteSpace(x.BloodType), () =>
-        {
-            RuleFor(x => x.BloodType)
-                .Must(code => BloodType.TryParse(code, out _))
-                .WithMessage("Blood type filter must be a valid ABO/Rh code (e.g. 'A+', 'O-').");
-        });
+        When(
+            x => !string.IsNullOrWhiteSpace(x.BloodType),
+            () =>
+            {
+                RuleFor(x => x.BloodType)
+                    .Must(code => BloodType.TryParse(code, out _))
+                    .WithMessage(
+                        "Blood type filter must be a valid ABO/Rh code (e.g. 'A+', 'O-')."
+                    );
+            }
+        );
 
-        When(x => !string.IsNullOrWhiteSpace(x.Component), () =>
-        {
-            RuleFor(x => x.Component)
-                .Must(comp => BloodComponentExtensions.TryParse(comp, out _))
-                .WithMessage("Component filter must be either 'RedCells' or 'Platelets'.");
-        });
+        When(
+            x => !string.IsNullOrWhiteSpace(x.Component),
+            () =>
+            {
+                RuleFor(x => x.Component)
+                    .Must(comp => BloodComponentExtensions.TryParse(comp, out _))
+                    .WithMessage("Component filter must be either 'RedCells' or 'Platelets'.");
+            }
+        );
     }
 }

@@ -7,5 +7,5 @@ public enum BloodUnitStatus
     InTransit,
     Delivered,
     Expired,
-    Discarded
+    Discarded,
 }

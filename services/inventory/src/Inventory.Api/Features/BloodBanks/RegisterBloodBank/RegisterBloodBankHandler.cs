@@ -6,7 +6,10 @@ namespace BloodLink.Inventory.Api.Features.BloodBanks.RegisterBloodBank;
 
 public class RegisterBloodBankHandler(InventoryDbContext dbContext)
 {
-    public async Task<RegisterBloodBankResponse> HandleAsync(RegisterBloodBankRequest request, CancellationToken cancellationToken)
+    public async Task<RegisterBloodBankResponse> HandleAsync(
+        RegisterBloodBankRequest request,
+        CancellationToken cancellationToken
+    )
     {
         var location = GeoLocation.Create(request.Latitude, request.Longitude);
         var bank = BloodBank.Register(Guid.NewGuid(), request.Name, location);

@@ -13,7 +13,10 @@ public sealed partial record DonationNumber
         Value = value;
     }
 
-    public static bool TryParse(string? input, [NotNullWhen(true)] out DonationNumber? donationNumber)
+    public static bool TryParse(
+        string? input,
+        [NotNullWhen(true)] out DonationNumber? donationNumber
+    )
     {
         donationNumber = null;
         if (string.IsNullOrWhiteSpace(input))
@@ -40,7 +43,10 @@ public sealed partial record DonationNumber
     {
         if (!TryParse(value, out DonationNumber? donationNumber))
         {
-            throw new DomainException($"'{value}' is not a valid donation number. Must be 3-32 alphanumeric characters with optional hyphens.", "donation_number.invalid");
+            throw new DomainException(
+                $"'{value}' is not a valid donation number. Must be 3-32 alphanumeric characters with optional hyphens.",
+                "donation_number.invalid"
+            );
         }
 
         return donationNumber;
