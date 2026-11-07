@@ -107,18 +107,19 @@ public class FoundationArchitectureTests
         );
 
         // Also assert that references are limited to BuildingBlocks.Domain and BCL
-        var referencedAssemblies = InventoryDomainAssembly
+        string?[] referencedAssemblies = InventoryDomainAssembly
             .GetReferencedAssemblies()
             .Select(a => a.Name)
             .Where(name => name != null)
             .ToArray();
 
-        foreach (var refName in referencedAssemblies)
+        foreach (string? refName in referencedAssemblies)
         {
             bool isAllowed =
                 refName!.StartsWith("System", StringComparison.Ordinal)
                 || refName.StartsWith("Microsoft.NET", StringComparison.Ordinal)
                 || refName.Equals("mscorlib", StringComparison.Ordinal)
+                || refName.Equals("netstandard", StringComparison.Ordinal)
                 || refName.Equals("BloodLink.BuildingBlocks.Domain", StringComparison.Ordinal);
 
             isAllowed.ShouldBeTrue(
@@ -172,18 +173,19 @@ public class FoundationArchitectureTests
             $"Inventory.Contracts must not depend on external libraries: {string.Join(", ", result.FailingTypes?.Select(t => t.FullName) ?? [])}"
         );
 
-        var referencedAssemblies = InventoryContractsAssembly
+        string?[] referencedAssemblies = InventoryContractsAssembly
             .GetReferencedAssemblies()
             .Select(a => a.Name)
             .Where(name => name != null)
             .ToArray();
 
-        foreach (var refName in referencedAssemblies)
+        foreach (string? refName in referencedAssemblies)
         {
             bool isBcl =
                 refName!.StartsWith("System", StringComparison.Ordinal)
                 || refName.StartsWith("Microsoft.NET", StringComparison.Ordinal)
-                || refName.Equals("mscorlib", StringComparison.Ordinal);
+                || refName.Equals("mscorlib", StringComparison.Ordinal)
+                || refName.Equals("netstandard", StringComparison.Ordinal);
 
             isBcl.ShouldBeTrue(
                 $"Inventory.Contracts must reference only BCL assemblies, but references '{refName}'."

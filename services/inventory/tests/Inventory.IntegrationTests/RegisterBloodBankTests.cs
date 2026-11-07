@@ -23,10 +23,7 @@ public class RegisterBloodBankTests : IAsyncLifetime
         _client = _factory.CreateClient();
     }
 
-    public async Task InitializeAsync()
-    {
-        await _databaseFixture.ResetDatabaseAsync();
-    }
+    public async Task InitializeAsync() => await _databaseFixture.ResetDatabaseAsync();
 
     public Task DisposeAsync() => Task.CompletedTask;
 
