@@ -34,4 +34,3 @@ public abstract class AggregateRoot<TId>(TId id) : Entity<TId>(id), IHasDomainEv
         return events;
     }
 }
-

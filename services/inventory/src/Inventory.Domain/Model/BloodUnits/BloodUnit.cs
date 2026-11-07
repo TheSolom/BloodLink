@@ -55,7 +55,10 @@ public class BloodUnit : AggregateRoot<Guid>
 
         if (collectedAt > now)
         {
-            throw new DomainException("Donation collection time cannot be in the future.", "unit.collected_in_future");
+            throw new DomainException(
+                "Donation collection time cannot be in the future.",
+                "unit.collected_in_future"
+            );
         }
 
         DateTimeOffset utcCollectedAt = collectedAt.ToUniversalTime();
@@ -63,7 +66,10 @@ public class BloodUnit : AggregateRoot<Guid>
 
         if (expiresAt <= now)
         {
-            throw new DomainException("Donation is already expired based on shelf life.", "unit.already_expired");
+            throw new DomainException(
+                "Donation is already expired based on shelf life.",
+                "unit.already_expired"
+            );
         }
 
         var unit = new BloodUnit(
@@ -77,15 +83,17 @@ public class BloodUnit : AggregateRoot<Guid>
             version: 1
         );
 
-        unit.AddDomainEvent(new UnitReceivedDomainEvent(
-            id,
-            donationNumber,
-            bloodType,
-            component,
-            utcCollectedAt,
-            expiresAt,
-            bloodBankId
-        ));
+        unit.AddDomainEvent(
+            new UnitReceivedDomainEvent(
+                id,
+                donationNumber,
+                bloodType,
+                component,
+                utcCollectedAt,
+                expiresAt,
+                bloodBankId
+            )
+        );
 
         return unit;
     }
@@ -94,7 +102,10 @@ public class BloodUnit : AggregateRoot<Guid>
     {
         if (Status != BloodUnitStatus.Available)
         {
-            throw new DomainException("Unit is not available for reservation.", "unit.not_available");
+            throw new DomainException(
+                "Unit is not available for reservation.",
+                "unit.not_available"
+            );
         }
 
         if (now >= ExpiresAt)
@@ -113,7 +124,10 @@ public class BloodUnit : AggregateRoot<Guid>
     {
         if (Status != BloodUnitStatus.Reserved || CurrentReservationRequestId != requestId)
         {
-            throw new DomainException("Unit is not reserved by this request.", "unit.invalid_reservation");
+            throw new DomainException(
+                "Unit is not reserved by this request.",
+                "unit.invalid_reservation"
+            );
         }
 
         Status = BloodUnitStatus.Available;
@@ -127,12 +141,18 @@ public class BloodUnit : AggregateRoot<Guid>
     {
         if (Status is BloodUnitStatus.Delivered or BloodUnitStatus.Discarded)
         {
-            throw new DomainException("Cannot expire unit in terminal state.", "unit.cannot_expire_terminal");
+            throw new DomainException(
+                "Cannot expire unit in terminal state.",
+                "unit.cannot_expire_terminal"
+            );
         }
 
         if (now < ExpiresAt)
         {
-            throw new DomainException("Cannot expire unit before its expiration timestamp.", "unit.not_yet_expired");
+            throw new DomainException(
+                "Cannot expire unit before its expiration timestamp.",
+                "unit.not_yet_expired"
+            );
         }
 
         Status = BloodUnitStatus.Expired;
@@ -145,7 +165,10 @@ public class BloodUnit : AggregateRoot<Guid>
     {
         if (string.IsNullOrWhiteSpace(reason))
         {
-            throw new DomainException("Discard reason is required.", "unit.discard_reason_required");
+            throw new DomainException(
+                "Discard reason is required.",
+                "unit.discard_reason_required"
+            );
         }
 
         Status = BloodUnitStatus.Discarded;
@@ -156,7 +179,10 @@ public class BloodUnit : AggregateRoot<Guid>
     {
         if (Status != BloodUnitStatus.Reserved || CurrentReservationRequestId != requestId)
         {
-            throw new DomainException("Unit must be reserved by the request to mark in transit.", "unit.not_reserved");
+            throw new DomainException(
+                "Unit must be reserved by the request to mark in transit.",
+                "unit.not_reserved"
+            );
         }
 
         Status = BloodUnitStatus.InTransit;
@@ -169,7 +195,10 @@ public class BloodUnit : AggregateRoot<Guid>
     {
         if (Status != BloodUnitStatus.InTransit || CurrentReservationRequestId != requestId)
         {
-            throw new DomainException("Unit must be in transit to mark delivered.", "unit.not_in_transit");
+            throw new DomainException(
+                "Unit must be in transit to mark delivered.",
+                "unit.not_in_transit"
+            );
         }
 
         Status = BloodUnitStatus.Delivered;

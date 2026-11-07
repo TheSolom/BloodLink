@@ -51,4 +51,3 @@ public abstract class Entity<TId>(TId id) : IEquatable<Entity<TId>>
 
     private bool IsTransient() => EqualityComparer<TId>.Default.Equals(Id, default!);
 }
-

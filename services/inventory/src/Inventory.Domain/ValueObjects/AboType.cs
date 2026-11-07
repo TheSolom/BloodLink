@@ -5,5 +5,5 @@ public enum AboType
     A,
     B,
     AB,
-    O
+    O,
 }

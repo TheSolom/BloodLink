@@ -57,6 +57,7 @@ appsettings.Development.json
 
 # Superpowers scratch
 .superpowers/
+docs/superpowers/
 
 # Local agent artifacts (skills restored via `npx skills experimental_install`)
 .agents/

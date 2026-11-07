@@ -26,4 +26,3 @@ public class DomainException : Exception
         Code = code;
     }
 }
-
