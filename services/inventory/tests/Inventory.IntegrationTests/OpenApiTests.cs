@@ -18,14 +18,14 @@ public class OpenApiTests(DatabaseFixture databaseFixture)
         HttpResponseMessage response = await client.GetAsync("/openapi/v1.json");
 
         response.StatusCode.ShouldBe(HttpStatusCode.OK);
-        var content = await response.Content.ReadAsStringAsync();
+        string content = await response.Content.ReadAsStringAsync();
 
         using var doc = JsonDocument.Parse(content);
         doc.RootElement.TryGetProperty("openapi", out JsonElement openapiProp).ShouldBeTrue();
         openapiProp.GetString().ShouldStartWith("3.");
 
         // Also save OpenAPI spec to a known path for tooling if folder exists
-        var targetDir = Path.GetFullPath(
+        string targetDir = Path.GetFullPath(
             Path.Combine(AppContext.BaseDirectory, "../../../../../../../web/dashboard")
         );
         if (!Directory.Exists(targetDir))
