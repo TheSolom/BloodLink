@@ -119,6 +119,7 @@ public class FoundationArchitectureTests
                 refName!.StartsWith("System", StringComparison.Ordinal)
                 || refName.StartsWith("Microsoft.NET", StringComparison.Ordinal)
                 || refName.Equals("mscorlib", StringComparison.Ordinal)
+                || refName.Equals("netstandard", StringComparison.Ordinal)
                 || refName.Equals("BloodLink.BuildingBlocks.Domain", StringComparison.Ordinal);
 
             isAllowed.ShouldBeTrue(
@@ -183,7 +184,8 @@ public class FoundationArchitectureTests
             bool isBcl =
                 refName!.StartsWith("System", StringComparison.Ordinal)
                 || refName.StartsWith("Microsoft.NET", StringComparison.Ordinal)
-                || refName.Equals("mscorlib", StringComparison.Ordinal);
+                || refName.Equals("mscorlib", StringComparison.Ordinal)
+                || refName.Equals("netstandard", StringComparison.Ordinal);
 
             isBcl.ShouldBeTrue(
                 $"Inventory.Contracts must reference only BCL assemblies, but references '{refName}'."
