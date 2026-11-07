@@ -94,7 +94,7 @@ public class ReceiveDonationTests : IAsyncLifetime
 
         // Verify nothing was persisted to database
         await using InventoryDbContext dbContext = _factory.CreateDbContext();
-        var unitsCount = await dbContext.BloodUnits.CountAsync();
+        int unitsCount = await dbContext.BloodUnits.CountAsync();
         unitsCount.ShouldBe(0);
     }
 
@@ -186,7 +186,7 @@ public class ReceiveDonationTests : IAsyncLifetime
 
         // Exactly one unit in database
         await using InventoryDbContext dbContext = _factory.CreateDbContext();
-        var count = await dbContext.BloodUnits.CountAsync(u =>
+        int count = await dbContext.BloodUnits.CountAsync(u =>
             u.BloodBankId == bankId && u.DonationNumber == DonationNumber.Create("DN-CONCUR-001")
         );
         count.ShouldBe(1);
@@ -227,7 +227,7 @@ public class ReceiveDonationTests : IAsyncLifetime
         responseB.StatusCode.ShouldBe(HttpStatusCode.Created);
 
         await using InventoryDbContext dbContext = _factory.CreateDbContext();
-        var count = await dbContext.BloodUnits.CountAsync(u =>
+        int count = await dbContext.BloodUnits.CountAsync(u =>
             u.DonationNumber == DonationNumber.Create("DN-SHARED-001")
         );
         count.ShouldBe(2);
