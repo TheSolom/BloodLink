@@ -43,8 +43,8 @@ public class ReleaseUnitsConsumerTests
             x.AddConsumer<ReleaseUnitsConsumer>();
         });
 
-        await using var provider = services.BuildServiceProvider(true);
-        var harness = provider.GetRequiredService<ITestHarness>();
+        await using ServiceProvider provider = services.BuildServiceProvider(true);
+        ITestHarness harness = provider.GetRequiredService<ITestHarness>();
 
         await harness.Start();
 
@@ -54,7 +54,8 @@ public class ReleaseUnitsConsumerTests
 
         await harness.Bus.Publish(command);
 
-        var consumerHarness = harness.GetConsumerHarness<ReleaseUnitsConsumer>();
+        IConsumerTestHarness<ReleaseUnitsConsumer> consumerHarness =
+            harness.GetConsumerHarness<ReleaseUnitsConsumer>();
 
         (await consumerHarness.Consumed.Any<ReleaseUnitsCommand>()).ShouldBeTrue();
         fakeHandler.CallCount.ShouldBe(1);

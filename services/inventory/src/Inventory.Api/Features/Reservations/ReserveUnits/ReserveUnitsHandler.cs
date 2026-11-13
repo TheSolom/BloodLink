@@ -21,7 +21,7 @@ public class ReserveUnitsHandler(
         DateTimeOffset now = timeProvider.GetUtcNow();
 
         // 1. Load requested units
-        var units = await dbContext
+        List<BloodUnit> units = await dbContext
             .BloodUnits.Where(u => request.UnitIds.Contains(u.Id))
             .ToListAsync(cancellationToken);
 
@@ -121,7 +121,7 @@ public class ReserveUnitsHandler(
         }
 
         // 5. Reserve each unit (increments Version, sets Status & CurrentReservationRequestId)
-        foreach (var unit in units)
+        foreach (BloodUnit? unit in units)
         {
             unit.Reserve(request.RequestId, now);
         }
@@ -139,7 +139,7 @@ public class ReserveUnitsHandler(
         catch (DbUpdateConcurrencyException ex)
         {
             dbContext.ChangeTracker.Clear();
-            var current = await dbContext
+            List<BloodUnit> current = await dbContext
                 .BloodUnits.AsNoTracking()
                 .Where(u => request.UnitIds.Contains(u.Id))
                 .ToListAsync(cancellationToken);

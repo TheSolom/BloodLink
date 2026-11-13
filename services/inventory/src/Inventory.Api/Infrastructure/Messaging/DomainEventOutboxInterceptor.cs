@@ -3,6 +3,7 @@ using BloodLink.Inventory.Api.Infrastructure.Messaging.Mappers;
 using BloodLink.Inventory.Domain.Model.BloodUnits;
 using BloodLink.Inventory.Domain.Model.BloodUnits.Events;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace BloodLink.Inventory.Api.Infrastructure.Messaging;
@@ -47,11 +48,11 @@ public class DomainEventOutboxInterceptor(IEventPublisher eventPublisher) : Save
 
         var integrationEvents = new List<object>();
 
-        foreach (var entry in entries)
+        foreach (EntityEntry<IHasDomainEvents>? entry in entries)
         {
-            var domainEvents = entry.Entity.ClearDomainEvents();
+            IReadOnlyCollection<IDomainEvent> domainEvents = entry.Entity.ClearDomainEvents();
 
-            foreach (var domainEvent in domainEvents)
+            foreach (IDomainEvent domainEvent in domainEvents)
             {
                 switch (domainEvent)
                 {

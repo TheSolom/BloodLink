@@ -72,14 +72,15 @@ public class ReservationConcurrencyTests : IAsyncLifetime
             var shuffledRequests = requests.OrderBy(_ => rnd.Next()).ToList();
 
             // Execute all 50 requests concurrently
-            var tasks = shuffledRequests.Select(async req =>
-            {
-                HttpResponseMessage response = await _client.PostAsJsonAsync(
-                    "/api/v1/stock/reserve",
-                    req.Payload
-                );
-                return (req.RequestId, req.Payload.UnitIds[0], response.StatusCode);
-            });
+            IEnumerable<Task<(Guid RequestId, Guid, HttpStatusCode StatusCode)>> tasks =
+                shuffledRequests.Select(async req =>
+                {
+                    HttpResponseMessage response = await _client.PostAsJsonAsync(
+                        "/api/v1/stock/reserve",
+                        req.Payload
+                    );
+                    return (req.RequestId, req.Payload.UnitIds[0], response.StatusCode);
+                });
 
             (Guid RequestId, Guid UnitId, HttpStatusCode StatusCode)[] results = await Task.WhenAll(
                 tasks
