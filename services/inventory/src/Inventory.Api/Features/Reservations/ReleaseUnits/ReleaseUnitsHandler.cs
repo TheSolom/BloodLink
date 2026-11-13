@@ -12,7 +12,7 @@ public class ReleaseUnitsHandler(
     ILogger<ReleaseUnitsHandler> logger
 )
 {
-    public async Task<IResult> HandleAsync(
+    public virtual async Task<IResult> HandleAsync(
         ReleaseUnitsRequest request,
         CancellationToken cancellationToken
     )

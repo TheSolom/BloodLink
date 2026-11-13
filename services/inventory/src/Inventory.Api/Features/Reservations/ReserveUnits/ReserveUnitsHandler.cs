@@ -13,7 +13,7 @@ public class ReserveUnitsHandler(
     ILogger<ReserveUnitsHandler> logger
 )
 {
-    public async Task<IResult> HandleAsync(
+    public virtual async Task<IResult> HandleAsync(
         ReserveUnitsRequest request,
         CancellationToken cancellationToken
     )
