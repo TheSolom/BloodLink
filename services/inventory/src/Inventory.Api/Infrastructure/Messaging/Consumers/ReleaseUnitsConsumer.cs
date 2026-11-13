@@ -1,4 +1,5 @@
 using BloodLink.Inventory.Api.Features.Reservations.ReleaseUnits;
+using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using BloodLink.Inventory.Contracts;
 using MassTransit;
 
@@ -17,4 +18,13 @@ public class ReleaseUnitsConsumer(ReleaseUnitsHandler handler) : IConsumer<Relea
         var request = new ReleaseUnitsRequest(context.Message.RequestId, context.Message.UnitIds);
         await handler.HandleAsync(request, context.CancellationToken);
     }
+}
+
+public class ReleaseUnitsConsumerDefinition : ConsumerDefinition<ReleaseUnitsConsumer>
+{
+    protected override void ConfigureConsumer(
+        IReceiveEndpointConfigurator endpointConfigurator,
+        IConsumerConfigurator<ReleaseUnitsConsumer> consumerConfigurator,
+        IRegistrationContext context
+    ) => endpointConfigurator.UseEntityFrameworkOutbox<InventoryDbContext>(context);
 }

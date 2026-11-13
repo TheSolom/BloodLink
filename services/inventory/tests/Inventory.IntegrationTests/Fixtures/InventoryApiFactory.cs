@@ -1,3 +1,4 @@
+using System.Globalization;
 using BloodLink.BuildingBlocks.Domain;
 using BloodLink.Inventory.Api.Infrastructure.Messaging;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
@@ -22,6 +23,14 @@ public class InventoryApiFactory(DatabaseFixture databaseFixture) : WebApplicati
             "ConnectionStrings:InventoryConnection",
             databaseFixture.ConnectionString
         );
+        builder.UseSetting("RabbitMq:Host", databaseFixture.RabbitMqHost);
+        builder.UseSetting(
+            "RabbitMq:Port",
+            databaseFixture.RabbitMqPort.ToString(CultureInfo.InvariantCulture)
+        );
+        builder.UseSetting("RabbitMq:UserName", databaseFixture.RabbitMqUsername);
+        builder.UseSetting("RabbitMq:Password", databaseFixture.RabbitMqPassword);
+        builder.UseSetting("RabbitMq:VirtualHost", "/");
 
         builder.ConfigureTestServices(services =>
         {

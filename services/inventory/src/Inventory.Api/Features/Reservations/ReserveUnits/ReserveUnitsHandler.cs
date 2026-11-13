@@ -3,7 +3,6 @@ using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using BloodLink.Inventory.Contracts;
 using BloodLink.Inventory.Domain.Model.BloodUnits;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace BloodLink.Inventory.Api.Features.Reservations.ReserveUnits;
 
@@ -149,8 +148,9 @@ public class ReserveUnitsHandler(
                 );
             }
 
-            using (IServiceScope scope = scopeFactory.CreateScope())
+            try
             {
+                using IServiceScope scope = scopeFactory.CreateScope();
                 InventoryDbContext checkDbContext =
                     scope.ServiceProvider.GetRequiredService<InventoryDbContext>();
                 List<BloodUnit> current = await checkDbContext
@@ -180,6 +180,14 @@ public class ReserveUnitsHandler(
                     cancellationToken
                 );
                 await checkDbContext.SaveChangesAsync(cancellationToken);
+            }
+            catch (Exception outboxEx)
+            {
+                logger.LogWarning(
+                    outboxEx,
+                    "Failed to record rejection event in outbox for RequestId {RequestId}",
+                    request.RequestId
+                );
             }
 
             return Results.Problem(

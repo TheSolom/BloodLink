@@ -1,4 +1,3 @@
-using BloodLink.BuildingBlocks.Domain;
 using BloodLink.Inventory.Api.Infrastructure.Messaging;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using BloodLink.Inventory.Contracts;
@@ -42,9 +41,7 @@ public class DomainEventOutboxInterceptorTests
 
         DbContextOptions<InventoryDbContext> options =
             new DbContextOptionsBuilder<InventoryDbContext>()
-                .UseSqlServer(
-                    "Server=localhost;Database=BloodLink_Inventory_Test;Trusted_Connection=True;TrustServerCertificate=True;"
-                )
+                .UseSqlServer("Server=dummy;Database=dummy;")
                 .Options;
 
         await using var context = new InventoryDbContext(options);
@@ -85,9 +82,7 @@ public class DomainEventOutboxInterceptorTests
 
         DbContextOptions<InventoryDbContext> options =
             new DbContextOptionsBuilder<InventoryDbContext>()
-                .UseSqlServer(
-                    "Server=localhost;Database=BloodLink_Inventory_Test;Trusted_Connection=True;TrustServerCertificate=True;"
-                )
+                .UseSqlServer("Server=dummy;Database=dummy;")
                 .Options;
 
         await using var context = new InventoryDbContext(options);

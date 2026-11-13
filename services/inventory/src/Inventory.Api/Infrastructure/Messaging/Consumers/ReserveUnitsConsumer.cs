@@ -1,4 +1,5 @@
 using BloodLink.Inventory.Api.Features.Reservations.ReserveUnits;
+using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using BloodLink.Inventory.Contracts;
 using MassTransit;
 
@@ -19,4 +20,13 @@ public class ReserveUnitsConsumer(ReserveUnitsHandler handler) : IConsumer<Reser
         var request = new ReserveUnitsRequest(context.Message.RequestId, context.Message.UnitIds);
         await handler.HandleAsync(request, context.CancellationToken);
     }
+}
+
+public class ReserveUnitsConsumerDefinition : ConsumerDefinition<ReserveUnitsConsumer>
+{
+    protected override void ConfigureConsumer(
+        IReceiveEndpointConfigurator endpointConfigurator,
+        IConsumerConfigurator<ReserveUnitsConsumer> consumerConfigurator,
+        IRegistrationContext context
+    ) => endpointConfigurator.UseEntityFrameworkOutbox<InventoryDbContext>(context);
 }

@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Json;
 using BloodLink.Inventory.Api.Features.Reservations.ReserveUnits;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using BloodLink.Inventory.Domain.Model.BloodBanks;

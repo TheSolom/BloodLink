@@ -1,8 +1,6 @@
 using BloodLink.Inventory.Api.Infrastructure.Messaging.Consumers;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using MassTransit;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace BloodLink.Inventory.Api.Infrastructure.Messaging;
 
@@ -29,8 +27,8 @@ public static class MessagingExtensions
         {
             x.SetKebabCaseEndpointNameFormatter();
 
-            x.AddConsumer<ReserveUnitsConsumer>();
-            x.AddConsumer<ReleaseUnitsConsumer>();
+            x.AddConsumer<ReserveUnitsConsumer, ReserveUnitsConsumerDefinition>();
+            x.AddConsumer<ReleaseUnitsConsumer, ReleaseUnitsConsumerDefinition>();
 
             x.AddEntityFrameworkOutbox<InventoryDbContext>(o =>
             {
