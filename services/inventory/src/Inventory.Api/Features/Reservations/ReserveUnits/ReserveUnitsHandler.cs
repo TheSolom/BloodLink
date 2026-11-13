@@ -100,15 +100,26 @@ public class ReserveUnitsHandler(
             );
         }
 
-        await eventPublisher.PublishAsync(
-            new ReservationRejectedIntegrationEvent(
-                request.RequestId,
-                missingIds,
-                $"One or more blood units were not found in inventory: {string.Join(", ", missingIds)}"
-            ),
-            cancellationToken
-        );
-        await dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await eventPublisher.PublishAsync(
+                new ReservationRejectedIntegrationEvent(
+                    request.RequestId,
+                    missingIds,
+                    $"One or more blood units were not found in inventory: {string.Join(", ", missingIds)}"
+                ),
+                cancellationToken
+            );
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(
+                ex,
+                "Failed to record rejection event in outbox for missing units, RequestId {RequestId}",
+                request.RequestId
+            );
+        }
 
         return Results.Problem(
             statusCode: StatusCodes.Status404NotFound,
@@ -137,15 +148,26 @@ public class ReserveUnitsHandler(
             );
         }
 
-        await eventPublisher.PublishAsync(
-            new ReservationRejectedIntegrationEvent(
-                request.RequestId,
-                unavailableUnits,
-                "One or more requested blood units are no longer available for reservation."
-            ),
-            cancellationToken
-        );
-        await dbContext.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await eventPublisher.PublishAsync(
+                new ReservationRejectedIntegrationEvent(
+                    request.RequestId,
+                    unavailableUnits,
+                    "One or more requested blood units are no longer available for reservation."
+                ),
+                cancellationToken
+            );
+            await dbContext.SaveChangesAsync(cancellationToken);
+        }
+        catch (Exception ex)
+        {
+            logger.LogWarning(
+                ex,
+                "Failed to record rejection event in outbox for unavailable units, RequestId {RequestId}",
+                request.RequestId
+            );
+        }
 
         return Results.Problem(
             statusCode: StatusCodes.Status409Conflict,

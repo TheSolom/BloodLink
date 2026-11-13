@@ -99,7 +99,7 @@ public class ReservationConcurrencyTests : IAsyncLifetime
             );
             conflictCount.ShouldBe(
                 totalRequests - unitCount,
-                $"Iteration {iter}: Expected exactly {totalRequests - unitCount} conflicts but got {conflictCount}"
+                $"Iteration {iter}: Expected exactly {totalRequests - unitCount} conflicts but got {conflictCount}. Status codes: {string.Join(", ", results.GroupBy(r => r.StatusCode).Select(g => $"{g.Key}:{g.Count()}"))}"
             );
 
             // Verify each of the 10 units has exactly one winning request
