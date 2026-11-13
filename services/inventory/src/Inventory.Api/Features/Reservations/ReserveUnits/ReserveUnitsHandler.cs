@@ -1,4 +1,6 @@
+using BloodLink.Inventory.Api.Infrastructure.Messaging;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
+using BloodLink.Inventory.Contracts;
 using BloodLink.Inventory.Domain.Model.BloodUnits;
 using Microsoft.EntityFrameworkCore;
 
@@ -7,6 +9,7 @@ namespace BloodLink.Inventory.Api.Features.Reservations.ReserveUnits;
 public class ReserveUnitsHandler(
     InventoryDbContext dbContext,
     TimeProvider timeProvider,
+    IEventPublisher eventPublisher,
     ILogger<ReserveUnitsHandler> logger
 )
 {
@@ -36,6 +39,16 @@ public class ReserveUnitsHandler(
                     missingIds.Count
                 );
             }
+
+            await eventPublisher.PublishAsync(
+                new ReservationRejectedIntegrationEvent(
+                    request.RequestId,
+                    missingIds,
+                    $"One or more blood units were not found in inventory: {string.Join(", ", missingIds)}"
+                ),
+                cancellationToken
+            );
+            await dbContext.SaveChangesAsync(cancellationToken);
 
             return Results.Problem(
                 statusCode: StatusCodes.Status404NotFound,
@@ -85,6 +98,16 @@ public class ReserveUnitsHandler(
                 );
             }
 
+            await eventPublisher.PublishAsync(
+                new ReservationRejectedIntegrationEvent(
+                    request.RequestId,
+                    unavailableUnits,
+                    "One or more requested blood units are no longer available for reservation."
+                ),
+                cancellationToken
+            );
+            await dbContext.SaveChangesAsync(cancellationToken);
+
             return Results.Problem(
                 statusCode: StatusCodes.Status409Conflict,
                 title: "Blood Units Unavailable",
@@ -102,6 +125,11 @@ public class ReserveUnitsHandler(
         {
             unit.Reserve(request.RequestId, now);
         }
+
+        await eventPublisher.PublishAsync(
+            new UnitsReservedIntegrationEvent(request.RequestId, request.UnitIds),
+            cancellationToken
+        );
 
         // 6. Save changes in one transaction, catching concurrency conflicts
         try
@@ -134,6 +162,16 @@ public class ReserveUnitsHandler(
                     request.RequestId
                 );
             }
+
+            await eventPublisher.PublishAsync(
+                new ReservationRejectedIntegrationEvent(
+                    request.RequestId,
+                    request.UnitIds,
+                    "One or more blood units were modified concurrently by another transaction."
+                ),
+                cancellationToken
+            );
+            await dbContext.SaveChangesAsync(cancellationToken);
 
             return Results.Problem(
                 statusCode: StatusCodes.Status409Conflict,

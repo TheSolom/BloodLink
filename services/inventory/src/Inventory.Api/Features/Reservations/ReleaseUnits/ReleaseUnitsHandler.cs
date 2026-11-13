@@ -1,10 +1,16 @@
+using BloodLink.Inventory.Api.Infrastructure.Messaging;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
+using BloodLink.Inventory.Contracts;
 using BloodLink.Inventory.Domain.Model.BloodUnits;
 using Microsoft.EntityFrameworkCore;
 
 namespace BloodLink.Inventory.Api.Features.Reservations.ReleaseUnits;
 
-public class ReleaseUnitsHandler(InventoryDbContext dbContext, ILogger<ReleaseUnitsHandler> logger)
+public class ReleaseUnitsHandler(
+    InventoryDbContext dbContext,
+    IEventPublisher eventPublisher,
+    ILogger<ReleaseUnitsHandler> logger
+)
 {
     public async Task<IResult> HandleAsync(
         ReleaseUnitsRequest request,
@@ -59,6 +65,12 @@ public class ReleaseUnitsHandler(InventoryDbContext dbContext, ILogger<ReleaseUn
         // 4. Save changes if any units were released
         if (unitsToRelease.Count > 0)
         {
+            var releasedIds = unitsToRelease.Select(u => u.Id).ToList();
+            await eventPublisher.PublishAsync(
+                new UnitsReleasedIntegrationEvent(request.RequestId, releasedIds),
+                cancellationToken
+            );
+
             try
             {
                 await dbContext.SaveChangesAsync(cancellationToken);
@@ -95,7 +107,7 @@ public class ReleaseUnitsHandler(InventoryDbContext dbContext, ILogger<ReleaseUn
             );
         }
 
-        var releasedIds = unitsToRelease.Select(u => u.Id).ToList();
-        return Results.Ok(new ReleaseUnitsResponse(request.RequestId, releasedIds));
+        var releasedResultIds = unitsToRelease.Select(u => u.Id).ToList();
+        return Results.Ok(new ReleaseUnitsResponse(request.RequestId, releasedResultIds));
     }
 }
