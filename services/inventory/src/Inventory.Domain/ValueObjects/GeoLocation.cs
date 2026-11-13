@@ -4,6 +4,11 @@ namespace BloodLink.Inventory.Domain.ValueObjects;
 
 public sealed record GeoLocation
 {
+    public const double MinLatitude = -90.0;
+    public const double MaxLatitude = 90.0;
+    public const double MinLongitude = -180.0;
+    public const double MaxLongitude = 180.0;
+
     public double Latitude { get; }
     public double Longitude { get; }
 
@@ -15,11 +20,6 @@ public sealed record GeoLocation
 
     public static GeoLocation Create(double latitude, double longitude)
     {
-        const double MinLatitude = -90.0;
-        const double MaxLatitude = 90.0;
-        const double MinLongitude = -180.0;
-        const double MaxLongitude = 180.0;
-
         if (latitude is < MinLatitude or > MaxLatitude)
         {
             throw new DomainException(
