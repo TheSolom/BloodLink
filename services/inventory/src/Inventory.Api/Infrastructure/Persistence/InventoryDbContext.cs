@@ -1,3 +1,4 @@
+using BloodLink.Inventory.Api.Infrastructure.Messaging;
 using BloodLink.Inventory.Domain.Model.BloodBanks;
 using BloodLink.Inventory.Domain.Model.BloodUnits;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,7 @@ public class InventoryDbContext(DbContextOptions<InventoryDbContext> options) : 
     {
         modelBuilder.HasDefaultSchema("inventory");
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(InventoryDbContext).Assembly);
+        modelBuilder.ConfigureInventoryOutbox();
         base.OnModelCreating(modelBuilder);
     }
 }
