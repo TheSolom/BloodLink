@@ -14,6 +14,10 @@ public class MassTransitEventPublisher(IPublishEndpoint publishEndpoint) : IEven
         where T : class
     {
         ArgumentNullException.ThrowIfNull(message);
+        if (typeof(T) == typeof(object))
+        {
+            return publishEndpoint.Publish(message, message.GetType(), cancellationToken);
+        }
         return publishEndpoint.Publish(message, cancellationToken);
     }
 
@@ -24,6 +28,12 @@ public class MassTransitEventPublisher(IPublishEndpoint publishEndpoint) : IEven
         where T : class
     {
         ArgumentNullException.ThrowIfNull(messages);
+        if (typeof(T) == typeof(object))
+        {
+            return Task.WhenAll(
+                messages.Select(m => publishEndpoint.Publish(m, m.GetType(), cancellationToken))
+            );
+        }
         return publishEndpoint.PublishBatch(messages, cancellationToken);
     }
 }

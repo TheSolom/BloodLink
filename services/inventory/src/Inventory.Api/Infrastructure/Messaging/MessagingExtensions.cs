@@ -21,7 +21,9 @@ public static class MessagingExtensions
         ArgumentNullException.ThrowIfNull(configuration);
 
         services.AddScoped<IEventPublisher, MassTransitEventPublisher>();
-        services.AddScoped<DomainEventOutboxInterceptor>();
+        services.AddScoped<DomainEventOutboxInterceptor>(sp => new DomainEventOutboxInterceptor(
+            sp
+        ));
 
         services.AddMassTransit(x =>
         {

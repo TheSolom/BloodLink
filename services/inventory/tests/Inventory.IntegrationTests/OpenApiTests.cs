@@ -7,9 +7,13 @@ using Xunit;
 namespace BloodLink.Inventory.IntegrationTests;
 
 [Collection("InventoryIntegrationTests")]
-public class OpenApiTests(DatabaseFixture databaseFixture)
+public class OpenApiTests(DatabaseFixture databaseFixture) : IAsyncLifetime
 {
     private readonly InventoryApiFactory _factory = new(databaseFixture);
+
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync() => await _factory.DisposeAsync();
 
     [Fact]
     public async Task GetOpenApi_Returns200AndValidDocument()

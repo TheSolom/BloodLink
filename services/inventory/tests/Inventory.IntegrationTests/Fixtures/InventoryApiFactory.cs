@@ -1,4 +1,5 @@
 using BloodLink.BuildingBlocks.Domain;
+using BloodLink.Inventory.Api.Infrastructure.Messaging;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -26,10 +27,13 @@ public class InventoryApiFactory(DatabaseFixture databaseFixture) : WebApplicati
         {
             // Replace DbContext configuration with the container connection string
             services.RemoveAll<DbContextOptions<InventoryDbContext>>();
-            services.AddDbContext<InventoryDbContext>(options =>
-            {
-                options.UseSqlServer(databaseFixture.ConnectionString);
-            });
+            services.AddDbContext<InventoryDbContext>(
+                (sp, options) =>
+                {
+                    options.UseSqlServer(databaseFixture.ConnectionString);
+                    options.AddInterceptors(sp.GetRequiredService<DomainEventOutboxInterceptor>());
+                }
+            );
 
             // Replace TimeProvider with FakeTimeProvider
             services.RemoveAll<TimeProvider>();

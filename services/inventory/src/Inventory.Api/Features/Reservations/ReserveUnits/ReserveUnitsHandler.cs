@@ -3,6 +3,7 @@ using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using BloodLink.Inventory.Contracts;
 using BloodLink.Inventory.Domain.Model.BloodUnits;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BloodLink.Inventory.Api.Features.Reservations.ReserveUnits;
 
@@ -10,7 +11,8 @@ public class ReserveUnitsHandler(
     InventoryDbContext dbContext,
     TimeProvider timeProvider,
     IEventPublisher eventPublisher,
-    ILogger<ReserveUnitsHandler> logger
+    ILogger<ReserveUnitsHandler> logger,
+    IServiceScopeFactory scopeFactory
 )
 {
     public virtual async Task<IResult> HandleAsync(
@@ -138,22 +140,6 @@ public class ReserveUnitsHandler(
         }
         catch (DbUpdateConcurrencyException ex)
         {
-            dbContext.ChangeTracker.Clear();
-            List<BloodUnit> current = await dbContext
-                .BloodUnits.AsNoTracking()
-                .Where(u => request.UnitIds.Contains(u.Id))
-                .ToListAsync(cancellationToken);
-            if (
-                current.Count == request.UnitIds.Count
-                && current.All(u =>
-                    u.Status == BloodUnitStatus.Reserved
-                    && u.CurrentReservationRequestId == request.RequestId
-                )
-            )
-            {
-                return Results.Ok(new ReserveUnitsResponse(request.RequestId, request.UnitIds));
-            }
-
             if (logger.IsEnabled(LogLevel.Warning))
             {
                 logger.LogWarning(
@@ -163,15 +149,38 @@ public class ReserveUnitsHandler(
                 );
             }
 
-            await eventPublisher.PublishAsync(
-                new ReservationRejectedIntegrationEvent(
-                    request.RequestId,
-                    request.UnitIds,
-                    "One or more blood units were modified concurrently by another transaction."
-                ),
-                cancellationToken
-            );
-            await dbContext.SaveChangesAsync(cancellationToken);
+            using (IServiceScope scope = scopeFactory.CreateScope())
+            {
+                InventoryDbContext checkDbContext =
+                    scope.ServiceProvider.GetRequiredService<InventoryDbContext>();
+                List<BloodUnit> current = await checkDbContext
+                    .BloodUnits.AsNoTracking()
+                    .Where(u => request.UnitIds.Contains(u.Id))
+                    .ToListAsync(cancellationToken);
+
+                if (
+                    current.Count == request.UnitIds.Count
+                    && current.All(u =>
+                        u.Status == BloodUnitStatus.Reserved
+                        && u.CurrentReservationRequestId == request.RequestId
+                    )
+                )
+                {
+                    return Results.Ok(new ReserveUnitsResponse(request.RequestId, request.UnitIds));
+                }
+
+                IEventPublisher scopePublisher =
+                    scope.ServiceProvider.GetRequiredService<IEventPublisher>();
+                await scopePublisher.PublishAsync(
+                    new ReservationRejectedIntegrationEvent(
+                        request.RequestId,
+                        request.UnitIds,
+                        "One or more blood units were modified concurrently by another transaction."
+                    ),
+                    cancellationToken
+                );
+                await checkDbContext.SaveChangesAsync(cancellationToken);
+            }
 
             return Results.Problem(
                 statusCode: StatusCodes.Status409Conflict,

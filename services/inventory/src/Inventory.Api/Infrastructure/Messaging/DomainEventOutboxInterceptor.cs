@@ -13,8 +13,22 @@ namespace BloodLink.Inventory.Api.Infrastructure.Messaging;
 /// and dispatches corresponding integration events into the MassTransit Transactional Outbox
 /// before SaveChanges commits, guaranteeing zero dual-write anomalies per ADR-0006.
 /// </summary>
-public class DomainEventOutboxInterceptor(IEventPublisher eventPublisher) : SaveChangesInterceptor
+public class DomainEventOutboxInterceptor : SaveChangesInterceptor
 {
+    private readonly Func<IEventPublisher> _eventPublisherProvider;
+
+    public DomainEventOutboxInterceptor(IEventPublisher eventPublisher)
+    {
+        ArgumentNullException.ThrowIfNull(eventPublisher);
+        _eventPublisherProvider = () => eventPublisher;
+    }
+
+    public DomainEventOutboxInterceptor(IServiceProvider serviceProvider)
+    {
+        ArgumentNullException.ThrowIfNull(serviceProvider);
+        _eventPublisherProvider = () => serviceProvider.GetRequiredService<IEventPublisher>();
+    }
+
     public override async ValueTask<InterceptionResult<int>> SavingChangesAsync(
         DbContextEventData eventData,
         InterceptionResult<int> result,
@@ -143,6 +157,7 @@ public class DomainEventOutboxInterceptor(IEventPublisher eventPublisher) : Save
             }
         }
 
+        IEventPublisher eventPublisher = _eventPublisherProvider();
         foreach (var evt in integrationEvents)
         {
             await eventPublisher.PublishAsync(evt, cancellationToken);

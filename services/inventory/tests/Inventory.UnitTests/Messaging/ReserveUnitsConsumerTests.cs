@@ -18,7 +18,7 @@ public class ReserveUnitsConsumerTests
         public int CallCount { get; private set; }
 
         public FakeReserveUnitsHandler()
-            : base(null!, TimeProvider.System, null!, null!) { }
+            : base(null!, TimeProvider.System, null!, null!, null!) { }
 
         public override Task<IResult> HandleAsync(
             ReserveUnitsRequest request,
