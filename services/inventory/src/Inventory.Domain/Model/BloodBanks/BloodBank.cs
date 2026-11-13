@@ -25,11 +25,13 @@ public class BloodBank : AggregateRoot<Guid>
             throw new DomainException("Blood bank name is required.", "blood_bank.name_required");
         }
 
+        const int BloodBankNameMaxLength = 200;
+
         string trimmedName = name.Trim();
-        if (trimmedName.Length > 200)
+        if (trimmedName.Length > BloodBankNameMaxLength)
         {
             throw new DomainException(
-                "Blood bank name cannot exceed 200 characters.",
+                $"Blood bank name cannot exceed {BloodBankNameMaxLength} characters.",
                 "blood_bank.name_too_long"
             );
         }
