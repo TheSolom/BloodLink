@@ -50,117 +50,81 @@ public class DomainEventOutboxInterceptor : SaveChangesInterceptor
     {
         ArgumentNullException.ThrowIfNull(context);
 
+        List<object> integrationEvents = ExtractIntegrationEvents(context);
+        if (integrationEvents.Count == 0)
+        {
+            return;
+        }
+
+        IEventPublisher eventPublisher = _eventPublisherProvider();
+        foreach (object evt in integrationEvents)
+        {
+            await eventPublisher.PublishAsync(evt, cancellationToken);
+        }
+    }
+
+    private static List<object> ExtractIntegrationEvents(DbContext context)
+    {
         var entries = context
             .ChangeTracker.Entries<IHasDomainEvents>()
             .Where(e => e.Entity.DomainEvents.Count > 0)
             .ToList();
 
-        if (entries.Count == 0)
-        {
-            return;
-        }
-
         var integrationEvents = new List<object>();
 
-        foreach (EntityEntry<IHasDomainEvents>? entry in entries)
+        foreach (EntityEntry<IHasDomainEvents> entry in entries)
         {
             IReadOnlyCollection<IDomainEvent> domainEvents = entry.Entity.ClearDomainEvents();
-
             foreach (IDomainEvent domainEvent in domainEvents)
             {
-                switch (domainEvent)
-                {
-                    case UnitReceivedDomainEvent received:
-                        integrationEvents.Add(
-                            InventoryIntegrationEventMapper.ToIntegrationEvent(received)
-                        );
-                        if (entry.Entity is BloodUnit unitR)
-                        {
-                            integrationEvents.Add(
-                                InventoryIntegrationEventMapper.ToUnitStatusChangedEvent(
-                                    unitR.Id,
-                                    unitR.Status.ToString(),
-                                    unitR.Version
-                                )
-                            );
-                        }
-                        break;
-
-                    case UnitReservedDomainEvent:
-                        if (entry.Entity is BloodUnit unitRes)
-                        {
-                            integrationEvents.Add(
-                                InventoryIntegrationEventMapper.ToUnitStatusChangedEvent(
-                                    unitRes.Id,
-                                    unitRes.Status.ToString(),
-                                    unitRes.Version
-                                )
-                            );
-                        }
-                        break;
-
-                    case UnitReservationReleasedDomainEvent:
-                        if (entry.Entity is BloodUnit unitRel)
-                        {
-                            integrationEvents.Add(
-                                InventoryIntegrationEventMapper.ToUnitStatusChangedEvent(
-                                    unitRel.Id,
-                                    unitRel.Status.ToString(),
-                                    unitRel.Version
-                                )
-                            );
-                        }
-                        break;
-
-                    case UnitExpiredDomainEvent expired:
-                        integrationEvents.Add(
-                            InventoryIntegrationEventMapper.ToUnitExpiredEvent(expired)
-                        );
-                        if (entry.Entity is BloodUnit unitExp)
-                        {
-                            integrationEvents.Add(
-                                InventoryIntegrationEventMapper.ToUnitStatusChangedEvent(
-                                    unitExp.Id,
-                                    unitExp.Status.ToString(),
-                                    unitExp.Version
-                                )
-                            );
-                        }
-                        break;
-
-                    case UnitDispatchedDomainEvent:
-                        if (entry.Entity is BloodUnit unitDisp)
-                        {
-                            integrationEvents.Add(
-                                InventoryIntegrationEventMapper.ToUnitStatusChangedEvent(
-                                    unitDisp.Id,
-                                    unitDisp.Status.ToString(),
-                                    unitDisp.Version
-                                )
-                            );
-                        }
-                        break;
-
-                    case UnitDeliveredDomainEvent:
-                        if (entry.Entity is BloodUnit unitDel)
-                        {
-                            integrationEvents.Add(
-                                InventoryIntegrationEventMapper.ToUnitStatusChangedEvent(
-                                    unitDel.Id,
-                                    unitDel.Status.ToString(),
-                                    unitDel.Version
-                                )
-                            );
-                        }
-                        break;
-                }
+                MapDomainEvent(domainEvent, entry.Entity, integrationEvents);
             }
         }
 
-        IEventPublisher eventPublisher = _eventPublisherProvider();
-        foreach (var evt in integrationEvents)
+        return integrationEvents;
+    }
+
+    private static void MapDomainEvent(
+        IDomainEvent domainEvent,
+        IHasDomainEvents entity,
+        List<object> integrationEvents
+    )
+    {
+        switch (domainEvent)
         {
-            await eventPublisher.PublishAsync(evt, cancellationToken);
+            case UnitReceivedDomainEvent received:
+                integrationEvents.Add(InventoryIntegrationEventMapper.ToIntegrationEvent(received));
+                AddStatusChangedEvent(entity, integrationEvents);
+                break;
+
+            case UnitExpiredDomainEvent expired:
+                integrationEvents.Add(InventoryIntegrationEventMapper.ToUnitExpiredEvent(expired));
+                AddStatusChangedEvent(entity, integrationEvents);
+                break;
+
+            case UnitReservedDomainEvent:
+            case UnitReservationReleasedDomainEvent:
+            case UnitDispatchedDomainEvent:
+            case UnitDeliveredDomainEvent:
+                AddStatusChangedEvent(entity, integrationEvents);
+                break;
+        }
+    }
+
+    private static void AddStatusChangedEvent(
+        IHasDomainEvents entity,
+        List<object> integrationEvents
+    )
+    {
+        if (entity is BloodUnit unit)
+        {
+            integrationEvents.Add(
+                InventoryIntegrationEventMapper.ToUnitStatusChangedEvent(
+                    unit.Id,
+                    unit.Status.ToString(),
+                    unit.Version
+                )
+            );
         }
     }
 }
