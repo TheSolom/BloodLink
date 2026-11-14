@@ -77,8 +77,9 @@ if (
 )
 {
     await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
-    InventoryDbContext dbContext = scope.ServiceProvider.GetRequiredService<InventoryDbContext>();
-    await dbContext.Database.MigrateAsync();
+    InventoryDbContext InventoryDbContext =
+        scope.ServiceProvider.GetRequiredService<InventoryDbContext>();
+    await InventoryDbContext.Database.MigrateAsync();
 }
 
 app.MapDefaultEndpoints();
