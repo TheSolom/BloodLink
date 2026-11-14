@@ -40,6 +40,7 @@ public class InventoryIntegrationEventMapperTests
         integrationEvent.CollectedAt.ShouldBe(collectedAt);
         integrationEvent.ExpiresAt.ShouldBe(expiresAt);
         integrationEvent.BloodBankId.ShouldBe(bloodBankId);
+        integrationEvent.Version.ShouldBe(1);
     }
 
     [Fact]
