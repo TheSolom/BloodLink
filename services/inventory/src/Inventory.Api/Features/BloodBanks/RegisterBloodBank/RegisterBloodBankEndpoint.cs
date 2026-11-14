@@ -1,4 +1,4 @@
-using BloodLink.Inventory.Api.Infrastructure.Filters;
+using BloodLink.BuildingBlocks.Web;
 
 namespace BloodLink.Inventory.Api.Features.BloodBanks.RegisterBloodBank;
 

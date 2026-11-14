@@ -1,4 +1,4 @@
-using BloodLink.Inventory.Api.Infrastructure.Middleware;
+using BloodLink.BuildingBlocks.Web;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using BloodLink.Inventory.Domain.Model.BloodBanks;
 using BloodLink.Inventory.Domain.Model.BloodUnits;

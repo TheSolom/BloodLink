@@ -1,3 +1,4 @@
+using BloodLink.BuildingBlocks.Web;
 using BloodLink.Inventory.Api.Features.BloodBanks.RegisterBloodBank;
 using BloodLink.Inventory.Api.Features.Donations.ReceiveDonation;
 using BloodLink.Inventory.Api.Features.Expiry.ExpireUnits;
@@ -5,7 +6,6 @@ using BloodLink.Inventory.Api.Features.Reservations.ReleaseUnits;
 using BloodLink.Inventory.Api.Features.Reservations.ReserveUnits;
 using BloodLink.Inventory.Api.Features.Stock.GetAvailableStock;
 using BloodLink.Inventory.Api.Infrastructure.Messaging;
-using BloodLink.Inventory.Api.Infrastructure.Middleware;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using BloodLink.ServiceDefaults;
 using FluentValidation;

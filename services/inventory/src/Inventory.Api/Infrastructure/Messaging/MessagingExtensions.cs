@@ -1,3 +1,4 @@
+using BloodLink.BuildingBlocks.Messaging;
 using BloodLink.Inventory.Api.Infrastructure.Messaging.Consumers;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using MassTransit;
@@ -50,16 +51,11 @@ public static class MessagingExtensions
                     string username = rabbitMqSection["UserName"] ?? "guest";
                     string password = rabbitMqSection["Password"] ?? "guest";
 
-                    cfg.Host(
-                        host,
-                        port,
-                        virtualHost,
-                        h =>
-                        {
-                            h.Username(username);
-                            h.Password(password);
-                        }
-                    );
+                    cfg.Host(host, port, virtualHost, h =>
+                    {
+                        h.Username(username);
+                        h.Password(password);
+                    });
 
                     // Configure standard message retry policy: 3 retries with exponential backoff
                     cfg.UseMessageRetry(r =>
