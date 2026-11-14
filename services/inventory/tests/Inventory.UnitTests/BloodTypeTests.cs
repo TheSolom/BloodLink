@@ -40,12 +40,34 @@ public class BloodTypeTests
     [InlineData("O*")]
     [InlineData("AB")]
     [InlineData("INVALID")]
+    [InlineData("O\u2212")] // Typographic minus (U+2212) must be rejected
+    [InlineData("A\u2212")]
+    [InlineData("O NEGATIVE")]
+    [InlineData("ONEGATIVE")]
     public void TryParse_InvalidCode_ReturnsFalse(string? input)
     {
         bool success = BloodType.TryParse(input, out BloodType? bloodType);
 
         success.ShouldBeFalse();
         bloodType.ShouldBeNull();
+    }
+
+    [Theory]
+    [InlineData("a+", "A+")]
+    [InlineData("a-", "A-")]
+    [InlineData("ab+", "AB+")]
+    [InlineData("ab-", "AB-")]
+    [InlineData("o-", "O-")]
+    public void TryParse_MixedOrLowerCase_NormalizesToUppercase(
+        string input,
+        string expectedCanonical
+    )
+    {
+        bool success = BloodType.TryParse(input, out BloodType? bloodType);
+
+        success.ShouldBeTrue();
+        bloodType.ShouldNotBeNull();
+        bloodType.ToString().ShouldBe(expectedCanonical);
     }
 
     [Fact]
