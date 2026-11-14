@@ -6,6 +6,9 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Requests.Domain\Requests.Domain.csproj" />
+        <ProjectReference Include="..\..\src\Requests.Contracts\Requests.Contracts.csproj" />
+        <ProjectReference Include="..\..\src\Requests.Api\Requests.Api.csproj" />
+        <ProjectReference Include="..\..\..\inventory\src\Inventory.Contracts\Inventory.Contracts.csproj" />
         <ProjectReference Include="..\..\..\..\shared\BuildingBlocks.Domain\BuildingBlocks.Domain.csproj" />
     </ItemGroup>
 
@@ -15,5 +18,6 @@
         <PackageReference Include="xunit.runner.visualstudio" />
         <PackageReference Include="Shouldly" />
         <PackageReference Include="coverlet.collector" />
+        <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
     </ItemGroup>
 </Project>
