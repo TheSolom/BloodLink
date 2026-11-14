@@ -72,12 +72,12 @@ public class DomainEventOutboxInterceptor : SaveChangesInterceptor
 
         var integrationEvents = new List<object>();
 
-        foreach (EntityEntry<IHasDomainEvents> entry in entries)
+        foreach (IHasDomainEvents entity in entries.Select(entry => entry.Entity))
         {
-            IReadOnlyCollection<IDomainEvent> domainEvents = entry.Entity.ClearDomainEvents();
+            IReadOnlyCollection<IDomainEvent> domainEvents = entity.ClearDomainEvents();
             foreach (IDomainEvent domainEvent in domainEvents)
             {
-                MapDomainEvent(domainEvent, entry.Entity, integrationEvents);
+                MapDomainEvent(domainEvent, entity, integrationEvents);
             }
         }
 
