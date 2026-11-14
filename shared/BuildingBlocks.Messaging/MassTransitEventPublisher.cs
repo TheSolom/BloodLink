@@ -1,6 +1,6 @@
 using MassTransit;
 
-namespace BloodLink.Inventory.Api.Infrastructure.Messaging;
+namespace BloodLink.BuildingBlocks.Messaging;
 
 /// <summary>
 /// MassTransit-backed event publisher. Encapsulates IPublishEndpoint to ensure that

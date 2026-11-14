@@ -1,10 +1,12 @@
 using BloodLink.BuildingBlocks.Domain;
 using Microsoft.AspNetCore.Diagnostics;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
-namespace BloodLink.Inventory.Api.Infrastructure.Middleware;
+namespace BloodLink.BuildingBlocks.Web;
 
 public class GlobalExceptionHandler(
     IProblemDetailsService problemDetailsService,
@@ -72,7 +74,7 @@ public class GlobalExceptionHandler(
             && IsUniqueConstraintViolation(dbUpdateException)
         )
         {
-            return (StatusCodes.Status409Conflict, "Conflict", "donation.duplicate");
+            return (StatusCodes.Status409Conflict, "Conflict", "conflict.unique_violation");
         }
 
         return (

@@ -1,3 +1,4 @@
+using BloodLink.BuildingBlocks.Messaging;
 using BloodLink.Inventory.Api.Infrastructure.Messaging;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using BloodLink.Inventory.Contracts;

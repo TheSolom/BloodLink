@@ -9,6 +9,8 @@
     <ItemGroup>
         <ProjectReference Include="..\Inventory.Domain\Inventory.Domain.csproj" />
         <ProjectReference Include="..\Inventory.Contracts\Inventory.Contracts.csproj" />
+        <ProjectReference Include="..\..\..\..\shared\BuildingBlocks.Messaging\BuildingBlocks.Messaging.csproj" />
+        <ProjectReference Include="..\..\..\..\shared\BuildingBlocks.Web\BuildingBlocks.Web.csproj" />
         <ProjectReference Include="..\..\..\..\shared\ServiceDefaults\ServiceDefaults.csproj" />
     </ItemGroup>
 

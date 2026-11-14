@@ -1,4 +1,4 @@
-namespace BloodLink.Inventory.Api.Infrastructure.Messaging;
+namespace BloodLink.BuildingBlocks.Messaging;
 
 /// <summary>
 /// Domain and slice abstraction for publishing integration events without direct dependency on messaging frameworks.

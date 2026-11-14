@@ -1,4 +1,5 @@
 using BloodLink.BuildingBlocks.Domain;
+using BloodLink.BuildingBlocks.Messaging;
 using BloodLink.Inventory.Api.Infrastructure.Messaging.Mappers;
 using BloodLink.Inventory.Domain.Model.BloodUnits;
 using BloodLink.Inventory.Domain.Model.BloodUnits.Events;

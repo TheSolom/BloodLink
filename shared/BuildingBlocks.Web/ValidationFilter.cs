@@ -1,7 +1,9 @@
 using FluentValidation;
 using FluentValidation.Results;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.DependencyInjection;
 
-namespace BloodLink.Inventory.Api.Infrastructure.Filters;
+namespace BloodLink.BuildingBlocks.Web;
 
 public class ValidationFilter<TRequest> : IEndpointFilter
     where TRequest : class
