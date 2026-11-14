@@ -53,6 +53,10 @@ public class InventoryApiFactory(DatabaseFixture databaseFixture) : WebApplicati
         });
     }
 
+    /// <summary>
+    /// Creates a dedicated, non-scoped <see cref="InventoryDbContext"/> without <see cref="DomainEventOutboxInterceptor"/>.
+    /// Intentionally used in test arrangements (seeding) and assertions to avoid dispatching domain events to the outbox.
+    /// </summary>
     public InventoryDbContext CreateDbContext()
     {
         DbContextOptionsBuilder<InventoryDbContext> optionsBuilder =

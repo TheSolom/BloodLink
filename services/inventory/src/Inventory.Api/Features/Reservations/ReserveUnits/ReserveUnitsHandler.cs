@@ -3,6 +3,7 @@ using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using BloodLink.Inventory.Contracts;
 using BloodLink.Inventory.Domain.Model.BloodUnits;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BloodLink.Inventory.Api.Features.Reservations.ReserveUnits;
 
@@ -119,6 +120,7 @@ public class ReserveUnitsHandler(
                 "Failed to record rejection event in outbox for missing units, RequestId {RequestId}",
                 request.RequestId
             );
+            throw;
         }
 
         return Results.Problem(
@@ -167,6 +169,7 @@ public class ReserveUnitsHandler(
                 "Failed to record rejection event in outbox for unavailable units, RequestId {RequestId}",
                 request.RequestId
             );
+            throw;
         }
 
         return Results.Problem(
@@ -198,7 +201,7 @@ public class ReserveUnitsHandler(
 
         try
         {
-            using IServiceScope scope = scopeFactory.CreateScope();
+            await using AsyncServiceScope scope = scopeFactory.CreateAsyncScope();
             InventoryDbContext checkDbContext =
                 scope.ServiceProvider.GetRequiredService<InventoryDbContext>();
             List<BloodUnit> current = await checkDbContext
@@ -236,6 +239,7 @@ public class ReserveUnitsHandler(
                 "Failed to record rejection event in outbox for RequestId {RequestId}",
                 request.RequestId
             );
+            throw;
         }
 
         return Results.Problem(

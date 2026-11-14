@@ -4,7 +4,10 @@ using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using BloodLink.Inventory.Domain.Model.BloodBanks;
 using BloodLink.Inventory.Domain.ValueObjects;
 using BloodLink.Inventory.IntegrationTests.Fixtures;
+using Microsoft.AspNetCore.TestHost;
 using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Shouldly;
 using Xunit;
 
@@ -21,7 +24,28 @@ public class OutboxPersistenceIntegrationTests : IAsyncLifetime
     {
         _databaseFixture = databaseFixture;
         _factory = new InventoryApiFactory(databaseFixture);
-        _client = _factory.CreateClient();
+        _client = _factory
+            .WithWebHostBuilder(builder =>
+            {
+                builder.ConfigureTestServices(services =>
+                {
+                    // Disable the background outbox delivery service for this persistence test
+                    // so that outbox records remain persisted in inventory.OutboxMessages
+                    // without race conditions against the background delivery poller.
+                    List<ServiceDescriptor> deliveryServices = services
+                        .Where(d =>
+                            d.ServiceType == typeof(IHostedService)
+                            && d.ImplementationType?.Name.StartsWith("BusOutboxDeliveryService", StringComparison.Ordinal) == true
+                        )
+                        .ToList();
+
+                    foreach (ServiceDescriptor descriptor in deliveryServices)
+                    {
+                        services.Remove(descriptor);
+                    }
+                });
+            })
+            .CreateClient();
     }
 
     public async Task InitializeAsync() => await _databaseFixture.ResetDatabaseAsync();
@@ -56,22 +80,16 @@ public class OutboxPersistenceIntegrationTests : IAsyncLifetime
         await using var connection = new SqlConnection(_databaseFixture.ConnectionString);
         await connection.OpenAsync();
 
-        // Query OutboxMessages and OutboxStates to confirm transactional outbox persistence
+        // Query OutboxMessages to confirm transactional outbox persistence
         await using var messageCmd = new SqlCommand(
             "SELECT COUNT(1) FROM inventory.OutboxMessages WHERE MessageType LIKE '%UnitReceivedIntegrationEvent%'",
             connection
         );
         int messageCount = (int)(await messageCmd.ExecuteScalarAsync() ?? 0);
 
-        await using var stateCmd = new SqlCommand(
-            "SELECT COUNT(1) FROM inventory.OutboxStates",
-            connection
-        );
-        int stateCount = (int)(await stateCmd.ExecuteScalarAsync() ?? 0);
-
-        // Either the outbox message is still queued or the MassTransit poller already delivered it
-        (messageCount > 0 || stateCount > 0).ShouldBeTrue(
-            "Expected transactional outbox state or message to be recorded in schema inventory"
+        messageCount.ShouldBeGreaterThan(
+            0,
+            "Expected UnitReceivedIntegrationEvent outbox message to be persisted in schema inventory"
         );
     }
 

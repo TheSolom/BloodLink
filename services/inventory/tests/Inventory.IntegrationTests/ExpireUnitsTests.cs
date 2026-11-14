@@ -64,7 +64,7 @@ public class ExpireUnitsTests : IAsyncLifetime
             BloodUnitStatus.Delivered
         );
 
-        using (IServiceScope scope = _factory.Services.CreateScope())
+        await using (AsyncServiceScope scope = _factory.Services.CreateAsyncScope())
         {
             ExpireUnitsHandler handler =
                 scope.ServiceProvider.GetRequiredService<ExpireUnitsHandler>();

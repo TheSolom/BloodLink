@@ -63,4 +63,52 @@ public class ReleaseUnitsConsumerTests
         fakeHandler.HandledRequest.RequestId.ShouldBe(requestId);
         fakeHandler.HandledRequest.UnitIds.ShouldBe(unitIds);
     }
+
+    [Fact]
+    public async Task Consume_ShouldFault_WhenHandlerReturnsProblemResult()
+    {
+        var fakeHandler = new FakeFailingReleaseUnitsHandler();
+
+        var services = new ServiceCollection();
+        services.AddSingleton<ReleaseUnitsHandler>(fakeHandler);
+        services.AddMassTransitTestHarness(x =>
+        {
+            x.AddConsumer<ReleaseUnitsConsumer>();
+        });
+
+        await using ServiceProvider provider = services.BuildServiceProvider(true);
+        ITestHarness harness = provider.GetRequiredService<ITestHarness>();
+
+        await harness.Start();
+
+        var requestId = Guid.NewGuid();
+        List<Guid> unitIds = [Guid.NewGuid()];
+        var command = new ReleaseUnitsCommand(requestId, unitIds);
+
+        await harness.Bus.Publish(command);
+
+        IConsumerTestHarness<ReleaseUnitsConsumer> consumerHarness =
+            harness.GetConsumerHarness<ReleaseUnitsConsumer>();
+
+        (await consumerHarness.Consumed.Any<ReleaseUnitsCommand>()).ShouldBeTrue();
+        consumerHarness.Consumed.Select<ReleaseUnitsCommand>().Any(x => x.Exception != null).ShouldBeTrue();
+        fakeHandler.CallCount.ShouldBe(1);
+    }
+
+    private sealed class FakeFailingReleaseUnitsHandler : ReleaseUnitsHandler
+    {
+        public int CallCount { get; private set; }
+
+        public FakeFailingReleaseUnitsHandler()
+            : base(null!, null!, null!) { }
+
+        public override Task<IResult> HandleAsync(
+            ReleaseUnitsRequest request,
+            CancellationToken cancellationToken
+        )
+        {
+            CallCount++;
+            return Task.FromResult(Results.Problem(statusCode: StatusCodes.Status404NotFound));
+        }
+    }
 }

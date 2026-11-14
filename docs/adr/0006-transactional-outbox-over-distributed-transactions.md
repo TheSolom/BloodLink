@@ -43,7 +43,7 @@ We adopt the **Transactional Outbox Pattern** combined with an **Idempotent Tran
 ### Positive
 - **Guaranteed Consistency:** State changes and event publications are strictly atomic; zero dual-write anomalies or ghost events.
 - **Resilience to Broker Outages:** The Inventory service continues accepting donations and reservations even if RabbitMQ is temporarily unavailable.
-- **Idempotency Built-In:** The EF Core Inbox guarantees that duplicate messages delivered over RabbitMQ have exactly-one effect on business state.
+- **Idempotency Built-In:** The EF Core Inbox guarantees that duplicate messages delivered over RabbitMQ have exactly-one effect while the inbox record is retained within the configured duplicate detection window.
 
 ### Negative / Trade-offs
 - **Slight Publishing Latency:** Events are published via background polling (configured at 1-second query delay), meaning downstream subscribers receive events with a slight asynchronous delay rather than instantaneous inline push.

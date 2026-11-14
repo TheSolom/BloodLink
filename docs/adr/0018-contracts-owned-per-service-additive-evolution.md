@@ -35,7 +35,8 @@ We establish strict ownership and evolution rules for all inter-service messagin
    - **Explicit Versioning for Breaking Semantics:** If an event's semantic meaning changes fundamentally, a new versioned contract must be introduced (e.g., `UnitsReservedV2IntegrationEvent`), and publishers must dual-publish both versions during the migration transition window until all downstream consumers have upgraded.
 
 4. **Kebab-Case Endpoint and Topic Topology:**
-   All queue and exchange names are automatically derived using MassTransit's kebab-case endpoint name formatter (`SetKebabCaseEndpointNameFormatter`), establishing consistent, predictable, and language-agnostic RabbitMQ topology across all services (`reserve-units`, `release-units`).
+   Endpoint (queue) names are derived using MassTransit's kebab-case endpoint name formatter (`SetKebabCaseEndpointNameFormatter`), for example `reserve-units` and `release-units`.
+   Message exchange names are derived by MassTransit's separate entity-name formatter. `SetKebabCaseEndpointNameFormatter` does not apply to them. Integrations must not derive exchange names from endpoint names.
 
 ## Alternatives Considered
 

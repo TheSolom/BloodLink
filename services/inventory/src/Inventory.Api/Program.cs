@@ -66,7 +66,7 @@ if (
     && app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup")
 )
 {
-    using IServiceScope scope = app.Services.CreateScope();
+    await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
     InventoryDbContext dbContext = scope.ServiceProvider.GetRequiredService<InventoryDbContext>();
     await dbContext.Database.MigrateAsync();
 }

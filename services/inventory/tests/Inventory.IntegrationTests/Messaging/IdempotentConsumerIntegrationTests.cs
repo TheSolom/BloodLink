@@ -27,8 +27,8 @@ public class IdempotentConsumerIntegrationTests : IAsyncLifetime
 
     public async Task InitializeAsync()
     {
-        // Force server startup so MassTransit bus and consumers start listening
-        _factory.CreateClient();
+        // Force server startup so MassTransit bus and consumers start listening without allocating an undisposed HttpClient
+        _ = _factory.Server;
         await _databaseFixture.ResetDatabaseAsync();
     }
 
