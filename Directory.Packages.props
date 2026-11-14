@@ -6,15 +6,15 @@
 
     <ItemGroup>
         <!-- ASP.NET Core & EF Core (aligned with .NET 11 SDK) -->
-        <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="11.0.0-rc.3.26522.148" />
+        <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="11.0.0" />
         <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="11.0.0-rc.3.26522.148" />
         <PackageVersion
             Include="Microsoft.EntityFrameworkCore.SqlServer"
-            Version="11.0.0-rc.3.26522.148"
+            Version="11.0.0"
         />
         <PackageVersion
             Include="Microsoft.EntityFrameworkCore.Design"
-            Version="11.0.0-rc.3.26522.148"
+            Version="11.0.0"
         />
         <PackageVersion
             Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore"
@@ -22,8 +22,8 @@
         />
 
         <!-- Microsoft Extensions & Resilience -->
-        <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="10.11.0" />
-        <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="10.11.0" />
+        <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="11.0.0" />
+        <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="11.0.0" />
 
         <!-- OpenTelemetry & Observability -->
         <PackageVersion Include="OpenTelemetry" Version="1.20.1" />
@@ -49,9 +49,9 @@
         <!-- Testing & Architecture -->
         <PackageVersion
             Include="Microsoft.AspNetCore.Mvc.Testing"
-            Version="11.0.0-rc.3.26522.148"
+            Version="11.0.0"
         />
-        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
+        <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.12.0" />
         <PackageVersion Include="xunit" Version="2.9.3" />
         <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1" />
         <PackageVersion Include="Shouldly" Version="4.3.0" />
