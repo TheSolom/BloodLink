@@ -4,6 +4,11 @@ namespace BloodLink.Inventory.Domain.ValueObjects;
 
 public sealed record GeoLocation
 {
+    public const double MinLatitude = -90.0;
+    public const double MaxLatitude = 90.0;
+    public const double MinLongitude = -180.0;
+    public const double MaxLongitude = 180.0;
+
     public double Latitude { get; }
     public double Longitude { get; }
 
@@ -15,18 +20,18 @@ public sealed record GeoLocation
 
     public static GeoLocation Create(double latitude, double longitude)
     {
-        if (latitude is < -90.0 or > 90.0)
+        if (latitude is < MinLatitude or > MaxLatitude)
         {
             throw new DomainException(
-                $"Latitude {latitude} is outside valid range [-90, 90].",
+                $"Latitude {latitude} is outside valid range [{MinLatitude}, {MaxLatitude}].",
                 "geo_location.out_of_range"
             );
         }
 
-        if (longitude is < -180.0 or > 180.0)
+        if (longitude is < MinLongitude or > MaxLongitude)
         {
             throw new DomainException(
-                $"Longitude {longitude} is outside valid range [-180, 180].",
+                $"Longitude {longitude} is outside valid range [{MinLongitude}, {MaxLongitude}].",
                 "geo_location.out_of_range"
             );
         }

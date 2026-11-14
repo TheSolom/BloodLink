@@ -6,6 +6,8 @@ namespace BloodLink.Inventory.Domain.Model.BloodBanks;
 
 public class BloodBank : AggregateRoot<Guid>
 {
+    public const int NameMaxLength = 200;
+
     public string Name { get; private set; } = null!;
     public GeoLocation Location { get; private set; } = null!;
 
@@ -26,10 +28,10 @@ public class BloodBank : AggregateRoot<Guid>
         }
 
         string trimmedName = name.Trim();
-        if (trimmedName.Length > 200)
+        if (trimmedName.Length > NameMaxLength)
         {
             throw new DomainException(
-                "Blood bank name cannot exceed 200 characters.",
+                $"Blood bank name cannot exceed {NameMaxLength} characters.",
                 "blood_bank.name_too_long"
             );
         }
