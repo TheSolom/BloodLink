@@ -3,7 +3,6 @@ using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using BloodLink.Inventory.Contracts;
 using BloodLink.Inventory.Domain.Model.BloodUnits;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 
 namespace BloodLink.Inventory.Api.Features.Reservations.ReserveUnits;
 
