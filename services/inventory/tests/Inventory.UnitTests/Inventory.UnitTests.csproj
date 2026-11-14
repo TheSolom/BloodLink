@@ -6,6 +6,8 @@
 
     <ItemGroup>
         <ProjectReference Include="..\..\src\Inventory.Domain\Inventory.Domain.csproj" />
+        <ProjectReference Include="..\..\src\Inventory.Contracts\Inventory.Contracts.csproj" />
+        <ProjectReference Include="..\..\src\Inventory.Api\Inventory.Api.csproj" />
         <ProjectReference Include="..\..\..\..\shared\BuildingBlocks.Domain\BuildingBlocks.Domain.csproj" />
     </ItemGroup>
 
@@ -14,6 +16,7 @@
         <PackageReference Include="xunit" />
         <PackageReference Include="xunit.runner.visualstudio" />
         <PackageReference Include="Shouldly" />
+        <PackageReference Include="MassTransit" />
         <PackageReference Include="coverlet.collector" />
     </ItemGroup>
 </Project>

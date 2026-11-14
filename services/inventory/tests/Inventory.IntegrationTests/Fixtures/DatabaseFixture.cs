@@ -4,6 +4,7 @@ using Microsoft.Data.SqlClient;
 using Microsoft.EntityFrameworkCore;
 using Respawn;
 using Testcontainers.MsSql;
+using Testcontainers.RabbitMq;
 using Xunit;
 
 namespace BloodLink.Inventory.IntegrationTests.Fixtures;
@@ -14,14 +15,24 @@ public class DatabaseFixture : IAsyncLifetime
         "mcr.microsoft.com/mssql/server:2025-CU10-ubuntu-24.04"
     ).Build();
 
+    private readonly RabbitMqContainer _rabbitMqContainer = new RabbitMqBuilder(
+        "masstransit/rabbitmq:4.3.1"
+    ).Build();
+
     private DbConnection _dbConnection = null!;
     private Respawner _respawner = null!;
 
     public string ConnectionString => _msSqlContainer.GetConnectionString();
+    public string RabbitMqConnectionString => _rabbitMqContainer.GetConnectionString();
+    private Uri RabbitMqUri => new(_rabbitMqContainer.GetConnectionString());
+    public string RabbitMqHost => RabbitMqUri.Host;
+    public ushort RabbitMqPort => (ushort)RabbitMqUri.Port;
+    public string RabbitMqUsername => RabbitMqUri.UserInfo.Split(':')[0];
+    public string RabbitMqPassword => RabbitMqUri.UserInfo.Split(':')[1];
 
     public async Task InitializeAsync()
     {
-        await _msSqlContainer.StartAsync();
+        await Task.WhenAll(_msSqlContainer.StartAsync(), _rabbitMqContainer.StartAsync());
 
         _dbConnection = new SqlConnection(ConnectionString);
         await _dbConnection.OpenAsync();
@@ -53,6 +64,9 @@ public class DatabaseFixture : IAsyncLifetime
             await _dbConnection.DisposeAsync();
         }
 
-        await _msSqlContainer.DisposeAsync();
+        await Task.WhenAll(
+            _msSqlContainer.DisposeAsync().AsTask(),
+            _rabbitMqContainer.DisposeAsync().AsTask()
+        );
     }
 }

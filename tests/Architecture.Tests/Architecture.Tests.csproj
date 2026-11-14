@@ -9,6 +9,7 @@
         <ProjectReference Include="..\..\shared\ServiceDefaults\ServiceDefaults.csproj" />
         <ProjectReference Include="..\..\services\inventory\src\Inventory.Domain\Inventory.Domain.csproj" />
         <ProjectReference Include="..\..\services\inventory\src\Inventory.Contracts\Inventory.Contracts.csproj" />
+        <ProjectReference Include="..\..\services\inventory\src\Inventory.Api\Inventory.Api.csproj" />
     </ItemGroup>
 
     <ItemGroup>

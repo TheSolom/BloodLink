@@ -1,4 +1,5 @@
 using BloodLink.BuildingBlocks.Domain;
+using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using BloodLink.Inventory.Contracts;
 using BloodLink.Inventory.Domain.Model.BloodUnits;
 using BloodLink.ServiceDefaults;
@@ -27,6 +28,8 @@ public class FoundationArchitectureTests
         typeof(BloodUnit).Assembly;
     private static readonly System.Reflection.Assembly InventoryContractsAssembly =
         typeof(UnitReceivedIntegrationEvent).Assembly;
+    private static readonly System.Reflection.Assembly InventoryApiAssembly =
+        typeof(InventoryDbContext).Assembly;
 
     [Fact]
     public void BuildingBlocksDomain_ShouldNotHaveDependencyOnInfrastructureFrameworks()
@@ -203,12 +206,24 @@ public class FoundationArchitectureTests
         // They may reference only another service's *.Contracts.
     }
 
-    [Fact(
-        Skip = "Skipped in Phase 2: requires messaging infrastructure and sagas implementation in Phase 4 & Phase 6."
-    )]
+    [Fact]
     public void MassTransitTypes_ShouldOnlyBeReferencedByMessagingInfrastructureOrRequestsSagas()
     {
         // Boundary rule:
         // Only Infrastructure/Messaging (and Requests.Api/Sagas) may reference MassTransit types.
+        Type[] types = InventoryApiAssembly.GetExportedTypes();
+        types.ShouldNotBeEmpty("Inventory.Api assembly must contain types to test non-vacuously.");
+
+        TestResult result = Types
+            .InAssembly(InventoryApiAssembly)
+            .That()
+            .DoNotResideInNamespace("BloodLink.Inventory.Api.Infrastructure.Messaging")
+            .ShouldNot()
+            .HaveDependencyOnAny("MassTransit")
+            .GetResult();
+
+        result.IsSuccessful.ShouldBeTrue(
+            $"MassTransit types must only be referenced in Infrastructure.Messaging: {string.Join(", ", result.FailingTypes?.Select(t => t.FullName) ?? [])}"
+        );
     }
 }

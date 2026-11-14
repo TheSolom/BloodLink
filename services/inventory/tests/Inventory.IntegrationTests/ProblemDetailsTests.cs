@@ -7,7 +7,7 @@ using Xunit;
 namespace BloodLink.Inventory.IntegrationTests;
 
 [Collection("InventoryIntegrationTests")]
-public class ProblemDetailsTests
+public class ProblemDetailsTests : IAsyncLifetime
 {
     private readonly InventoryApiFactory _factory;
     private readonly HttpClient _client;
@@ -16,6 +16,14 @@ public class ProblemDetailsTests
     {
         _factory = new InventoryApiFactory(databaseFixture);
         _client = _factory.CreateClient();
+    }
+
+    public Task InitializeAsync() => Task.CompletedTask;
+
+    public async Task DisposeAsync()
+    {
+        _client.Dispose();
+        await _factory.DisposeAsync();
     }
 
     [Fact]

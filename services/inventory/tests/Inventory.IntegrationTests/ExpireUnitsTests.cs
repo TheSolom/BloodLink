@@ -24,7 +24,7 @@ public class ExpireUnitsTests : IAsyncLifetime
 
     public async Task InitializeAsync() => await _databaseFixture.ResetDatabaseAsync();
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public async Task DisposeAsync() => await _factory.DisposeAsync();
 
     [Fact]
     public async Task Should_TransitionExpiredUnits_To_ExpiredStatus_WhenSweepExecutes()
@@ -64,7 +64,7 @@ public class ExpireUnitsTests : IAsyncLifetime
             BloodUnitStatus.Delivered
         );
 
-        using (IServiceScope scope = _factory.Services.CreateScope())
+        await using (AsyncServiceScope scope = _factory.Services.CreateAsyncScope())
         {
             ExpireUnitsHandler handler =
                 scope.ServiceProvider.GetRequiredService<ExpireUnitsHandler>();

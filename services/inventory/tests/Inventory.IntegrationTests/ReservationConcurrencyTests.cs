@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Json;
 using BloodLink.Inventory.Api.Features.Reservations.ReserveUnits;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using BloodLink.Inventory.Domain.Model.BloodBanks;
@@ -28,7 +27,11 @@ public class ReservationConcurrencyTests : IAsyncLifetime
 
     public async Task InitializeAsync() => await _databaseFixture.ResetDatabaseAsync();
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public async Task DisposeAsync()
+    {
+        _client.Dispose();
+        await _factory.DisposeAsync();
+    }
 
     [Fact]
     public async Task Should_CorrectlyHandle50ConcurrentReservations_Across10Units_WithZeroDoubleReservations_Repeated20Times()
@@ -72,14 +75,15 @@ public class ReservationConcurrencyTests : IAsyncLifetime
             var shuffledRequests = requests.OrderBy(_ => rnd.Next()).ToList();
 
             // Execute all 50 requests concurrently
-            var tasks = shuffledRequests.Select(async req =>
-            {
-                HttpResponseMessage response = await _client.PostAsJsonAsync(
-                    "/api/v1/stock/reserve",
-                    req.Payload
-                );
-                return (req.RequestId, req.Payload.UnitIds[0], response.StatusCode);
-            });
+            IEnumerable<Task<(Guid RequestId, Guid, HttpStatusCode StatusCode)>> tasks =
+                shuffledRequests.Select(async req =>
+                {
+                    HttpResponseMessage response = await _client.PostAsJsonAsync(
+                        "/api/v1/stock/reserve",
+                        req.Payload
+                    );
+                    return (req.RequestId, req.Payload.UnitIds[0], response.StatusCode);
+                });
 
             (Guid RequestId, Guid UnitId, HttpStatusCode StatusCode)[] results = await Task.WhenAll(
                 tasks
@@ -95,7 +99,7 @@ public class ReservationConcurrencyTests : IAsyncLifetime
             );
             conflictCount.ShouldBe(
                 totalRequests - unitCount,
-                $"Iteration {iter}: Expected exactly {totalRequests - unitCount} conflicts but got {conflictCount}"
+                $"Iteration {iter}: Expected exactly {totalRequests - unitCount} conflicts but got {conflictCount}. Status codes: {string.Join(", ", results.GroupBy(r => r.StatusCode).Select(g => $"{g.Key}:{g.Count()}"))}"
             );
 
             // Verify each of the 10 units has exactly one winning request

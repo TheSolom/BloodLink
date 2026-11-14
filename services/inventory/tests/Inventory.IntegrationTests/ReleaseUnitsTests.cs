@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Json;
 using BloodLink.Inventory.Api.Features.Reservations.ReleaseUnits;
 using BloodLink.Inventory.Api.Features.Reservations.ReserveUnits;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
@@ -30,7 +29,11 @@ public class ReleaseUnitsTests : IAsyncLifetime
 
     public async Task InitializeAsync() => await _databaseFixture.ResetDatabaseAsync();
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public async Task DisposeAsync()
+    {
+        _client.Dispose();
+        await _factory.DisposeAsync();
+    }
 
     [Fact]
     public async Task Should_ReleaseUnits_Successfully_WhenUnitsReservedByRequest()

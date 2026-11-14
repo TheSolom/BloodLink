@@ -4,6 +4,7 @@ using BloodLink.Inventory.Api.Features.Expiry.ExpireUnits;
 using BloodLink.Inventory.Api.Features.Reservations.ReleaseUnits;
 using BloodLink.Inventory.Api.Features.Reservations.ReserveUnits;
 using BloodLink.Inventory.Api.Features.Stock.GetAvailableStock;
+using BloodLink.Inventory.Api.Infrastructure.Messaging;
 using BloodLink.Inventory.Api.Infrastructure.Middleware;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using BloodLink.ServiceDefaults;
@@ -25,10 +26,16 @@ string connectionString =
     builder.Configuration.GetConnectionString("InventoryConnection")
     ?? throw new InvalidOperationException("Connection string 'InventoryConnection' not found.");
 
-builder.Services.AddDbContext<InventoryDbContext>(options =>
-{
-    options.UseSqlServer(connectionString);
-});
+builder.Services.AddDbContext<InventoryDbContext>(
+    (sp, options) =>
+    {
+        options.UseSqlServer(connectionString);
+        options.AddInterceptors(sp.GetRequiredService<DomainEventOutboxInterceptor>());
+    }
+);
+
+// Messaging, Outbox, and Consumers
+builder.Services.AddInventoryMessaging(builder.Configuration);
 
 // TimeProvider & Plain Handlers
 builder.Services.AddSingleton(TimeProvider.System);
@@ -59,7 +66,7 @@ if (
     && app.Configuration.GetValue<bool>("Database:ApplyMigrationsOnStartup")
 )
 {
-    using IServiceScope scope = app.Services.CreateScope();
+    await using AsyncServiceScope scope = app.Services.CreateAsyncScope();
     InventoryDbContext dbContext = scope.ServiceProvider.GetRequiredService<InventoryDbContext>();
     await dbContext.Database.MigrateAsync();
 }
