@@ -66,7 +66,7 @@ public class MatchingScenarioTests
             Version: 1
         );
 
-        var result = _matchingPolicy.Match(
+        MatchResult result = _matchingPolicy.Match(
             request,
             [unitONeg, unitOPos],
             _now,
@@ -127,7 +127,7 @@ public class MatchingScenarioTests
             Version: 1
         );
 
-        var result = _matchingPolicy.Match(
+        MatchResult result = _matchingPolicy.Match(
             request,
             [nearUnit, farUnit],
             _now,
@@ -161,9 +161,9 @@ public class MatchingScenarioTests
         var bankId = Guid.NewGuid();
         // Bank is ~100 km away. At 40 km/h, travel time is 2.5 hours. With 30 min safety margin, trip requires 3.0 hours.
         var bankLocation = new GeoLocation(52.2053, 0.1218); // Cambridge ~80-90 km away
-        var distanceKm = _hospitalLocation.DistanceToKm(bankLocation);
-        var travelTimeHours = distanceKm / 40.0;
-        var requiredLeadTime = TimeSpan.FromHours(travelTimeHours) + TimeSpan.FromMinutes(30);
+        double distanceKm = _hospitalLocation.DistanceToKm(bankLocation);
+        double travelTimeHours = distanceKm / 40.0;
+        TimeSpan requiredLeadTime = TimeSpan.FromHours(travelTimeHours) + TimeSpan.FromMinutes(30);
 
         // Unit expires in only 1 hour (less than requiredLeadTime)
         var expiringTooSoonUnit = new CandidateUnitSnapshot(
@@ -176,7 +176,7 @@ public class MatchingScenarioTests
             Version: 1
         );
 
-        var result = _matchingPolicy.Match(
+        MatchResult result = _matchingPolicy.Match(
             request,
             [expiringTooSoonUnit],
             _now,
@@ -229,7 +229,7 @@ public class MatchingScenarioTests
         // Exclude the rejected unit
         var excluded = new HashSet<Guid> { rejectedUnit.UnitId };
 
-        var result = _matchingPolicy.Match(
+        MatchResult result = _matchingPolicy.Match(
             request,
             [rejectedUnit, alternativeUnit],
             _now,
@@ -291,7 +291,7 @@ public class MatchingScenarioTests
             1
         );
 
-        var result = _matchingPolicy.Match(
+        MatchResult result = _matchingPolicy.Match(
             request,
             [unitA1, unitA2, unitB1],
             _now,
@@ -345,8 +345,18 @@ public class MatchingScenarioTests
             1
         );
 
-        var resultA = _matchingPolicy.Match(request, [unit1, unit2], _now, new HashSet<Guid>());
-        var resultB = _matchingPolicy.Match(request, [unit2, unit1], _now, new HashSet<Guid>());
+        MatchResult resultA = _matchingPolicy.Match(
+            request,
+            [unit1, unit2],
+            _now,
+            new HashSet<Guid>()
+        );
+        MatchResult resultB = _matchingPolicy.Match(
+            request,
+            [unit2, unit1],
+            _now,
+            new HashSet<Guid>()
+        );
 
         resultA.IsSuccess.ShouldBeTrue();
         resultB.IsSuccess.ShouldBeTrue();
@@ -403,7 +413,7 @@ public class MatchingScenarioTests
             Version: 1
         );
 
-        var result = _matchingPolicy.Match(
+        MatchResult result = _matchingPolicy.Match(
             request,
             [nearExpiryONeg, freshOPos],
             _now,
@@ -461,7 +471,7 @@ public class MatchingScenarioTests
             1
         );
 
-        var result = _matchingPolicy.Match(
+        MatchResult result = _matchingPolicy.Match(
             request,
             [unit1, unit2],
             _now,
@@ -515,7 +525,7 @@ public class MatchingScenarioTests
             Version: 1
         );
 
-        var result = _matchingPolicy.Match(
+        MatchResult result = _matchingPolicy.Match(
             request,
             [mismatchedAboUnit, exactAboUnit],
             _now,

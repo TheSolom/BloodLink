@@ -1,5 +1,4 @@
 using System.Net;
-using System.Net.Http.Json;
 using BloodLink.Inventory.Api.Features.Stock.GetStockSnapshot;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using BloodLink.Inventory.Domain.Model.BloodBanks;
@@ -132,7 +131,7 @@ public class GetStockSnapshotTests : IAsyncLifetime
         returnedIds.ShouldNotContain(delivId);
 
         // Verify version and bank location are returned
-        var resDto = snapshot.Items.First(x => x.UnitId == resId);
+        StockSnapshotUnitDto resDto = snapshot.Items.First(x => x.UnitId == resId);
         resDto.Version.ShouldBe(2); // Initial 1 + Reserve 1 = 2
         resDto.Status.ShouldBe(nameof(BloodUnitStatus.Reserved));
         resDto.Latitude.ShouldBe(51.5074);
@@ -178,10 +177,11 @@ public class GetStockSnapshotTests : IAsyncLifetime
                 ? $"/internal/stock-snapshot?pageSize=2&cursor={nextCursor.Value}"
                 : "/internal/stock-snapshot?pageSize=2";
 
-            var response = await _client.GetAsync(url);
+            HttpResponseMessage response = await _client.GetAsync(url);
             response.StatusCode.ShouldBe(HttpStatusCode.OK);
 
-            var page = await response.Content.ReadFromJsonAsync<GetStockSnapshotResponse>();
+            GetStockSnapshotResponse? page =
+                await response.Content.ReadFromJsonAsync<GetStockSnapshotResponse>();
             page.ShouldNotBeNull();
             allFetchedIds.AddRange(page.Items.Select(x => x.UnitId));
             nextCursor = page.NextCursor;

@@ -122,7 +122,7 @@ public class WeightedMatchingPolicy(IMatchingProfileProvider profileProvider) : 
         // 4. Soft scoring per qualifying bank
         var candidateBankEvaluations = new List<BankEvaluation>();
 
-        foreach (var bankGroup in qualifyingBanks)
+        foreach (IGrouping<Guid, CandidateUnitSnapshot>? bankGroup in qualifyingBanks)
         {
             Guid bankId = bankGroup.Key;
             GeoLocation bankLocation = bankGroup.First().BankLocation;

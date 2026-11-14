@@ -28,7 +28,7 @@ public class GetStockSnapshotHandler(InventoryDbContext dbContext)
             baseQuery = baseQuery.Where(x => x.Unit.Id.CompareTo(cursor) > 0);
         }
 
-        var results = await baseQuery
+        List<StockSnapshotUnitDto> results = await baseQuery
             .OrderBy(x => x.Unit.Id)
             .Take(limit + 1)
             .Select(x => new StockSnapshotUnitDto(
@@ -45,7 +45,7 @@ public class GetStockSnapshotHandler(InventoryDbContext dbContext)
             .ToListAsync(cancellationToken);
 
         bool hasMore = results.Count > limit;
-        var items = hasMore ? results.Take(limit).ToList() : results;
+        List<StockSnapshotUnitDto> items = hasMore ? results.Take(limit).ToList() : results;
         Guid? nextCursor = hasMore && items.Count > 0 ? items[^1].UnitId : null;
 
         return new GetStockSnapshotResponse(items, nextCursor, hasMore);

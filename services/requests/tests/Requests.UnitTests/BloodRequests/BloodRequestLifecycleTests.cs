@@ -53,7 +53,7 @@ public class BloodRequestLifecycleTests
         request.AssignedUnitIds.ShouldBeEmpty();
 
         request.DomainEvents.Count.ShouldBe(1);
-        var submittedEvent = request
+        BloodRequestSubmittedDomainEvent submittedEvent = request
             .DomainEvents.First()
             .ShouldBeOfType<BloodRequestSubmittedDomainEvent>();
         submittedEvent.RequestId.ShouldBe(requestId);
@@ -150,7 +150,7 @@ public class BloodRequestLifecycleTests
     [Fact]
     public void FullHappyPathLifecycle_ShouldTransitionThroughAllStates_AndRaiseDomainEvents()
     {
-        var request = CreateValidRequest(unitsNeeded: 2);
+        BloodRequest request = CreateValidRequest(unitsNeeded: 2);
 
         // 1. Matching
         request.StartMatching();
@@ -190,7 +190,7 @@ public class BloodRequestLifecycleTests
     [Fact]
     public void StartReserving_ShouldThrowDomainException_WhenAssignedUnitsCountDoesNotMatchUnitsNeeded()
     {
-        var request = CreateValidRequest(unitsNeeded: 2);
+        BloodRequest request = CreateValidRequest(unitsNeeded: 2);
         request.StartMatching();
 
         Should
@@ -204,25 +204,25 @@ public class BloodRequestLifecycleTests
     public void Cancel_ShouldBeAllowed_BeforeInTransit()
     {
         // Cancel from Submitted
-        var req1 = CreateValidRequest();
+        BloodRequest req1 = CreateValidRequest();
         req1.Cancel("Patient transferred");
         req1.Status.ShouldBe(BloodRequestStatus.Cancelled);
 
         // Cancel from Matching
-        var req2 = CreateValidRequest();
+        BloodRequest req2 = CreateValidRequest();
         req2.StartMatching();
         req2.Cancel("Procedure postponed");
         req2.Status.ShouldBe(BloodRequestStatus.Cancelled);
 
         // Cancel from Reserving
-        var req3 = CreateValidRequest(unitsNeeded: 1);
+        BloodRequest req3 = CreateValidRequest(unitsNeeded: 1);
         req3.StartMatching();
         req3.StartReserving([Guid.NewGuid()]);
         req3.Cancel("No longer needed");
         req3.Status.ShouldBe(BloodRequestStatus.Cancelled);
 
         // Cancel from Dispatching
-        var req4 = CreateValidRequest(unitsNeeded: 1);
+        BloodRequest req4 = CreateValidRequest(unitsNeeded: 1);
         req4.StartMatching();
         req4.StartReserving([Guid.NewGuid()]);
         req4.StartDispatching();
@@ -234,7 +234,7 @@ public class BloodRequestLifecycleTests
     public void Cancel_ShouldThrowDomainException_WhenInTransitOrTerminal()
     {
         // When InTransit
-        var reqInTransit = CreateValidRequest(unitsNeeded: 1);
+        BloodRequest reqInTransit = CreateValidRequest(unitsNeeded: 1);
         reqInTransit.StartMatching();
         reqInTransit.StartReserving([Guid.NewGuid()]);
         reqInTransit.StartDispatching();
@@ -251,14 +251,14 @@ public class BloodRequestLifecycleTests
             .Code.ShouldBe("request.cannot_cancel_terminal");
 
         // When Failed
-        var reqFailed = CreateValidRequest();
+        BloodRequest reqFailed = CreateValidRequest();
         reqFailed.MarkFailed("No stock");
         Should
             .Throw<DomainException>(() => reqFailed.Cancel("Already failed"))
             .Code.ShouldBe("request.cannot_cancel_terminal");
 
         // When Cancelled
-        var reqCancelled = CreateValidRequest();
+        BloodRequest reqCancelled = CreateValidRequest();
         reqCancelled.Cancel("First cancel");
         Should
             .Throw<DomainException>(() => reqCancelled.Cancel("Second cancel"))
@@ -268,7 +268,7 @@ public class BloodRequestLifecycleTests
     [Fact]
     public void MarkFailed_ShouldTransitionToFailed_FromNonTerminalStates()
     {
-        var request = CreateValidRequest();
+        BloodRequest request = CreateValidRequest();
         request.MarkFailed("No match found");
 
         request.Status.ShouldBe(BloodRequestStatus.Failed);

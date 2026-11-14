@@ -1,7 +1,6 @@
 using Shouldly;
 using Xunit;
 using InventoryBloodType = BloodLink.Inventory.Domain.ValueObjects.BloodType;
-using InventoryComponent = BloodLink.Inventory.Domain.ValueObjects.BloodComponent;
 using InventoryComponentExtensions = BloodLink.Inventory.Domain.ValueObjects.BloodComponentExtensions;
 using RequestsBloodType = BloodLink.Requests.Domain.ValueObjects.BloodType;
 using RequestsComponent = BloodLink.Requests.Domain.ValueObjects.BloodComponent;
@@ -28,20 +27,20 @@ public class DomainParityTests
     public void BothDomains_MustAgreeOnCanonicalBloodTypeStrings()
     {
         // Requests domain canonical strings
-        var requestsStrings = RequestsBloodType
+        string[] requestsStrings = RequestsBloodType
             .All.Select(bt => bt.ToString())
             .OrderBy(s => s)
             .ToArray();
         // Canonical strings defined in test
-        var expectedStrings = CanonicalBloodTypeStrings.OrderBy(s => s).ToArray();
+        string[] expectedStrings = CanonicalBloodTypeStrings.OrderBy(s => s).ToArray();
 
         requestsStrings.ShouldBe(expectedStrings);
 
         // Check Inventory domain by parsing all canonical strings
         foreach (string canonical in CanonicalBloodTypeStrings)
         {
-            InventoryBloodType.TryParse(canonical, out var invBt).ShouldBeTrue();
-            invBt!.ToString().ShouldBe(canonical);
+            InventoryBloodType.TryParse(canonical, out InventoryBloodType? invBt).ShouldBeTrue();
+            invBt.ToString().ShouldBe(canonical);
         }
     }
 
@@ -67,8 +66,8 @@ public class DomainParityTests
     [InlineData(" ")]
     public void BothDomains_MustAgreeOnBloodTypeParsingBehavior(string input)
     {
-        bool invSuccess = InventoryBloodType.TryParse(input, out var invBt);
-        bool reqSuccess = RequestsBloodType.TryParse(input, out var reqBt);
+        bool invSuccess = InventoryBloodType.TryParse(input, out InventoryBloodType? invBt);
+        bool reqSuccess = RequestsBloodType.TryParse(input, out RequestsBloodType? reqBt);
 
         reqSuccess.ShouldBe(
             invSuccess,
@@ -100,8 +99,11 @@ public class DomainParityTests
         {
             bool invValid = InventoryComponentExtensions.TryParse(comp, out _);
             bool reqValid =
-                Enum.TryParse<RequestsComponent>(comp, ignoreCase: true, out var parsedReq)
-                && Enum.IsDefined(parsedReq);
+                Enum.TryParse<RequestsComponent>(
+                    comp,
+                    ignoreCase: true,
+                    out RequestsComponent parsedReq
+                ) && Enum.IsDefined(parsedReq);
 
             reqValid.ShouldBe(
                 invValid,
