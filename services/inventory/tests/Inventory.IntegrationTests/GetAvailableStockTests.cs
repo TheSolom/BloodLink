@@ -26,7 +26,11 @@ public class GetAvailableStockTests : IAsyncLifetime
 
     public async Task InitializeAsync() => await _databaseFixture.ResetDatabaseAsync();
 
-    public Task DisposeAsync() => Task.CompletedTask;
+    public async Task DisposeAsync()
+    {
+        _client.Dispose();
+        await _factory.DisposeAsync();
+    }
 
     [Fact]
     public async Task Should_ReturnOnlyAvailableAndNonExpiredStock_ExcludingReservedDeliveredAndExpired()

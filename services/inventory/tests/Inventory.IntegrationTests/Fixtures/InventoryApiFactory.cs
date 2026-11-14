@@ -1,4 +1,6 @@
+using System.Globalization;
 using BloodLink.BuildingBlocks.Domain;
+using BloodLink.Inventory.Api.Infrastructure.Messaging;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -21,15 +23,26 @@ public class InventoryApiFactory(DatabaseFixture databaseFixture) : WebApplicati
             "ConnectionStrings:InventoryConnection",
             databaseFixture.ConnectionString
         );
+        builder.UseSetting("RabbitMq:Host", databaseFixture.RabbitMqHost);
+        builder.UseSetting(
+            "RabbitMq:Port",
+            databaseFixture.RabbitMqPort.ToString(CultureInfo.InvariantCulture)
+        );
+        builder.UseSetting("RabbitMq:UserName", databaseFixture.RabbitMqUsername);
+        builder.UseSetting("RabbitMq:Password", databaseFixture.RabbitMqPassword);
+        builder.UseSetting("RabbitMq:VirtualHost", "/");
 
         builder.ConfigureTestServices(services =>
         {
             // Replace DbContext configuration with the container connection string
             services.RemoveAll<DbContextOptions<InventoryDbContext>>();
-            services.AddDbContext<InventoryDbContext>(options =>
-            {
-                options.UseSqlServer(databaseFixture.ConnectionString);
-            });
+            services.AddDbContext<InventoryDbContext>(
+                (sp, options) =>
+                {
+                    options.UseSqlServer(databaseFixture.ConnectionString);
+                    options.AddInterceptors(sp.GetRequiredService<DomainEventOutboxInterceptor>());
+                }
+            );
 
             // Replace TimeProvider with FakeTimeProvider
             services.RemoveAll<TimeProvider>();
