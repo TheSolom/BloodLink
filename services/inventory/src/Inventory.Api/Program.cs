@@ -21,9 +21,18 @@ builder.Services.AddOpenApi();
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 
+// CORS
+string[] allowedOrigins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>()
+    ?? [];
+
+builder.Services.AddCors(options =>
+    options.AddDefaultPolicy(policy =>
+        policy.WithOrigins(allowedOrigins).AllowAnyHeader().AllowAnyMethod()
+    )
+);
+
 // Database & Persistence
-string connectionString =
-    builder.Configuration.GetConnectionString("InventoryConnection")
+string connectionString = builder.Configuration.GetConnectionString("InventoryConnection")
     ?? throw new InvalidOperationException("Connection string 'InventoryConnection' not found.");
 
 builder.Services.AddDbContext<InventoryDbContext>(
@@ -59,6 +68,7 @@ WebApplication app = builder.Build();
 
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+app.UseCors();
 
 // Apply migrations on startup ONLY in Development when explicitly configured
 if (
@@ -85,4 +95,4 @@ app.MapGetAvailableStock();
 app.MapReserveUnits();
 app.MapReleaseUnits();
 
-app.Run();
+await app.RunAsync();
