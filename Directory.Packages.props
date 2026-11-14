@@ -7,7 +7,7 @@
     <ItemGroup>
         <!-- ASP.NET Core & EF Core (aligned with .NET 11 SDK) -->
         <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="11.0.0" />
-        <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="11.0.0-rc.3.26522.148" />
+        <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="11.0.0" />
         <PackageVersion
             Include="Microsoft.EntityFrameworkCore.SqlServer"
             Version="11.0.0"
@@ -18,7 +18,7 @@
         />
         <PackageVersion
             Include="Microsoft.Extensions.Diagnostics.HealthChecks.EntityFrameworkCore"
-            Version="11.0.0-rc.3.26522.148"
+            Version="11.0.0"
         />
 
         <!-- Microsoft Extensions & Resilience -->
