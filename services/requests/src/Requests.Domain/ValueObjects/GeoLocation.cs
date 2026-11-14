@@ -11,18 +11,23 @@ public sealed record GeoLocation
 
     public GeoLocation(double latitude, double longitude)
     {
-        if (latitude is < -90.0 or > 90.0)
+        const double MinLatitude = -90.0;
+        const double MaxLatitude = 90.0;
+        const double MinLongitude = -180.0;
+        const double MaxLongitude = 180.0;
+
+        if (latitude is < MinLatitude or > MaxLatitude)
         {
             throw new DomainException(
-                $"Latitude must be between -90 and 90 degrees. Received: {latitude}.",
+                $"Latitude must be between {MinLatitude} and {MaxLatitude} degrees. Received: {latitude}.",
                 "geolocation.invalid_latitude"
             );
         }
 
-        if (longitude is < -180.0 or > 180.0)
+        if (longitude is < MinLongitude or > MaxLongitude)
         {
             throw new DomainException(
-                $"Longitude must be between -180 and 180 degrees. Received: {longitude}.",
+                $"Longitude must be between {MinLongitude} and {MaxLongitude} degrees. Received: {longitude}.",
                 "geolocation.invalid_longitude"
             );
         }
