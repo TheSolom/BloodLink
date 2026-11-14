@@ -411,8 +411,16 @@ public class MatchingScenarioTests
         );
 
         result.IsSuccess.ShouldBeTrue();
-        // The test verifies the result and documents the scoring trade-off
-        result.AssignedUnitIds.Count.ShouldBe(1);
+        // The test verifies and documents the current scoring trade-off:
+        // Near-expiry O- (2 days left) scores 0.595 (waste penalty 0.50*4/7 = 0.286 vs expiry bonus 0.40*0.952 = 0.381)
+        // Fresh O+ (35 days left) scores 0.567 (zero waste bonus 0.50*1.0 = 0.500 vs expiry 0.40*0.167 = 0.067).
+        // Hence, near-expiry O- wins over fresh O+, preventing the O- unit from expiring unused.
+        result
+            .AssignedUnitIds[0]
+            .ShouldBe(
+                nearExpiryONeg.UnitId,
+                "Under current weights, high expiry score on a 2-day O- unit outweighs the waste penalty against a 35-day O+ unit"
+            );
     }
 
     [Fact]
