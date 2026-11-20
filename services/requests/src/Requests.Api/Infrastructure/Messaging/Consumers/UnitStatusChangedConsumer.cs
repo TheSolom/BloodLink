@@ -15,12 +15,3 @@ public class UnitStatusChangedConsumer(IStockReadModelService readModelService)
         );
     }
 }
-
-public class UnitStatusChangedConsumerDefinition : ConsumerDefinition<UnitStatusChangedConsumer>
-{
-    public UnitStatusChangedConsumerDefinition()
-    {
-        EndpointName = "requests-unit-status-changed";
-        ConcurrentMessageLimit = 1;
-    }
-}

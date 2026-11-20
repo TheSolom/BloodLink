@@ -13,12 +13,12 @@ public class InventoryIntegrationEventMapperTests
     [Fact]
     public void ToIntegrationEvent_UnitReceivedDomainEvent_ShouldMapAllFieldsAccurately()
     {
-        Guid unitId = Guid.NewGuid();
-        Guid bloodBankId = Guid.NewGuid();
+        var unitId = Guid.NewGuid();
+        var bloodBankId = Guid.NewGuid();
         DateTimeOffset collectedAt = new(2026, 11, 13, 10, 0, 0, TimeSpan.Zero);
         DateTimeOffset expiresAt = collectedAt.AddDays(42);
-        DonationNumber donationNumber = DonationNumber.Create("DON-12345678");
-        BloodType bloodType = BloodType.Parse("O+");
+        var donationNumber = DonationNumber.Create("DON-12345678");
+        var bloodType = BloodType.Parse("O+");
         BloodComponent component = BloodComponent.RedCells;
 
         UnitReceivedDomainEvent domainEvent = new(
@@ -46,7 +46,7 @@ public class InventoryIntegrationEventMapperTests
     [Fact]
     public void ToUnitsReservedEvent_ShouldMapRequestIdAndUnitIds()
     {
-        Guid requestId = Guid.NewGuid();
+        var requestId = Guid.NewGuid();
         List<Guid> unitIds = [Guid.NewGuid(), Guid.NewGuid()];
 
         UnitsReservedIntegrationEvent integrationEvent =
@@ -59,7 +59,7 @@ public class InventoryIntegrationEventMapperTests
     [Fact]
     public void ToUnitsReleasedEvent_ShouldMapRequestIdAndUnitIds()
     {
-        Guid requestId = Guid.NewGuid();
+        var requestId = Guid.NewGuid();
         List<Guid> unitIds = [Guid.NewGuid(), Guid.NewGuid()];
 
         UnitsReleasedIntegrationEvent integrationEvent =
@@ -72,7 +72,7 @@ public class InventoryIntegrationEventMapperTests
     [Fact]
     public void ToUnitExpiredEvent_ShouldMapUnitIdAndExpiredAt()
     {
-        Guid unitId = Guid.NewGuid();
+        var unitId = Guid.NewGuid();
         UnitExpiredDomainEvent domainEvent = new(unitId);
 
         UnitExpiredIntegrationEvent integrationEvent =
@@ -85,7 +85,7 @@ public class InventoryIntegrationEventMapperTests
     [Fact]
     public void ToUnitStatusChangedEvent_ShouldMapUnitIdStatusAndVersion()
     {
-        Guid unitId = Guid.NewGuid();
+        var unitId = Guid.NewGuid();
         string status = BloodUnitStatus.Reserved.ToString();
         int version = 3;
 

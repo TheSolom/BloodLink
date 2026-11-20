@@ -6,8 +6,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace BloodLink.Requests.Api.Features.Requests.CancelRequest;
 
-public record CancelRequestCommand(string Reason);
-
 public class CancelRequestHandler(RequestsDbContext dbContext, IHospitalContext hospitalContext)
 {
     public async Task HandleAsync(

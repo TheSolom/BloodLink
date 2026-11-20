@@ -162,7 +162,7 @@ public class ExpiryFactorAndSensitivityTests
         // (c) Boundary at exactly window: factor is 0, one tick inside: > 0
         var options = new MatchingOptions { ExpiryWindowFraction = 0.20 };
         // For RedCells (42 days), window = 0.20 * 42 = 8.4 days = 201.6 hours
-        TimeSpan window = TimeSpan.FromHours(42.0 * 24.0 * options.ExpiryWindowFraction);
+        var window = TimeSpan.FromHours(42.0 * 24.0 * options.ExpiryWindowFraction);
 
         var unitAtBoundary = new CandidateUnitSnapshot(
             Guid.NewGuid(),

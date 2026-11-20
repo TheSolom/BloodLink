@@ -1,4 +1,4 @@
-namespace BloodLink.Requests.Api.Infrastructure.Clients;
+namespace BloodLink.Inventory.Api.Features.Stock.GetStockSnapshot;
 
 public record StockSnapshotUnitDto(
     Guid UnitId,
@@ -10,10 +10,4 @@ public record StockSnapshotUnitDto(
     DateTimeOffset ExpiresAt,
     string Status,
     int Version
-);
-
-public record GetStockSnapshotResponse(
-    IReadOnlyList<StockSnapshotUnitDto> Items,
-    Guid? NextCursor,
-    bool HasMore
 );

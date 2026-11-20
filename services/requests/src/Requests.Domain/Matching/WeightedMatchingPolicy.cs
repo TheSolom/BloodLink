@@ -217,7 +217,7 @@ public class WeightedMatchingPolicy(IMatchingProfileProvider? profileProvider = 
     {
         double distanceKm = hospitalLocation.DistanceToKm(unit.BankLocation);
         double travelHours = distanceKm / options.TravelSpeedKmH;
-        TimeSpan estimatedTravelTime = TimeSpan.FromHours(travelHours);
+        var estimatedTravelTime = TimeSpan.FromHours(travelHours);
         DateTimeOffset requiredArrivalDeadline = now.Add(estimatedTravelTime)
             .Add(options.ArrivalSafetyMargin);
 

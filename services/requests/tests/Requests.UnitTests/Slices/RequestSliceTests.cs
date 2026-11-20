@@ -13,11 +13,6 @@ using Xunit;
 
 namespace BloodLink.Requests.UnitTests.Slices;
 
-public class TestHospitalContext(Guid hospitalId) : IHospitalContext
-{
-    public Guid GetHospitalId() => hospitalId;
-}
-
 public class RequestSliceTests
 {
     private static readonly Guid HospitalAId = SeededHospitals.StThomas.Id;

@@ -8,11 +8,6 @@ namespace BloodLink.Requests.Api.Infrastructure.Auth;
 /// In Phase 8, this will be replaced with real JWT claims extraction.
 /// For now, reads the 'X-Hospital-Id' header, or defaults to seeded St. Thomas' Hospital.
 /// </summary>
-public interface IHospitalContext
-{
-    Guid GetHospitalId();
-}
-
 public class DevHospitalContext(IHttpContextAccessor httpContextAccessor) : IHospitalContext
 {
     public const string HospitalIdHeaderName = "X-Hospital-Id";

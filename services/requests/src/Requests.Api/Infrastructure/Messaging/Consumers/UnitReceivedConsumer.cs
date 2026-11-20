@@ -12,12 +12,3 @@ public class UnitReceivedConsumer(IStockReadModelService readModelService)
         await readModelService.ApplyUnitReceivedAsync(context.Message, context.CancellationToken);
     }
 }
-
-public class UnitReceivedConsumerDefinition : ConsumerDefinition<UnitReceivedConsumer>
-{
-    public UnitReceivedConsumerDefinition()
-    {
-        EndpointName = "requests-unit-received";
-        ConcurrentMessageLimit = 1;
-    }
-}

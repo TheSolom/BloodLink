@@ -37,13 +37,13 @@ public class GetStockSnapshotTests : IAsyncLifetime
     {
         DateTimeOffset now = _factory.TimeProvider.GetUtcNow();
         Guid bankId = await SeedBloodBankAsync("Central Bank", 51.5074, -0.1278);
-        Guid requestId = Guid.NewGuid();
+        var requestId = Guid.NewGuid();
 
-        Guid availId = Guid.NewGuid();
-        Guid resId = Guid.NewGuid();
-        Guid inTransitId = Guid.NewGuid();
-        Guid expId = Guid.NewGuid();
-        Guid delivId = Guid.NewGuid();
+        var availId = Guid.NewGuid();
+        var resId = Guid.NewGuid();
+        var inTransitId = Guid.NewGuid();
+        var expId = Guid.NewGuid();
+        var delivId = Guid.NewGuid();
 
         await using (InventoryDbContext dbContext = _factory.CreateDbContext())
         {
@@ -149,7 +149,7 @@ public class GetStockSnapshotTests : IAsyncLifetime
         {
             for (int i = 1; i <= 5; i++)
             {
-                Guid id = Guid.Parse($"10000000-0000-0000-0000-00000000000{i}");
+                var id = Guid.Parse($"10000000-0000-0000-0000-00000000000{i}");
                 createdIds.Add(id);
                 var unit = BloodUnit.ReceiveDonation(
                     id,
