@@ -13,14 +13,14 @@ public static class SubmitRequestEndpoint
                 "/api/v1/requests",
                 async (
                     [FromBody] SubmitRequestCommand command,
-                    [FromHeader(Name = IdempotencyKey.HeaderName)] string idempotencyKey,
+                    [FromHeader(Name = IdempotencyKey.HeaderName)] string? idempotencyKey,
                     SubmitRequestHandler handler,
                     CancellationToken cancellationToken
                 ) =>
                 {
                     SubmitRequestResponse response = await handler.HandleAsync(
                         command,
-                        idempotencyKey,
+                        idempotencyKey!,
                         cancellationToken
                     );
 
