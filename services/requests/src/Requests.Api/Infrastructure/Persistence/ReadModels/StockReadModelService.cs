@@ -105,7 +105,36 @@ public class StockReadModelService(RequestsDbContext dbContext) : IStockReadMode
             CheckAndSetComplete(existing);
             await dbContext.SaveChangesAsync(ct);
         }
-        // If incoming Version < stored Version: ignore stale event
+        else if (!existing.IsComplete)
+        {
+            // UnitReceived has older version than parked row, but provides the missing attributes
+            existing.BloodBankId ??= unitReceived.BloodBankId;
+            existing.BloodType ??= unitReceived.BloodType;
+            existing.Component ??= unitReceived.Component;
+            existing.ExpiresAt ??= unitReceived.ExpiresAt;
+
+            if (!existing.Latitude.HasValue || !existing.Longitude.HasValue)
+            {
+                var bankCoords = await dbContext
+                    .StockReadModels.Where(u =>
+                        u.BloodBankId == unitReceived.BloodBankId
+                        && u.Latitude.HasValue
+                        && u.Longitude.HasValue
+                    )
+                    .Select(u => new { u.Latitude, u.Longitude })
+                    .FirstOrDefaultAsync(ct);
+
+                if (bankCoords != null)
+                {
+                    existing.Latitude = bankCoords.Latitude;
+                    existing.Longitude = bankCoords.Longitude;
+                }
+            }
+
+            CheckAndSetComplete(existing);
+            await dbContext.SaveChangesAsync(ct);
+        }
+        // If incoming Version < stored Version and row is already complete: ignore stale event
     }
 
     public async Task ApplyUnitStatusChangedAsync(
@@ -225,6 +254,8 @@ public class StockReadModelService(RequestsDbContext dbContext) : IStockReadMode
         {
             if (
                 c.BloodBankId.HasValue
+                && c.Latitude.HasValue
+                && c.Longitude.HasValue
                 && c.ExpiresAt.HasValue
                 && BloodType.TryParse(c.BloodType, out BloodType? bloodType)
                 && Enum.TryParse<BloodComponent>(
@@ -238,7 +269,7 @@ public class StockReadModelService(RequestsDbContext dbContext) : IStockReadMode
                     new CandidateUnitSnapshot(
                         c.UnitId,
                         c.BloodBankId.Value,
-                        new GeoLocation(c.Latitude ?? 0.0, c.Longitude ?? 0.0),
+                        new GeoLocation(c.Latitude.Value, c.Longitude.Value),
                         bloodType,
                         component,
                         c.ExpiresAt.Value,
@@ -255,6 +286,8 @@ public class StockReadModelService(RequestsDbContext dbContext) : IStockReadMode
     {
         item.IsComplete =
             item.BloodBankId.HasValue
+            && item.Latitude.HasValue
+            && item.Longitude.HasValue
             && item.ExpiresAt.HasValue
             && !string.IsNullOrEmpty(item.BloodType)
             && !string.IsNullOrEmpty(item.Component)

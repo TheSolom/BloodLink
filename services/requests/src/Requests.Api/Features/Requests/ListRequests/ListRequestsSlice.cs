@@ -46,6 +46,7 @@ public class ListRequestsHandler(RequestsDbContext dbContext, IHospitalContext h
 
         List<BloodRequest> requests = await baseQuery
             .OrderByDescending(r => r.NeededBy)
+            .ThenBy(r => r.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);

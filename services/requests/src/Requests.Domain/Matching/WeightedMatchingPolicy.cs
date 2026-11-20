@@ -22,12 +22,32 @@ public class WeightedMatchingPolicy(IMatchingProfileProvider? profileProvider = 
         ArgumentNullException.ThrowIfNull(candidateStock);
         ArgumentNullException.ThrowIfNull(excludedUnitIds);
 
+        MatchingOptions effectiveOptions = options ?? new MatchingOptions();
+
+        if (
+            effectiveOptions.TravelSpeedKmH <= 0
+            || double.IsNaN(effectiveOptions.TravelSpeedKmH)
+            || double.IsInfinity(effectiveOptions.TravelSpeedKmH)
+        )
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(options),
+                "TravelSpeedKmH must be a positive finite number."
+            );
+        }
+
+        if (effectiveOptions.ArrivalSafetyMargin < TimeSpan.Zero)
+        {
+            throw new ArgumentOutOfRangeException(
+                nameof(options),
+                "ArrivalSafetyMargin must be non-negative."
+            );
+        }
+
         MatchingWeightProfile profile =
             options != null
-                ? options.GetProfile(request.Urgency)
+                ? effectiveOptions.GetProfile(request.Urgency)
                 : _profileProvider.GetProfile(request.Urgency);
-
-        options ??= new MatchingOptions();
 
         // 1. Initial categorization of compatibility and component
         (List<CandidateUnitSnapshot>? compatibleUnits, MatchResult? compatibilityError) =
@@ -39,7 +59,7 @@ public class WeightedMatchingPolicy(IMatchingProfileProvider? profileProvider = 
 
         // 2. Hard filter: unit must survive travel time + arrival safety margin
         (List<CandidateUnitSnapshot>? viableUnits, MatchResult? viabilityError) =
-            FilterViableTravelUnits(request, compatibleUnits, now, options);
+            FilterViableTravelUnits(request, compatibleUnits, now, effectiveOptions);
         if (viabilityError != null)
         {
             return viabilityError;
@@ -57,7 +77,7 @@ public class WeightedMatchingPolicy(IMatchingProfileProvider? profileProvider = 
 
         // 4. Soft scoring per qualifying bank
         var candidateBankEvaluations = qualifyingBanks
-            .Select(bankGroup => EvaluateBank(bankGroup, request, now, options, profile))
+            .Select(bankGroup => EvaluateBank(bankGroup, request, now, effectiveOptions, profile))
             .ToList();
 
         // 5. Rank candidate banks deterministically:

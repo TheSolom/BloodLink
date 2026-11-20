@@ -30,6 +30,19 @@ public static class SubmitRequestEndpoint
                         );
                     }
 
+                    if (idempotencyKey.Trim().Length > 128)
+                    {
+                        return Results.Problem(
+                            statusCode: StatusCodes.Status400BadRequest,
+                            title: "Invalid Idempotency-Key",
+                            detail: "The 'Idempotency-Key' header must not exceed 128 characters.",
+                            extensions: new Dictionary<string, object?>
+                            {
+                                ["errorCode"] = "request.idempotency_key_too_long",
+                            }
+                        );
+                    }
+
                     SubmitRequestResponse response = await handler.HandleAsync(
                         command,
                         idempotencyKey,

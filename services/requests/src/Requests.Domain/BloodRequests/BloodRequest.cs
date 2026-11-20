@@ -85,6 +85,22 @@ public class BloodRequest : AggregateRoot<Guid>
             );
         }
 
+        if (!Enum.IsDefined(details.Component))
+        {
+            throw new DomainException(
+                $"Undefined BloodComponent value: {details.Component}.",
+                "request.invalid_component"
+            );
+        }
+
+        if (!Enum.IsDefined(details.Urgency))
+        {
+            throw new DomainException(
+                $"Undefined RequestUrgency value: {details.Urgency}.",
+                "request.invalid_urgency"
+            );
+        }
+
         DateTimeOffset now = timeProvider.GetUtcNow();
         if (details.NeededBy <= now)
         {
@@ -144,10 +160,13 @@ public class BloodRequest : AggregateRoot<Guid>
             );
         }
 
-        if (candidateUnitIds.Count != UnitsNeeded)
+        if (
+            candidateUnitIds.Count != UnitsNeeded
+            || candidateUnitIds.Distinct().Count() != UnitsNeeded
+        )
         {
             throw new DomainException(
-                $"Assigned units count ({candidateUnitIds.Count}) must match UnitsNeeded ({UnitsNeeded}).",
+                $"Assigned units count ({candidateUnitIds.Count}) must match UnitsNeeded ({UnitsNeeded}) with distinct unit IDs.",
                 "request.unit_count_mismatch"
             );
         }

@@ -35,7 +35,18 @@ public sealed record BloodType
         Rh = rh;
     }
 
-    public static BloodType Create(AboType abo, RhFactor rh) => new(abo, rh);
+    public static BloodType Create(AboType abo, RhFactor rh)
+    {
+        if (!Enum.IsDefined(abo))
+        {
+            throw new ArgumentOutOfRangeException(nameof(abo), $"Undefined AboType value: {abo}.");
+        }
+        if (!Enum.IsDefined(rh))
+        {
+            throw new ArgumentOutOfRangeException(nameof(rh), $"Undefined RhFactor value: {rh}.");
+        }
+        return new(abo, rh);
+    }
 
     public static bool TryParse(string? input, [NotNullWhen(true)] out BloodType? bloodType)
     {

@@ -99,4 +99,13 @@ public class BloodTypeTests
         (bt1 == bt3).ShouldBeFalse();
         bt1.GetHashCode().ShouldBe(bt2.GetHashCode());
     }
+
+    [Fact]
+    public void Create_UndefinedEnumValues_ThrowsArgumentOutOfRangeException()
+    {
+        Should.Throw<ArgumentOutOfRangeException>(() =>
+            BloodType.Create((AboType)99, RhFactor.Positive)
+        );
+        Should.Throw<ArgumentOutOfRangeException>(() => BloodType.Create(AboType.A, (RhFactor)99));
+    }
 }

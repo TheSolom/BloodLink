@@ -148,6 +148,55 @@ public class RequestSliceTests
     }
 
     [Fact]
+    public async Task SubmitRequest_IdempotencyKeyTooLong_ThrowsDomainException()
+    {
+        // Arrange
+        (RequestsDbContext? dbContext, FakeTimeProvider? timeProvider) = CreateContext();
+        var hospitalContext = new TestHospitalContext(HospitalAId);
+        var handler = new SubmitRequestHandler(dbContext, hospitalContext, timeProvider);
+
+        var command = new SubmitRequestCommand(
+            "O-",
+            "RedCells",
+            UnitsNeeded: 1,
+            "Critical",
+            NeededBy: timeProvider.GetUtcNow().AddHours(1)
+        );
+
+        string longKey = new string('x', 129);
+
+        // Act & Assert
+        DomainException ex = await Should.ThrowAsync<DomainException>(() =>
+            handler.HandleAsync(command, longKey, CancellationToken.None)
+        );
+
+        ex.Code.ShouldBe("request.idempotency_key_too_long");
+    }
+
+    [Fact]
+    public void SubmitRequestValidator_RejectsNumericOrUndefinedStrings()
+    {
+        var validator = new SubmitRequestValidator();
+
+        var invalidCommand = new SubmitRequestCommand(
+            "O-",
+            "0", // numeric string
+            UnitsNeeded: 2,
+            "0", // numeric string
+            NeededBy: DateTimeOffset.UtcNow.AddHours(2)
+        );
+
+        var result = validator.Validate(invalidCommand);
+        result.IsValid.ShouldBeFalse();
+        result
+            .Errors.Any(e => e.PropertyName == nameof(SubmitRequestCommand.Component))
+            .ShouldBeTrue();
+        result
+            .Errors.Any(e => e.PropertyName == nameof(SubmitRequestCommand.Urgency))
+            .ShouldBeTrue();
+    }
+
+    [Fact]
     public async Task CancelRequest_BeforeInTransit_SuccessfullyCancels()
     {
         // Arrange
@@ -289,7 +338,7 @@ public class RequestSliceTests
         );
 
         // Act: Owner gets status
-        RequestStatusResponse status = await statusHandlerA.HandleAsync(
+        RequestStatusResponse? status = await statusHandlerA.HandleAsync(
             submitted.Id,
             CancellationToken.None
         );
@@ -300,6 +349,13 @@ public class RequestSliceTests
         status.HospitalId.ShouldBe(HospitalAId);
         status.BloodType.ShouldBe("O-");
         status.Status.ShouldBe("Submitted");
+
+        // Act & Assert: Missing request returns null
+        RequestStatusResponse? missingStatus = await statusHandlerA.HandleAsync(
+            Guid.NewGuid(),
+            CancellationToken.None
+        );
+        missingStatus.ShouldBeNull();
 
         // Act & Assert: Other hospital forbidden
         DomainException ex = await Should.ThrowAsync<DomainException>(() =>

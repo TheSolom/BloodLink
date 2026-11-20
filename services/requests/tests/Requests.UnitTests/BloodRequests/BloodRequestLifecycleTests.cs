@@ -276,6 +276,60 @@ public class BloodRequestLifecycleTests
     }
 
     [Fact]
+    public void Submit_ShouldThrowDomainException_WhenComponentOrUrgencyUndefined()
+    {
+        Should
+            .Throw<DomainException>(() =>
+                BloodRequest.Submit(
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    _hospitalLocation,
+                    new BloodRequestDetails(
+                        BloodType.OPositive,
+                        (BloodComponent)999,
+                        UnitsNeeded: 2,
+                        RequestUrgency.Routine,
+                        _baseTime.AddHours(2)
+                    ),
+                    "key-1",
+                    _timeProvider
+                )
+            )
+            .Code.ShouldBe("request.invalid_component");
+
+        Should
+            .Throw<DomainException>(() =>
+                BloodRequest.Submit(
+                    Guid.NewGuid(),
+                    Guid.NewGuid(),
+                    _hospitalLocation,
+                    new BloodRequestDetails(
+                        BloodType.OPositive,
+                        BloodComponent.RedCells,
+                        UnitsNeeded: 2,
+                        (RequestUrgency)999,
+                        _baseTime.AddHours(2)
+                    ),
+                    "key-1",
+                    _timeProvider
+                )
+            )
+            .Code.ShouldBe("request.invalid_urgency");
+    }
+
+    [Fact]
+    public void StartReserving_ShouldThrowDomainException_WhenAssignedUnitsContainDuplicates()
+    {
+        BloodRequest request = CreateValidRequest(unitsNeeded: 2);
+        request.StartMatching();
+
+        var unitId = Guid.NewGuid();
+        Should
+            .Throw<DomainException>(() => request.StartReserving([unitId, unitId]))
+            .Code.ShouldBe("request.unit_count_mismatch");
+    }
+
+    [Fact]
     public void MarkFailed_ShouldTransitionToFailed_FromNonTerminalStates()
     {
         BloodRequest request = CreateValidRequest();

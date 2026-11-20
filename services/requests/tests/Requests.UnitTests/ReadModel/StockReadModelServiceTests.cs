@@ -103,6 +103,23 @@ public class StockReadModelServiceTests
         var bankId = Guid.NewGuid();
         DateTimeOffset now = DateTimeOffset.UtcNow;
 
+        // Seed bank coordinates so bank location is known in read model
+        dbContext.StockReadModels.Add(
+            new StockItemReadModel
+            {
+                UnitId = Guid.NewGuid(),
+                BloodBankId = bankId,
+                Latitude = 51.5074,
+                Longitude = -0.1278,
+                BloodType = "A+",
+                Component = "RedCells",
+                Status = "Available",
+                Version = 1,
+                IsComplete = true,
+            }
+        );
+        await dbContext.SaveChangesAsync();
+
         // Act 1: UnitStatusChanged arrives first (e.g. Reserved, version 2)
         var statusEvent = new UnitStatusChangedIntegrationEvent(unitId, "Reserved", Version: 2);
         await service.ApplyUnitStatusChangedAsync(statusEvent);
@@ -116,7 +133,7 @@ public class StockReadModelServiceTests
         parked.IsComplete.ShouldBeFalse();
         parked.IsMatchCandidate.ShouldBeFalse();
 
-        // Act 2: UnitReceived arrives later with version 2
+        // Act 2: UnitReceived arrives later with version 1 (older than the reservation version 2)
         var receivedEvent = new UnitReceivedIntegrationEvent(
             unitId,
             "B-",
@@ -124,11 +141,11 @@ public class StockReadModelServiceTests
             now.AddDays(-1),
             now.AddDays(5),
             bankId,
-            Version: 2
+            Version: 1
         );
         await service.ApplyUnitReceivedAsync(receivedEvent);
 
-        // Assert 2: Row is completed with attributes, status remains Reserved
+        // Assert 2: Row is completed with attributes, status remains Reserved, version remains 2
         StockItemReadModel completed = await dbContext.StockReadModels.FirstAsync(u =>
             u.UnitId == unitId
         );
@@ -136,6 +153,7 @@ public class StockReadModelServiceTests
         completed.BloodType.ShouldBe("B-");
         completed.Component.ShouldBe("Platelets");
         completed.Status.ShouldBe("Reserved");
+        completed.Version.ShouldBe(2);
         completed.IsMatchCandidate.ShouldBeFalse(); // Not Available
     }
 

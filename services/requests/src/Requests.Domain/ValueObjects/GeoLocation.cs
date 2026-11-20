@@ -16,7 +16,7 @@ public sealed record GeoLocation
         const double MinLongitude = -180.0;
         const double MaxLongitude = 180.0;
 
-        if (latitude is < MinLatitude or > MaxLatitude)
+        if (double.IsNaN(latitude) || latitude is < MinLatitude or > MaxLatitude)
         {
             throw new DomainException(
                 $"Latitude must be between {MinLatitude} and {MaxLatitude} degrees. Received: {latitude}.",
@@ -24,7 +24,7 @@ public sealed record GeoLocation
             );
         }
 
-        if (longitude is < MinLongitude or > MaxLongitude)
+        if (double.IsNaN(longitude) || longitude is < MinLongitude or > MaxLongitude)
         {
             throw new DomainException(
                 $"Longitude must be between {MinLongitude} and {MaxLongitude} degrees. Received: {longitude}.",

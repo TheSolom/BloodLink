@@ -32,6 +32,14 @@ public class SubmitRequestHandler(
         Guid hospitalId = hospitalContext.GetHospitalId();
         string cleanKey = idempotencyKey.Trim();
 
+        if (cleanKey.Length > 128)
+        {
+            throw new DomainException(
+                "Idempotency-Key header must not exceed 128 characters.",
+                "request.idempotency_key_too_long"
+            );
+        }
+
         // 1. Idempotency check: if request already exists for this hospital & key, return original request
         BloodRequest? existing = await dbContext
             .BloodRequests.AsNoTracking()

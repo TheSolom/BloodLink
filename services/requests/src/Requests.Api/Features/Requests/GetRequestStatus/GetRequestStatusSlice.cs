@@ -58,7 +58,7 @@ public static partial class GetRequestStatusMapper
 
 public class GetRequestStatusHandler(RequestsDbContext dbContext, IHospitalContext hospitalContext)
 {
-    public async Task<RequestStatusResponse> HandleAsync(
+    public async Task<RequestStatusResponse?> HandleAsync(
         Guid requestId,
         CancellationToken cancellationToken
     )
@@ -71,10 +71,7 @@ public class GetRequestStatusHandler(RequestsDbContext dbContext, IHospitalConte
 
         if (request == null)
         {
-            throw new DomainException(
-                $"Blood request '{requestId}' was not found.",
-                "request.not_found"
-            );
+            return null;
         }
 
         if (request.HospitalId != hospitalId)
@@ -102,11 +99,11 @@ public static class GetRequestStatusEndpoint
                     CancellationToken cancellationToken
                 ) =>
                 {
-                    RequestStatusResponse response = await handler.HandleAsync(
+                    RequestStatusResponse? response = await handler.HandleAsync(
                         id,
                         cancellationToken
                     );
-                    return Results.Ok(response);
+                    return response is not null ? Results.Ok(response) : Results.NotFound();
                 }
             )
             .WithName("GetRequestStatus")

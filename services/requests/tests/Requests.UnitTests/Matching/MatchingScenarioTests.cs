@@ -529,4 +529,40 @@ public class MatchingScenarioTests
             .AssignedUnitIds[0]
             .ShouldBe(exactAboUnit.UnitId, "Platelet matching must prefer exact ABO match");
     }
+
+    [Fact]
+    public void Match_InvalidTransitOptions_ThrowsArgumentOutOfRangeException()
+    {
+        BloodRequest request = CreateRequest(BloodType.OPositive, BloodComponent.RedCells);
+
+        Should.Throw<ArgumentOutOfRangeException>(() =>
+            _matchingPolicy.Match(
+                request,
+                [],
+                _now,
+                new HashSet<Guid>(),
+                new MatchingOptions { TravelSpeedKmH = 0 }
+            )
+        );
+
+        Should.Throw<ArgumentOutOfRangeException>(() =>
+            _matchingPolicy.Match(
+                request,
+                [],
+                _now,
+                new HashSet<Guid>(),
+                new MatchingOptions { TravelSpeedKmH = -10 }
+            )
+        );
+
+        Should.Throw<ArgumentOutOfRangeException>(() =>
+            _matchingPolicy.Match(
+                request,
+                [],
+                _now,
+                new HashSet<Guid>(),
+                new MatchingOptions { ArrivalSafetyMargin = TimeSpan.FromMinutes(-1) }
+            )
+        );
+    }
 }

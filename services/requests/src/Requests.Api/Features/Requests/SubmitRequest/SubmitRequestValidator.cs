@@ -17,7 +17,11 @@ public class SubmitRequestValidator : AbstractValidator<SubmitRequestCommand>
 
         RuleFor(x => x.Component)
             .NotEmpty()
-            .Must(c => Enum.TryParse<BloodComponent>(c, ignoreCase: true, out _))
+            .Must(c =>
+                !int.TryParse(c, out _)
+                && Enum.TryParse<BloodComponent>(c, ignoreCase: true, out BloodComponent comp)
+                && Enum.IsDefined(comp)
+            )
             .WithMessage("Component must be either 'RedCells' or 'Platelets'.");
 
         RuleFor(x => x.UnitsNeeded)
@@ -26,7 +30,11 @@ public class SubmitRequestValidator : AbstractValidator<SubmitRequestCommand>
 
         RuleFor(x => x.Urgency)
             .NotEmpty()
-            .Must(u => Enum.TryParse<RequestUrgency>(u, ignoreCase: true, out _))
+            .Must(u =>
+                !int.TryParse(u, out _)
+                && Enum.TryParse<RequestUrgency>(u, ignoreCase: true, out RequestUrgency urg)
+                && Enum.IsDefined(urg)
+            )
             .WithMessage("Urgency must be 'Routine', 'Urgent', or 'Critical'.");
 
         RuleFor(x => x.NeededBy)
