@@ -1,3 +1,4 @@
+using BloodLink.BuildingBlocks.Domain;
 using BloodLink.BuildingBlocks.Web;
 using Microsoft.AspNetCore.Mvc;
 
@@ -12,37 +13,11 @@ public static class SubmitRequestEndpoint
                 "/api/v1/requests",
                 async (
                     [FromBody] SubmitRequestCommand command,
-                    [FromHeader(Name = "Idempotency-Key")] string? idempotencyKey,
+                    [FromHeader(Name = IdempotencyKey.HeaderName)] string idempotencyKey,
                     SubmitRequestHandler handler,
                     CancellationToken cancellationToken
                 ) =>
                 {
-                    if (string.IsNullOrWhiteSpace(idempotencyKey))
-                    {
-                        return Results.Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            title: "Missing Idempotency-Key",
-                            detail: "The 'Idempotency-Key' header is required for request submission.",
-                            extensions: new Dictionary<string, object?>
-                            {
-                                ["errorCode"] = "request.idempotency_key_required",
-                            }
-                        );
-                    }
-
-                    if (idempotencyKey.Trim().Length > 128)
-                    {
-                        return Results.Problem(
-                            statusCode: StatusCodes.Status400BadRequest,
-                            title: "Invalid Idempotency-Key",
-                            detail: "The 'Idempotency-Key' header must not exceed 128 characters.",
-                            extensions: new Dictionary<string, object?>
-                            {
-                                ["errorCode"] = "request.idempotency_key_too_long",
-                            }
-                        );
-                    }
-
                     SubmitRequestResponse response = await handler.HandleAsync(
                         command,
                         idempotencyKey,
@@ -52,6 +27,7 @@ public static class SubmitRequestEndpoint
                     return Results.Ok(response);
                 }
             )
+            .RequireIdempotencyKey()
             .AddEndpointFilter<ValidationFilter<SubmitRequestCommand>>()
             .WithName("SubmitRequest")
             .WithSummary("Submits a new blood request with idempotency protection")

@@ -1,3 +1,5 @@
+using BloodLink.BuildingBlocks.Domain;
+
 namespace BloodLink.Inventory.Api.Features.Stock.GetAvailableStock;
 
 public record GetAvailableStockResponse(
@@ -5,4 +7,4 @@ public record GetAvailableStockResponse(
     int Page,
     int PageSize,
     int TotalCount
-);
+) : PagedResult<StockItemDto>(Items, Page, PageSize, TotalCount);

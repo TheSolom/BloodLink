@@ -1,3 +1,5 @@
+using BloodLink.BuildingBlocks.Domain;
+using BloodLink.BuildingBlocks.Web;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using BloodLink.Inventory.Domain.Model.BloodUnits;
 using BloodLink.Inventory.Domain.ValueObjects;
@@ -45,14 +47,9 @@ public class GetAvailableStockHandler(InventoryDbContext dbContext, TimeProvider
             unitsQuery = unitsQuery.Where(u => u.ExpiresAt <= query.ExpiringBefore.Value);
         }
 
-        int totalCount = await unitsQuery.CountAsync(cancellationToken);
-
-        int skip = (query.Page - 1) * query.PageSize;
-        List<StockItemDto> items = await unitsQuery
+        PagedResult<StockItemDto> paged = await unitsQuery
             .OrderBy(u => u.ExpiresAt)
             .ThenBy(u => u.Id)
-            .Skip(skip)
-            .Take(query.PageSize)
             .Select(u => new StockItemDto(
                 u.Id,
                 u.DonationNumber.Value,
@@ -63,8 +60,13 @@ public class GetAvailableStockHandler(InventoryDbContext dbContext, TimeProvider
                 u.Status.ToString(),
                 u.BloodBankId
             ))
-            .ToListAsync(cancellationToken);
+            .ToPagedResultAsync(query.Page, query.PageSize, cancellationToken);
 
-        return new GetAvailableStockResponse(items, query.Page, query.PageSize, totalCount);
+        return new GetAvailableStockResponse(
+            paged.Items,
+            paged.Page,
+            paged.PageSize,
+            paged.TotalCount
+        );
     }
 }

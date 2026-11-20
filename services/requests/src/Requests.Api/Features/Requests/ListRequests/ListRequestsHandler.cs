@@ -1,3 +1,5 @@
+using BloodLink.BuildingBlocks.Domain;
+using BloodLink.BuildingBlocks.Web;
 using BloodLink.Requests.Api.Infrastructure.Auth;
 using BloodLink.Requests.Api.Infrastructure.Persistence;
 using BloodLink.Requests.Domain.BloodRequests;
@@ -13,24 +15,18 @@ public class ListRequestsHandler(RequestsDbContext dbContext, IHospitalContext h
     )
     {
         Guid hospitalId = hospitalContext.GetHospitalId();
-        int page = Math.Max(1, query.Page);
-        int pageSize = Math.Clamp(query.PageSize, 1, 100);
 
         IQueryable<BloodRequest> baseQuery = dbContext
             .BloodRequests.AsNoTracking()
             .Where(r => r.HospitalId == hospitalId);
 
-        int totalCount = await baseQuery.CountAsync(cancellationToken);
-
-        List<BloodRequest> requests = await baseQuery
+        PagedResult<BloodRequest> paged = await baseQuery
             .OrderByDescending(r => r.NeededBy)
             .ThenBy(r => r.Id)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync(cancellationToken);
+            .ToPagedResultAsync(query.Page, query.PageSize, cancellationToken);
 
-        var items = requests
-            .Select(r => new RequestSummaryDto(
+        var items = paged
+            .Items.Select(r => new RequestSummaryDto(
                 r.Id,
                 r.HospitalId,
                 r.BloodType.ToString(),
@@ -44,6 +40,6 @@ public class ListRequestsHandler(RequestsDbContext dbContext, IHospitalContext h
             ))
             .ToList();
 
-        return new ListRequestsResponse(items, page, pageSize, totalCount);
+        return new ListRequestsResponse(items, paged.Page, paged.PageSize, paged.TotalCount);
     }
 }

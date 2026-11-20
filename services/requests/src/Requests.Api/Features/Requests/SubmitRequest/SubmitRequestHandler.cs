@@ -21,24 +21,9 @@ public class SubmitRequestHandler(
         CancellationToken cancellationToken
     )
     {
-        if (string.IsNullOrWhiteSpace(idempotencyKey))
-        {
-            throw new DomainException(
-                "Idempotency-Key header is required.",
-                "request.idempotency_key_required"
-            );
-        }
-
+        var key = IdempotencyKey.Create(idempotencyKey);
         Guid hospitalId = hospitalContext.GetHospitalId();
-        string cleanKey = idempotencyKey.Trim();
-
-        if (cleanKey.Length > 128)
-        {
-            throw new DomainException(
-                "Idempotency-Key header must not exceed 128 characters.",
-                "request.idempotency_key_too_long"
-            );
-        }
+        string cleanKey = key.Value;
 
         // 1. Idempotency check: if request already exists for this hospital & key, return original request
         BloodRequest? existing = await dbContext

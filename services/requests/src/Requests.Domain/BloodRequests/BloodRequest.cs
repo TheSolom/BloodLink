@@ -77,13 +77,7 @@ public class BloodRequest : AggregateRoot<Guid>
             );
         }
 
-        if (string.IsNullOrWhiteSpace(idempotencyKey))
-        {
-            throw new DomainException(
-                "Idempotency key is required.",
-                "request.idempotency_key_required"
-            );
-        }
+        var key = BuildingBlocks.Domain.IdempotencyKey.Create(idempotencyKey);
 
         if (!Enum.IsDefined(details.Component))
         {
@@ -110,13 +104,7 @@ public class BloodRequest : AggregateRoot<Guid>
             );
         }
 
-        var request = new BloodRequest(
-            id,
-            hospitalId,
-            hospitalLocation,
-            details,
-            idempotencyKey.Trim()
-        );
+        var request = new BloodRequest(id, hospitalId, hospitalLocation, details, key.Value);
 
         request.AddDomainEvent(
             new BloodRequestSubmittedDomainEvent(
