@@ -38,7 +38,7 @@
         <PackageVersion Include="OpenTelemetry.Instrumentation.Runtime" Version="1.21.0" />
 
         <!-- Messaging: MassTransit v8 (pinned per ADR-0007 / Apache 2.0) -->
-        <PackageVersion Include="MassTransit" Version="8.5.12" />
+        <PackageVersion Include="MassTransit" Version="9.3.0" />
         <PackageVersion Include="MassTransit.RabbitMQ" Version="8.5.12" />
         <PackageVersion Include="MassTransit.EntityFrameworkCore" Version="8.5.12" />
 
