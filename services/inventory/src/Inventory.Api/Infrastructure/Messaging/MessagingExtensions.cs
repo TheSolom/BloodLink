@@ -44,7 +44,7 @@ public static class MessagingExtensions
                 {
                     IConfigurationSection rabbitMqSection = configuration.GetSection("RabbitMq");
                     string host = rabbitMqSection["Host"] ?? "localhost";
-                    ushort port = ushort.TryParse(rabbitMqSection["Port"], out var p)
+                    ushort port = ushort.TryParse(rabbitMqSection["Port"], out ushort p)
                         ? p
                         : (ushort)5672;
                     string virtualHost = rabbitMqSection["VirtualHost"] ?? "/";

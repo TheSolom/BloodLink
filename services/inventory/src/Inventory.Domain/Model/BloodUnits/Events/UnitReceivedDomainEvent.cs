@@ -10,5 +10,6 @@ public record UnitReceivedDomainEvent(
     BloodComponent Component,
     DateTimeOffset CollectedAt,
     DateTimeOffset ExpiresAt,
-    Guid BloodBankId
+    Guid BloodBankId,
+    int Version = 1
 ) : DomainEvent;

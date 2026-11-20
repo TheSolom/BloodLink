@@ -91,7 +91,8 @@ public class BloodUnit : AggregateRoot<Guid>
                 component,
                 utcCollectedAt,
                 expiresAt,
-                bloodBankId
+                bloodBankId,
+                unit.Version
             )
         );
 

@@ -30,12 +30,3 @@ public class ReleaseUnitsConsumer(ReleaseUnitsHandler handler) : IConsumer<Relea
         }
     }
 }
-
-public class ReleaseUnitsConsumerDefinition : ConsumerDefinition<ReleaseUnitsConsumer>
-{
-    protected override void ConfigureConsumer(
-        IReceiveEndpointConfigurator endpointConfigurator,
-        IConsumerConfigurator<ReleaseUnitsConsumer> consumerConfigurator,
-        IRegistrationContext context
-    ) => endpointConfigurator.UseEntityFrameworkOutbox<InventoryDbContext>(context);
-}

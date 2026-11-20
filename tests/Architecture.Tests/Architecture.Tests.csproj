@@ -10,6 +10,9 @@
         <ProjectReference Include="..\..\services\inventory\src\Inventory.Domain\Inventory.Domain.csproj" />
         <ProjectReference Include="..\..\services\inventory\src\Inventory.Contracts\Inventory.Contracts.csproj" />
         <ProjectReference Include="..\..\services\inventory\src\Inventory.Api\Inventory.Api.csproj" />
+        <ProjectReference Include="..\..\services\requests\src\Requests.Domain\Requests.Domain.csproj" />
+        <ProjectReference Include="..\..\services\requests\src\Requests.Contracts\Requests.Contracts.csproj" />
+        <ProjectReference Include="..\..\services\requests\src\Requests.Api\Requests.Api.csproj" />
     </ItemGroup>
 
     <ItemGroup>

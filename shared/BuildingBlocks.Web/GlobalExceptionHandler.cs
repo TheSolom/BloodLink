@@ -69,6 +69,11 @@ public class GlobalExceptionHandler(
             );
         }
 
+        if (exception is BadHttpRequestException badHttpRequestException)
+        {
+            return (badHttpRequestException.StatusCode, "Bad Request", "request.bad_request");
+        }
+
         if (
             exception is DbUpdateException dbUpdateException
             && IsUniqueConstraintViolation(dbUpdateException)

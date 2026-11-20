@@ -4,7 +4,6 @@ using BloodLink.Inventory.Api.Infrastructure.Messaging.Mappers;
 using BloodLink.Inventory.Domain.Model.BloodUnits;
 using BloodLink.Inventory.Domain.Model.BloodUnits.Events;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Diagnostics;
 
 namespace BloodLink.Inventory.Api.Infrastructure.Messaging;

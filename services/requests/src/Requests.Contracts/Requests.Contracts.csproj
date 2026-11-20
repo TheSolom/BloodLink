@@ -1,0 +1,6 @@
+<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <RootNamespace>BloodLink.Requests.Contracts</RootNamespace>
+        <AssemblyName>BloodLink.Requests.Contracts</AssemblyName>
+    </PropertyGroup>
+</Project>

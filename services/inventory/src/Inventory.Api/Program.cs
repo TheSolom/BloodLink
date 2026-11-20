@@ -5,6 +5,7 @@ using BloodLink.Inventory.Api.Features.Expiry.ExpireUnits;
 using BloodLink.Inventory.Api.Features.Reservations.ReleaseUnits;
 using BloodLink.Inventory.Api.Features.Reservations.ReserveUnits;
 using BloodLink.Inventory.Api.Features.Stock.GetAvailableStock;
+using BloodLink.Inventory.Api.Features.Stock.GetStockSnapshot;
 using BloodLink.Inventory.Api.Infrastructure.Messaging;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using BloodLink.ServiceDefaults;
@@ -51,6 +52,7 @@ builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<RegisterBloodBankHandler>();
 builder.Services.AddScoped<ReceiveDonationHandler>();
 builder.Services.AddScoped<GetAvailableStockHandler>();
+builder.Services.AddScoped<GetStockSnapshotHandler>();
 builder.Services.AddScoped<ReserveUnitsHandler>();
 builder.Services.AddScoped<ReleaseUnitsHandler>();
 builder.Services.AddScoped<ExpireUnitsHandler>();
@@ -93,6 +95,7 @@ if (app.Environment.IsDevelopment())
 app.MapRegisterBloodBank();
 app.MapReceiveDonation();
 app.MapGetAvailableStock();
+app.MapGetStockSnapshot();
 app.MapReserveUnits();
 app.MapReleaseUnits();
 

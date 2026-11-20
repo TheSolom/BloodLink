@@ -32,10 +32,13 @@ public class OutboxPersistenceIntegrationTests : IAsyncLifetime
                     // Disable the background outbox delivery service for this persistence test
                     // so that outbox records remain persisted in inventory.OutboxMessages
                     // without race conditions against the background delivery poller.
-                    List<ServiceDescriptor> deliveryServices = services
+                    var deliveryServices = services
                         .Where(d =>
                             d.ServiceType == typeof(IHostedService)
-                            && d.ImplementationType?.Name.StartsWith("BusOutboxDeliveryService", StringComparison.Ordinal) == true
+                            && d.ImplementationType?.Name.StartsWith(
+                                "BusOutboxDeliveryService",
+                                StringComparison.Ordinal
+                            ) == true
                         )
                         .ToList();
 

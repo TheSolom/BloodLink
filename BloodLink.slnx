@@ -6,6 +6,13 @@
         <Project Path="services/inventory/tests/Inventory.IntegrationTests/Inventory.IntegrationTests.csproj" />
         <Project Path="services/inventory/tests/Inventory.UnitTests/Inventory.UnitTests.csproj" />
     </Folder>
+    <Folder Name="/services/requests/">
+        <Project Path="services/requests/src/Requests.Api/Requests.Api.csproj" />
+        <Project Path="services/requests/src/Requests.Contracts/Requests.Contracts.csproj" />
+        <Project Path="services/requests/src/Requests.Domain/Requests.Domain.csproj" />
+        <Project Path="services/requests/tests/Requests.IntegrationTests/Requests.IntegrationTests.csproj" />
+        <Project Path="services/requests/tests/Requests.UnitTests/Requests.UnitTests.csproj" />
+    </Folder>
     <Folder Name="/shared/">
         <Project Path="shared/BuildingBlocks.Domain/BuildingBlocks.Domain.csproj" />
         <Project Path="shared/BuildingBlocks.Messaging/BuildingBlocks.Messaging.csproj" />

@@ -2,6 +2,9 @@ using BloodLink.BuildingBlocks.Domain;
 using BloodLink.Inventory.Api.Infrastructure.Persistence;
 using BloodLink.Inventory.Contracts;
 using BloodLink.Inventory.Domain.Model.BloodUnits;
+using BloodLink.Requests.Api.Infrastructure.Persistence;
+using BloodLink.Requests.Contracts;
+using BloodLink.Requests.Domain.BloodRequests;
 using BloodLink.ServiceDefaults;
 using NetArchTest.Rules;
 using Shouldly;
@@ -30,6 +33,12 @@ public class FoundationArchitectureTests
         typeof(UnitReceivedIntegrationEvent).Assembly;
     private static readonly System.Reflection.Assembly InventoryApiAssembly =
         typeof(InventoryDbContext).Assembly;
+    private static readonly System.Reflection.Assembly RequestsDomainAssembly =
+        typeof(BloodRequest).Assembly;
+    private static readonly System.Reflection.Assembly RequestsContractsAssembly =
+        typeof(BloodRequestStatusChangedIntegrationEvent).Assembly;
+    private static readonly System.Reflection.Assembly RequestsApiAssembly =
+        typeof(RequestsDbContext).Assembly;
 
     [Fact]
     public void BuildingBlocksDomain_ShouldNotHaveDependencyOnInfrastructureFrameworks()
@@ -86,10 +95,11 @@ public class FoundationArchitectureTests
         // *.Domain projects reference no EF Core, no MassTransit, and no ASP.NET Core.
         // They may reference only BuildingBlocks.Domain and standard C# BCL.
         // *.Domain projects do not reference ServiceDefaults.
-        Type[] types = InventoryDomainAssembly.GetExportedTypes();
-        types.ShouldNotBeEmpty(
-            "Inventory.Domain assembly must contain types to test non-vacuously."
-        );
+        System.Reflection.Assembly[] domainAssemblies =
+        [
+            InventoryDomainAssembly,
+            RequestsDomainAssembly,
+        ];
 
         string[] forbiddenDependencies =
         [
@@ -99,35 +109,43 @@ public class FoundationArchitectureTests
             "BloodLink.ServiceDefaults",
         ];
 
-        TestResult result = Types
-            .InAssembly(InventoryDomainAssembly)
-            .ShouldNot()
-            .HaveDependencyOnAny(forbiddenDependencies)
-            .GetResult();
-
-        result.IsSuccessful.ShouldBeTrue(
-            $"Inventory.Domain must not depend on external frameworks or ServiceDefaults: {string.Join(", ", result.FailingTypes?.Select(t => t.FullName) ?? [])}"
-        );
-
-        // Also assert that references are limited to BuildingBlocks.Domain and BCL
-        string?[] referencedAssemblies = InventoryDomainAssembly
-            .GetReferencedAssemblies()
-            .Select(a => a.Name)
-            .Where(name => name != null)
-            .ToArray();
-
-        foreach (string? refName in referencedAssemblies)
+        foreach (System.Reflection.Assembly assembly in domainAssemblies)
         {
-            bool isAllowed =
-                refName!.StartsWith("System", StringComparison.Ordinal)
-                || refName.StartsWith("Microsoft.NET", StringComparison.Ordinal)
-                || refName.Equals("mscorlib", StringComparison.Ordinal)
-                || refName.Equals("netstandard", StringComparison.Ordinal)
-                || refName.Equals("BloodLink.BuildingBlocks.Domain", StringComparison.Ordinal);
-
-            isAllowed.ShouldBeTrue(
-                $"Inventory.Domain must only reference BuildingBlocks.Domain and BCL, but references '{refName}'."
+            Type[] types = assembly.GetExportedTypes();
+            types.ShouldNotBeEmpty(
+                $"{assembly.GetName().Name} assembly must contain types to test non-vacuously."
             );
+
+            TestResult result = Types
+                .InAssembly(assembly)
+                .ShouldNot()
+                .HaveDependencyOnAny(forbiddenDependencies)
+                .GetResult();
+
+            result.IsSuccessful.ShouldBeTrue(
+                $"{assembly.GetName().Name} must not depend on external frameworks or ServiceDefaults: {string.Join(", ", result.FailingTypes?.Select(t => t.FullName) ?? [])}"
+            );
+
+            // Also assert that references are limited to BuildingBlocks.Domain and BCL
+            string?[] referencedAssemblies = assembly
+                .GetReferencedAssemblies()
+                .Select(a => a.Name)
+                .Where(name => name != null)
+                .ToArray();
+
+            foreach (string? refName in referencedAssemblies)
+            {
+                bool isAllowed =
+                    refName!.StartsWith("System", StringComparison.Ordinal)
+                    || refName.StartsWith("Microsoft.NET", StringComparison.Ordinal)
+                    || refName.Equals("mscorlib", StringComparison.Ordinal)
+                    || refName.Equals("netstandard", StringComparison.Ordinal)
+                    || refName.Equals("BloodLink.BuildingBlocks.Domain", StringComparison.Ordinal);
+
+                isAllowed.ShouldBeTrue(
+                    $"{assembly.GetName().Name} must only reference BuildingBlocks.Domain and BCL, but references '{refName}'."
+                );
+            }
         }
     }
 
@@ -136,24 +154,11 @@ public class FoundationArchitectureTests
     {
         // Boundary rule:
         // *.Contracts projects contain only records and enums and reference nothing outside BCL.
-        Type[] types = InventoryContractsAssembly.GetExportedTypes();
-        types.ShouldNotBeEmpty("Inventory.Contracts must contain types to test non-vacuously.");
-
-        foreach (Type type in types)
-        {
-            bool isEnum = type.IsEnum;
-            bool isRecord =
-                type.GetMethods().Any(m => m.Name == "<Clone>$")
-                || type.GetProperty(
-                    "EqualityContract",
-                    System.Reflection.BindingFlags.NonPublic
-                        | System.Reflection.BindingFlags.Instance
-                ) != null;
-
-            (isEnum || isRecord).ShouldBeTrue(
-                $"Contracts type {type.FullName} must be a record or an enum."
-            );
-        }
+        System.Reflection.Assembly[] contractsAssemblies =
+        [
+            InventoryContractsAssembly,
+            RequestsContractsAssembly,
+        ];
 
         string[] forbiddenDependencies =
         [
@@ -166,44 +171,122 @@ public class FoundationArchitectureTests
             "Riok.Mapperly",
         ];
 
-        TestResult result = Types
-            .InAssembly(InventoryContractsAssembly)
-            .ShouldNot()
-            .HaveDependencyOnAny(forbiddenDependencies)
-            .GetResult();
-
-        result.IsSuccessful.ShouldBeTrue(
-            $"Inventory.Contracts must not depend on external libraries: {string.Join(", ", result.FailingTypes?.Select(t => t.FullName) ?? [])}"
-        );
-
-        string?[] referencedAssemblies = InventoryContractsAssembly
-            .GetReferencedAssemblies()
-            .Select(a => a.Name)
-            .Where(name => name != null)
-            .ToArray();
-
-        foreach (string? refName in referencedAssemblies)
+        foreach (System.Reflection.Assembly assembly in contractsAssemblies)
         {
-            bool isBcl =
-                refName!.StartsWith("System", StringComparison.Ordinal)
-                || refName.StartsWith("Microsoft.NET", StringComparison.Ordinal)
-                || refName.Equals("mscorlib", StringComparison.Ordinal)
-                || refName.Equals("netstandard", StringComparison.Ordinal);
-
-            isBcl.ShouldBeTrue(
-                $"Inventory.Contracts must reference only BCL assemblies, but references '{refName}'."
+            Type[] types = assembly.GetExportedTypes();
+            types.ShouldNotBeEmpty(
+                $"{assembly.GetName().Name} must contain types to test non-vacuously."
             );
+
+            foreach (Type type in types)
+            {
+                bool isEnum = type.IsEnum;
+                bool isRecord =
+                    type.GetMethods().Any(m => m.Name == "<Clone>$")
+                    || type.GetProperty(
+                        "EqualityContract",
+                        System.Reflection.BindingFlags.NonPublic
+                            | System.Reflection.BindingFlags.Instance
+                    ) != null;
+
+                (isEnum || isRecord).ShouldBeTrue(
+                    $"Contracts type {type.FullName} in {assembly.GetName().Name} must be a record or an enum."
+                );
+            }
+
+            TestResult result = Types
+                .InAssembly(assembly)
+                .ShouldNot()
+                .HaveDependencyOnAny(forbiddenDependencies)
+                .GetResult();
+
+            result.IsSuccessful.ShouldBeTrue(
+                $"{assembly.GetName().Name} must not depend on external libraries: {string.Join(", ", result.FailingTypes?.Select(t => t.FullName) ?? [])}"
+            );
+
+            string?[] referencedAssemblies = assembly
+                .GetReferencedAssemblies()
+                .Select(a => a.Name)
+                .Where(name => name != null)
+                .ToArray();
+
+            foreach (string? refName in referencedAssemblies)
+            {
+                bool isBcl =
+                    refName!.StartsWith("System", StringComparison.Ordinal)
+                    || refName.StartsWith("Microsoft.NET", StringComparison.Ordinal)
+                    || refName.Equals("mscorlib", StringComparison.Ordinal)
+                    || refName.Equals("netstandard", StringComparison.Ordinal);
+
+                isBcl.ShouldBeTrue(
+                    $"{assembly.GetName().Name} must reference only BCL assemblies, but references '{refName}'."
+                );
+            }
         }
     }
 
-    [Fact(
-        Skip = "Skipped in Phase 2: requires a second service (Requests.Api / Requests.Domain) to test cross-service boundary enforcement in Phase 5."
-    )]
+    [Fact]
     public void Services_ShouldNeverReferenceOtherServicesApiOrDomain_OnlyContracts()
     {
         // Boundary rule:
         // A service's *.Api and *.Domain projects never reference another service's *.Api or *.Domain.
         // They may reference only another service's *.Contracts.
+
+        // 1. Inventory must never reference Requests (Api, Domain, or Contracts)
+        string?[] inventoryApiRefs = InventoryApiAssembly
+            .GetReferencedAssemblies()
+            .Select(a => a.Name)
+            .Where(n => n != null)
+            .ToArray();
+
+        inventoryApiRefs.ShouldNotContain(
+            n => n!.StartsWith("BloodLink.Requests", StringComparison.Ordinal),
+            "Inventory.Api must not reference any Requests assemblies."
+        );
+
+        string?[] inventoryDomainRefs = InventoryDomainAssembly
+            .GetReferencedAssemblies()
+            .Select(a => a.Name)
+            .Where(n => n != null)
+            .ToArray();
+
+        inventoryDomainRefs.ShouldNotContain(
+            n => n!.StartsWith("BloodLink.Requests", StringComparison.Ordinal),
+            "Inventory.Domain must not reference any Requests assemblies."
+        );
+
+        // 2. Requests.Domain must never reference Inventory (Api, Domain, or Contracts)
+        string?[] requestsDomainRefs = RequestsDomainAssembly
+            .GetReferencedAssemblies()
+            .Select(a => a.Name)
+            .Where(n => n != null)
+            .ToArray();
+
+        requestsDomainRefs.ShouldNotContain(
+            n => n!.StartsWith("BloodLink.Inventory", StringComparison.Ordinal),
+            "Requests.Domain must not reference any Inventory assemblies."
+        );
+
+        // 3. Requests.Api may reference Inventory.Contracts, but NEVER Inventory.Api or Inventory.Domain
+        string?[] requestsApiRefs = RequestsApiAssembly
+            .GetReferencedAssemblies()
+            .Select(a => a.Name)
+            .Where(n => n != null)
+            .ToArray();
+
+        requestsApiRefs.ShouldNotContain(
+            "BloodLink.Inventory.Api",
+            "Requests.Api must never reference Inventory.Api."
+        );
+        requestsApiRefs.ShouldNotContain(
+            "BloodLink.Inventory.Domain",
+            "Requests.Api must never reference Inventory.Domain."
+        );
+
+        requestsApiRefs.ShouldContain(
+            "BloodLink.Inventory.Contracts",
+            "Requests.Api must reference Inventory.Contracts to consume its integration events."
+        );
     }
 
     [Fact]

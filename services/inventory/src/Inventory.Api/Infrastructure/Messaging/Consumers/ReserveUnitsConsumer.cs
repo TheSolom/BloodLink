@@ -23,13 +23,19 @@ public class ReserveUnitsConsumer(
         ArgumentNullException.ThrowIfNull(context);
 
         var request = new ReserveUnitsRequest(context.Message.RequestId, context.Message.UnitIds);
-        FluentValidationResult validationResult = await validator.ValidateAsync(request, context.CancellationToken);
+        FluentValidationResult validationResult = await validator.ValidateAsync(
+            request,
+            context.CancellationToken
+        );
 
         if (!validationResult.IsValid)
         {
             if (request.RequestId != Guid.Empty)
             {
-                string failureReason = string.Join("; ", validationResult.Errors.Select(e => e.ErrorMessage));
+                string failureReason = string.Join(
+                    "; ",
+                    validationResult.Errors.Select(e => e.ErrorMessage)
+                );
                 await context.Publish(
                     new ReservationRejectedIntegrationEvent(
                         request.RequestId,
@@ -46,13 +52,4 @@ public class ReserveUnitsConsumer(
 
         await handler.HandleAsync(request, context.CancellationToken);
     }
-}
-
-public class ReserveUnitsConsumerDefinition : ConsumerDefinition<ReserveUnitsConsumer>
-{
-    protected override void ConfigureConsumer(
-        IReceiveEndpointConfigurator endpointConfigurator,
-        IConsumerConfigurator<ReserveUnitsConsumer> consumerConfigurator,
-        IRegistrationContext context
-    ) => endpointConfigurator.UseEntityFrameworkOutbox<InventoryDbContext>(context);
 }
