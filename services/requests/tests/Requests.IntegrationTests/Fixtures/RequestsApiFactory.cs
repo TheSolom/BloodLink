@@ -28,6 +28,7 @@ public class RequestsApiFactory(DatabaseFixture databaseFixture) : WebApplicatio
         builder.UseSetting("RabbitMq:UserName", databaseFixture.RabbitMqUsername);
         builder.UseSetting("RabbitMq:Password", databaseFixture.RabbitMqPassword);
         builder.UseSetting("RabbitMq:VirtualHost", "/");
+        builder.UseSetting("Inventory:BaseUrl", "http://localhost:5001");
 
         builder.ConfigureTestServices(services =>
         {
