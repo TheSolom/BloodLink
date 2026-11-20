@@ -421,15 +421,24 @@ public class MatchingScenarioTests
         );
 
         result.IsSuccess.ShouldBeTrue();
-        // The test verifies and documents the current scoring trade-off:
-        // Near-expiry O- (2 days left) scores 0.595 (waste penalty 0.50*4/7 = 0.286 vs expiry bonus 0.40*0.952 = 0.381)
-        // Fresh O+ (35 days left) scores 0.567 (zero waste bonus 0.50*1.0 = 0.500 vs expiry 0.40*0.167 = 0.067).
-        // Hence, near-expiry O- wins over fresh O+, preventing the O- unit from expiring unused.
+        // The test verifies and documents the window-based expiry factor behavior:
+        // Window is 20% of shelf life (8.4 days / 201.6h for red cells).
+        // Near-expiry O- (2 days = 48h left, inside window):
+        //   expiryFactor = 1 - (48 / 201.6) = ~0.762.
+        //   waste factor = 1 - 4/7 = ~0.429.
+        //   distance factor = ~0.976.
+        //   score = 0.50 * 0.429 + 0.40 * 0.762 + 0.10 * 0.976 = ~0.617.
+        // Fresh O+ (35 days left, outside 8.4-day window):
+        //   expiryFactor = 0.0 (fresh, zero expiry bonus).
+        //   waste factor = 1.0 (exact match).
+        //   score = 0.50 * 1.0 + 0.40 * 0.0 + 0.10 * 0.976 = ~0.598.
+        // Hence, near-expiry O- inside the 20% window wins over fresh O+, naturally rescuing
+        // units nearing discard without requiring a separate artificial waste-fade curve.
         result
             .AssignedUnitIds[0]
             .ShouldBe(
                 nearExpiryONeg.UnitId,
-                "Under current weights, high expiry score on a 2-day O- unit outweighs the waste penalty against a 35-day O+ unit"
+                "Under window-based expiry scoring (default 20% shelf life window), expiry bonus on a 2-day O- unit outweighs the waste penalty against a fresh 35-day O+ unit"
             );
     }
 

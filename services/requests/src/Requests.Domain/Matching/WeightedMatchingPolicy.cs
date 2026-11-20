@@ -4,9 +4,11 @@ using BloodLink.Requests.Domain.ValueObjects;
 
 namespace BloodLink.Requests.Domain.Matching;
 
-public class WeightedMatchingPolicy(IMatchingProfileProvider profileProvider) : IMatchingPolicy
+public class WeightedMatchingPolicy(IMatchingProfileProvider? profileProvider = null)
+    : IMatchingPolicy
 {
-    private readonly IMatchingProfileProvider _profileProvider = profileProvider;
+    private readonly IMatchingProfileProvider _profileProvider = profileProvider
+        ?? new MatchingProfileProvider();
 
     public MatchResult Match(
         BloodRequest request,
@@ -20,8 +22,12 @@ public class WeightedMatchingPolicy(IMatchingProfileProvider profileProvider) : 
         ArgumentNullException.ThrowIfNull(candidateStock);
         ArgumentNullException.ThrowIfNull(excludedUnitIds);
 
+        MatchingWeightProfile profile =
+            options != null
+                ? options.GetProfile(request.Urgency)
+                : _profileProvider.GetProfile(request.Urgency);
+
         options ??= new MatchingOptions();
-        MatchingWeightProfile profile = _profileProvider.GetProfile(request.Urgency);
 
         // 1. Initial categorization of compatibility and component
         (List<CandidateUnitSnapshot>? compatibleUnits, MatchResult? compatibilityError) =
@@ -243,7 +249,7 @@ public class WeightedMatchingPolicy(IMatchingProfileProvider profileProvider) : 
         var scoredUnits = bankGroup
             .Select(unit => new ScoredUnit(
                 unit,
-                ScoreUnit(unit, request, now, distanceFactor, profile)
+                ScoreUnit(unit, request, now, distanceFactor, profile, options)
             ))
             .OrderByDescending(u => u.Score)
             .ThenBy(u => u.Snapshot.ExpiresAt)
@@ -268,11 +274,12 @@ public class WeightedMatchingPolicy(IMatchingProfileProvider profileProvider) : 
         BloodRequest request,
         DateTimeOffset now,
         double distanceFactor,
-        MatchingWeightProfile profile
+        MatchingWeightProfile profile,
+        MatchingOptions options
     )
     {
         double waste = CalculateWaste(unit, request);
-        double expiryFactor = CalculateExpiryFactor(unit, now);
+        double expiryFactor = CalculateExpiryFactor(unit, now, options);
 
         return (profile.WasteWeight * (1.0 - waste))
             + (profile.ExpiryWeight * expiryFactor)
@@ -286,13 +293,26 @@ public class WeightedMatchingPolicy(IMatchingProfileProvider profileProvider) : 
             : PlateletCompatibility.CalculateWaste(unit.BloodType, request.BloodType);
     }
 
-    private static double CalculateExpiryFactor(CandidateUnitSnapshot unit, DateTimeOffset now)
+    internal static double CalculateExpiryFactor(
+        CandidateUnitSnapshot unit,
+        DateTimeOffset now,
+        MatchingOptions options
+    )
     {
-        double maxShelfLifeHours =
-            unit.Component == BloodComponent.RedCells ? (42.0 * 24.0) : (5.0 * 24.0);
+        TimeSpan shelfLife =
+            unit.Component == BloodComponent.RedCells
+                ? TimeSpan.FromDays(42)
+                : TimeSpan.FromDays(5);
 
-        double hoursRemaining = Math.Max(0.0, (unit.ExpiresAt - now).TotalHours);
-        return Math.Clamp(1.0 - (hoursRemaining / maxShelfLifeHours), 0.0, 1.0);
+        double windowSeconds = options.ExpiryWindowFraction * shelfLife.TotalSeconds;
+        if (windowSeconds <= 0)
+        {
+            return 0.0;
+        }
+
+        double remainingSeconds = (unit.ExpiresAt - now).TotalSeconds;
+        double ratio = Math.Clamp(remainingSeconds / windowSeconds, 0.0, 1.0);
+        return 1.0 - ratio;
     }
 
     private sealed record ScoredUnit(CandidateUnitSnapshot Snapshot, double Score);

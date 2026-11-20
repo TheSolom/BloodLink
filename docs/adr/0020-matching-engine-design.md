@@ -29,15 +29,22 @@ Hard filters are never relaxed, even under `Critical` urgency:
 ### 2. Soft Scoring and Weight Profiles
 For candidate banks meeting all hard filters, each unit is evaluated across three factors normalized to $[0, 1]$:
 - $\text{waste} \in [0, 1]$: measures the sacrifice of donor utility. For red cells, $\text{waste} = (\text{donorServesCount} - \text{recipientOwnServesCount}) / 7$. For platelets, $\text{waste} = 0$ for exact ABO match, $1$ otherwise. Lower waste is better, scored as $(1 - \text{waste})$.
-- $\text{expiryFactor} \in [0, 1]$: FEFO (First-Expired, First-Out) preference. Units closer to expiration score higher: $1 - (\text{hoursRemaining} / \text{maxShelfLifeHours})$.
+- $\text{expiryFactor} \in [0, 1]$: Window-based FEFO (First-Expired, First-Out) preference.
+  $$\text{window} = \text{ExpiryWindowFraction} \times \text{ShelfLife}$$
+  $$\text{expiryFactor} = 1 - \operatorname{clamp}\left(\frac{\text{remainingTime}}{\text{window}}, 0, 1\right)$$
+  Configured via `MatchingOptions` (default `ExpiryWindowFraction = 0.20`, yielding $\sim 8.4$ days for red cells, $1$ day for platelets).
+  - Outside the window ($\text{remainingTime} \ge \text{window}$): $\text{expiryFactor} = 0$. Fresh units do not receive an expiry bonus, so waste penalty prevents scarce universal donors (O-) from being wasted when non-scarce stock (O+) is available.
+  - Inside the window ($\text{remainingTime} < \text{window}$): $\text{expiryFactor}$ rises linearly toward 1. This naturally overcomes the waste penalty under Routine urgency, rescuing units from shelf expiration without needing an artificial or arbitrary waste-fade curve.
 - $\text{distanceFactor} \in [0, 1]$: Proximity preference based on Haversine distance: $\max(0, 1 - \text{distanceKm} / \text{maxRelevantKm})$.
 
 The aggregate score is computed as:
 $$\text{score} = w_{\text{waste}} \times (1 - \text{waste}) + w_{\text{expiry}} \times \text{expiryFactor} + w_{\text{distance}} \times \text{distanceFactor}$$
 
+All parameters (weights $w$, window fraction, travel speed, arrival safety margin, max distance) are loaded dynamically from `MatchingOptions`, not hardcoded constants.
+
 Weight profiles are pure data structures selected by request `Urgency`:
-- **Routine:** $w_{\text{waste}} = 0.50,\; w_{\text{expiry}} = 0.40,\; w_{\text{distance}} = 0.10$ (minimizes rare blood wastage and expired discard).
-- **Urgent:** $w_{\text{waste}} = 0.35,\; w_{\text{expiry}} = 0.30,\; w_{\text{distance}} = 0.35$ (balanced allocation).
+- **Routine:** $w_{\text{waste}} = 0.50,\; w_{\text{expiry}} = 0.40,\; w_{\text{distance}} = 0.10$ (protects rare donor units; rescues near-expiry units).
+- **Urgent:** $w_{\text{waste}} = 0.35,\; w_{\text{expiry}} = 0.30,\; w_{\text{distance}} = 0.35$ (balanced clinical allocation).
 - **Critical:** $w_{\text{waste}} = 0.15,\; w_{\text{expiry}} = 0.10,\; w_{\text{distance}} = 0.75$ (prioritizes speed and shortest delivery distance).
 
 ### 3. Deterministic Tie-Breaking
@@ -48,8 +55,17 @@ Matching must be 100% repeatable given identical inputs:
 
 ### 4. Deliberately Left Out (Out of Scope for MVP)
 - **Multi-bank splitting:** Fulfilling a single request from multiple banks requires multi-courier coordination and partial reservation compensation, which adds excessive complexity for the MVP.
-- **Dynamic traffic routing APIs:** Distances use straight-line Haversine with a configurable average speed (40 km/h) rather than Google Maps/OSRM.
-- **Dynamic waste-fade near expiry:** In the current formula, weights are static per profile. Whether waste penalty should dynamically fade to zero as a rare unit approaches expiration is documented as a tuning consideration for future phases.
+- **Dynamic traffic routing APIs:** Distances use straight-line Haversine with a configurable average speed (40 km/h) rather than external mapping services.
+
+---
+
+## Future Work
+
+### Multi-Bank Fulfillment
+In the MVP, if Bank A has 2 units and Bank B has 2 units, a 3-unit request fails with `NoBankCanFillEntireRequest`. Multi-bank fulfillment is planned for post-MVP and will require:
+1. **Planner Pass:** A knapsack / combinatorial search pass over candidate banks to find the minimal-bank combination that satisfies `unitsNeeded` while optimizing composite distance and shelf-life scores.
+2. **Saga Orchestration & Compensation:** The request reservation saga must issue parallel or sequential reservation requests across multiple blood banks. If Bank A reserves 2 units but Bank B fails to reserve the remaining 1 unit (due to concurrent lock or out-of-stock), the saga must execute compensating actions (release reserved units at Bank A) or attempt a secondary match.
+3. **Dispatch Courier Impact:** Dispatch cannot dispatch a single courier. It must either coordinate multiple concurrent courier dispatches (one per origin bank) or plan a multi-stop pickup route, significantly increasing operational coordination and delivery tracking complexity.
 
 ## Alternatives Considered
 
@@ -67,4 +83,4 @@ Matching must be 100% repeatable given identical inputs:
 
 ### Negative / Trade-offs
 - **Single bank limitation:** If Bank A has 2 units and Bank B has 2 units, a 3-unit request fails with `NoBankCanFillEntireRequest`. Multi-bank fulfillment is deferred to future work.
-- **Static weights:** Near-expiry universal donor units (O-) might still be penalized on waste under `Routine` urgency unless the expiry weight overcomes the waste penalty.
+- **Window tuning:** The window-based expiry calculation (`ExpiryWindowFraction`) naturally rescues near-expiry units before waste penalties can cause spoilage, but requires calibrated window sizing (e.g. 20%) to balance donor conservation against discard risk.
