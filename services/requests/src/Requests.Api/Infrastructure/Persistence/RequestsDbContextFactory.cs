@@ -35,9 +35,10 @@ public class RequestsDbContextFactory : IDesignTimeDbContextFactory<RequestsDbCo
             .AddEnvironmentVariables()
             .Build();
 
-        string connectionString = configuration.GetConnectionString("RequestsConnection")
-            ?? "Server=localhost,1433;Database=BloodLink_Requests;User Id=sa;Password=BloodLink!Password2026;TrustServerCertificate=True;";
-
+        string connectionString = configuration.GetConnectionString("RequestsMigrationsConnection")
+            ?? throw new InvalidOperationException(
+                $"Could not find connection string 'RequestsMigrationsConnection' in configuration at '{basePath}' for environment '{environment}'."
+            );
         var optionsBuilder = new DbContextOptionsBuilder<RequestsDbContext>();
         optionsBuilder.UseSqlServer(connectionString);
 

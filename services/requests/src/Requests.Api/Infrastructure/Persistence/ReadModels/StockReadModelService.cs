@@ -38,103 +38,108 @@ public class StockReadModelService(RequestsDbContext dbContext) : IStockReadMode
 
         if (existing == null)
         {
-            var newEntry = new StockItemReadModel
-            {
-                UnitId = unitReceived.UnitId,
-                BloodBankId = unitReceived.BloodBankId,
-                BloodType = unitReceived.BloodType,
-                Component = unitReceived.Component,
-                ExpiresAt = unitReceived.ExpiresAt,
-                Status = "Available",
-                Version = unitReceived.Version,
-            };
-
-            var bankCoords = await dbContext
-                .StockReadModels.Where(u =>
-                    u.BloodBankId == unitReceived.BloodBankId
-                    && u.Latitude.HasValue
-                    && u.Longitude.HasValue
-                )
-                .Select(u => new { u.Latitude, u.Longitude })
-                .FirstOrDefaultAsync(ct);
-
-            if (bankCoords != null)
-            {
-                newEntry.Latitude = bankCoords.Latitude;
-                newEntry.Longitude = bankCoords.Longitude;
-            }
-
-            CheckAndSetComplete(newEntry);
-            dbContext.StockReadModels.Add(newEntry);
-            await dbContext.SaveChangesAsync(ct);
+            await InsertNewStockItemAsync(unitReceived, ct);
             return;
         }
 
-        // Apply rules: UnitReceived upserts attributes if incoming Version >= stored Version
+        await UpdateExistingStockItemAsync(existing, unitReceived, ct);
+    }
+
+    private async Task InsertNewStockItemAsync(
+        UnitReceivedIntegrationEvent unitReceived,
+        CancellationToken ct
+    )
+    {
+        var newEntry = new StockItemReadModel
+        {
+            UnitId = unitReceived.UnitId,
+            BloodBankId = unitReceived.BloodBankId,
+            BloodType = unitReceived.BloodType,
+            Component = unitReceived.Component,
+            ExpiresAt = unitReceived.ExpiresAt,
+            Status = "Available",
+            Version = unitReceived.Version,
+        };
+
+        await PopulateCoordinatesIfMissingAsync(newEntry, unitReceived.BloodBankId, ct);
+        CheckAndSetComplete(newEntry);
+        dbContext.StockReadModels.Add(newEntry);
+        await dbContext.SaveChangesAsync(ct);
+    }
+
+    private async Task UpdateExistingStockItemAsync(
+        StockItemReadModel existing,
+        UnitReceivedIntegrationEvent unitReceived,
+        CancellationToken ct
+    )
+    {
         if (unitReceived.Version >= existing.Version)
         {
-            existing.BloodBankId = unitReceived.BloodBankId;
-            existing.BloodType = unitReceived.BloodType;
-            existing.Component = unitReceived.Component;
-            existing.ExpiresAt = unitReceived.ExpiresAt;
-            existing.Version = unitReceived.Version;
-
-            if (string.IsNullOrEmpty(existing.Status))
-            {
-                existing.Status = "Available";
-            }
-
-            if (!existing.Latitude.HasValue || !existing.Longitude.HasValue)
-            {
-                var bankCoords = await dbContext
-                    .StockReadModels.Where(u =>
-                        u.BloodBankId == unitReceived.BloodBankId
-                        && u.Latitude.HasValue
-                        && u.Longitude.HasValue
-                    )
-                    .Select(u => new { u.Latitude, u.Longitude })
-                    .FirstOrDefaultAsync(ct);
-
-                if (bankCoords != null)
-                {
-                    existing.Latitude = bankCoords.Latitude;
-                    existing.Longitude = bankCoords.Longitude;
-                }
-            }
-
+            ApplyCurrentVersionUnitReceived(existing, unitReceived);
+            await PopulateCoordinatesIfMissingAsync(existing, unitReceived.BloodBankId, ct);
             CheckAndSetComplete(existing);
             await dbContext.SaveChangesAsync(ct);
         }
         else if (!existing.IsComplete)
         {
-            // UnitReceived has older version than parked row, but provides the missing attributes
-            existing.BloodBankId ??= unitReceived.BloodBankId;
-            existing.BloodType ??= unitReceived.BloodType;
-            existing.Component ??= unitReceived.Component;
-            existing.ExpiresAt ??= unitReceived.ExpiresAt;
-
-            if (!existing.Latitude.HasValue || !existing.Longitude.HasValue)
-            {
-                var bankCoords = await dbContext
-                    .StockReadModels.Where(u =>
-                        u.BloodBankId == unitReceived.BloodBankId
-                        && u.Latitude.HasValue
-                        && u.Longitude.HasValue
-                    )
-                    .Select(u => new { u.Latitude, u.Longitude })
-                    .FirstOrDefaultAsync(ct);
-
-                if (bankCoords != null)
-                {
-                    existing.Latitude = bankCoords.Latitude;
-                    existing.Longitude = bankCoords.Longitude;
-                }
-            }
-
+            HydrateParkedRowAttributes(existing, unitReceived);
+            await PopulateCoordinatesIfMissingAsync(existing, unitReceived.BloodBankId, ct);
             CheckAndSetComplete(existing);
             await dbContext.SaveChangesAsync(ct);
         }
-        // If incoming Version < stored Version and row is already complete: ignore stale event
+    }
+
+    private static void ApplyCurrentVersionUnitReceived(
+        StockItemReadModel existing,
+        UnitReceivedIntegrationEvent unitReceived
+    )
+    {
+        existing.BloodBankId = unitReceived.BloodBankId;
+        existing.BloodType = unitReceived.BloodType;
+        existing.Component = unitReceived.Component;
+        existing.ExpiresAt = unitReceived.ExpiresAt;
+        existing.Version = unitReceived.Version;
+
+        if (string.IsNullOrEmpty(existing.Status))
+        {
+            existing.Status = "Available";
+        }
+    }
+
+    private static void HydrateParkedRowAttributes(
+        StockItemReadModel existing,
+        UnitReceivedIntegrationEvent unitReceived
+    )
+    {
+        existing.BloodBankId ??= unitReceived.BloodBankId;
+        existing.BloodType ??= unitReceived.BloodType;
+        existing.Component ??= unitReceived.Component;
+        existing.ExpiresAt ??= unitReceived.ExpiresAt;
+    }
+
+    private async Task PopulateCoordinatesIfMissingAsync(
+        StockItemReadModel item,
+        Guid bankId,
+        CancellationToken ct
+    )
+    {
+        if (item.Latitude.HasValue && item.Longitude.HasValue)
+        {
+            return;
+        }
+
+        var bankCoords = await dbContext
+            .StockReadModels.Where(u =>
+                u.BloodBankId == bankId && u.Latitude.HasValue && u.Longitude.HasValue
+            )
+            .Select(u => new { u.Latitude, u.Longitude })
+            .FirstOrDefaultAsync(ct);
+
+        if (bankCoords != null)
+        {
+            item.Latitude = bankCoords.Latitude;
+            item.Longitude = bankCoords.Longitude;
+        }
     }
 
     public async Task ApplyUnitStatusChangedAsync(
