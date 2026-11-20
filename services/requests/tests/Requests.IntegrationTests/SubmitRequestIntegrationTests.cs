@@ -1,10 +1,8 @@
 using System.Net;
-using System.Net.Http.Json;
 using BloodLink.Requests.Api.Features.Requests.SubmitRequest;
 using BloodLink.Requests.Api.Infrastructure.Persistence;
-using BloodLink.Requests.Domain.Hospitals;
+using BloodLink.Requests.Domain.BloodRequests;
 using BloodLink.Requests.IntegrationTests.Fixtures;
-using Microsoft.EntityFrameworkCore;
 using Shouldly;
 using Xunit;
 
@@ -55,8 +53,8 @@ public class SubmitRequestIntegrationTests(
         body.UnitsNeeded.ShouldBe(2);
         body.Status.ShouldBe("Submitted");
 
-        await using var dbContext = factory.CreateDbContext();
-        var stored = await dbContext.BloodRequests.FindAsync(body.Id);
+        await using RequestsDbContext dbContext = factory.CreateDbContext();
+        BloodRequest? stored = await dbContext.BloodRequests.FindAsync(body.Id);
         stored.ShouldNotBeNull();
         stored.HospitalId.ShouldBe(SeededHospitals.StThomas.Id);
     }

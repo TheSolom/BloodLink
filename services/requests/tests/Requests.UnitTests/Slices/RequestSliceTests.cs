@@ -6,8 +6,6 @@ using BloodLink.Requests.Api.Features.Requests.SubmitRequest;
 using BloodLink.Requests.Api.Infrastructure.Auth;
 using BloodLink.Requests.Api.Infrastructure.Persistence;
 using BloodLink.Requests.Domain.BloodRequests;
-using BloodLink.Requests.Domain.Hospitals;
-using BloodLink.Requests.Domain.ValueObjects;
 using BloodLink.Requests.UnitTests.Fixtures;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
@@ -27,9 +25,10 @@ public class RequestSliceTests
 
     private static (RequestsDbContext DbContext, FakeTimeProvider TimeProvider) CreateContext()
     {
-        var options = new DbContextOptionsBuilder<RequestsDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
+        DbContextOptions<RequestsDbContext> options =
+            new DbContextOptionsBuilder<RequestsDbContext>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .Options;
 
         var dbContext = new RequestsDbContext(options);
         dbContext.Hospitals.AddRange(
@@ -49,7 +48,7 @@ public class RequestSliceTests
     public async Task SubmitRequest_ValidCommand_CreatesRequest()
     {
         // Arrange
-        var (dbContext, timeProvider) = CreateContext();
+        (RequestsDbContext? dbContext, FakeTimeProvider? timeProvider) = CreateContext();
         var hospitalContext = new TestHospitalContext(HospitalAId);
         var handler = new SubmitRequestHandler(dbContext, hospitalContext, timeProvider);
 
@@ -79,7 +78,7 @@ public class RequestSliceTests
         response.Status.ShouldBe("Submitted");
         response.IdempotencyKey.ShouldBe("key-123");
 
-        var stored = await dbContext.BloodRequests.FindAsync(response.Id);
+        BloodRequest? stored = await dbContext.BloodRequests.FindAsync(response.Id);
         stored.ShouldNotBeNull();
         stored.Status.ShouldBe(BloodRequestStatus.Submitted);
     }
@@ -88,7 +87,7 @@ public class RequestSliceTests
     public async Task SubmitRequest_DuplicateIdempotencyKey_ReturnsOriginalRequestWithoutCreatingNew()
     {
         // Arrange
-        var (dbContext, timeProvider) = CreateContext();
+        (RequestsDbContext? dbContext, FakeTimeProvider? timeProvider) = CreateContext();
         var hospitalContext = new TestHospitalContext(HospitalAId);
         var handler = new SubmitRequestHandler(dbContext, hospitalContext, timeProvider);
 
@@ -128,7 +127,7 @@ public class RequestSliceTests
     public async Task SubmitRequest_MissingIdempotencyKey_ThrowsDomainException()
     {
         // Arrange
-        var (dbContext, timeProvider) = CreateContext();
+        (RequestsDbContext? dbContext, FakeTimeProvider? timeProvider) = CreateContext();
         var hospitalContext = new TestHospitalContext(HospitalAId);
         var handler = new SubmitRequestHandler(dbContext, hospitalContext, timeProvider);
 
@@ -152,7 +151,7 @@ public class RequestSliceTests
     public async Task CancelRequest_BeforeInTransit_SuccessfullyCancels()
     {
         // Arrange
-        var (dbContext, timeProvider) = CreateContext();
+        (RequestsDbContext? dbContext, FakeTimeProvider? timeProvider) = CreateContext();
         var hospitalContext = new TestHospitalContext(HospitalAId);
         var submitHandler = new SubmitRequestHandler(dbContext, hospitalContext, timeProvider);
         var cancelHandler = new CancelRequestHandler(dbContext, hospitalContext);
@@ -179,7 +178,7 @@ public class RequestSliceTests
         );
 
         // Assert
-        var stored = await dbContext.BloodRequests.FindAsync(submitted.Id);
+        BloodRequest? stored = await dbContext.BloodRequests.FindAsync(submitted.Id);
         stored.ShouldNotBeNull();
         stored.Status.ShouldBe(BloodRequestStatus.Cancelled);
     }
@@ -188,7 +187,7 @@ public class RequestSliceTests
     public async Task CancelRequest_OnceInTransit_ThrowsDomainException()
     {
         // Arrange
-        var (dbContext, timeProvider) = CreateContext();
+        (RequestsDbContext? dbContext, FakeTimeProvider? timeProvider) = CreateContext();
         var hospitalContext = new TestHospitalContext(HospitalAId);
         var submitHandler = new SubmitRequestHandler(dbContext, hospitalContext, timeProvider);
         var cancelHandler = new CancelRequestHandler(dbContext, hospitalContext);
@@ -208,7 +207,7 @@ public class RequestSliceTests
         );
 
         // Advance aggregate to InTransit
-        var request = await dbContext.BloodRequests.FindAsync(submitted.Id);
+        BloodRequest? request = await dbContext.BloodRequests.FindAsync(submitted.Id);
         request.ShouldNotBeNull();
         request.StartMatching();
         request.StartReserving([Guid.NewGuid()]);
@@ -232,7 +231,7 @@ public class RequestSliceTests
     public async Task CancelRequest_ByDifferentHospital_ThrowsForbiddenException()
     {
         // Arrange
-        var (dbContext, timeProvider) = CreateContext();
+        (RequestsDbContext? dbContext, FakeTimeProvider? timeProvider) = CreateContext();
         var hospitalAContext = new TestHospitalContext(HospitalAId);
         var hospitalBContext = new TestHospitalContext(HospitalBId);
         var submitHandler = new SubmitRequestHandler(dbContext, hospitalAContext, timeProvider);
@@ -268,7 +267,7 @@ public class RequestSliceTests
     public async Task GetRequestStatus_ReturnsDetailsForOwner_AndForbidsOtherHospital()
     {
         // Arrange
-        var (dbContext, timeProvider) = CreateContext();
+        (RequestsDbContext? dbContext, FakeTimeProvider? timeProvider) = CreateContext();
         var hospitalAContext = new TestHospitalContext(HospitalAId);
         var hospitalBContext = new TestHospitalContext(HospitalBId);
         var submitHandler = new SubmitRequestHandler(dbContext, hospitalAContext, timeProvider);
@@ -314,7 +313,7 @@ public class RequestSliceTests
     public async Task ListRequests_ReturnsOnlyHospitalOwnRequests_WithPagination()
     {
         // Arrange
-        var (dbContext, timeProvider) = CreateContext();
+        (RequestsDbContext? dbContext, FakeTimeProvider? timeProvider) = CreateContext();
         var hospitalAContext = new TestHospitalContext(HospitalAId);
         var hospitalBContext = new TestHospitalContext(HospitalBId);
         var submitHandlerA = new SubmitRequestHandler(dbContext, hospitalAContext, timeProvider);

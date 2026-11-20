@@ -46,9 +46,10 @@ public class RequestsApiFactory(DatabaseFixture databaseFixture) : WebApplicatio
 
     public RequestsDbContext CreateDbContext()
     {
-        var optionsBuilder = new DbContextOptionsBuilder<RequestsDbContext>().UseSqlServer(
-            databaseFixture.ConnectionString
-        );
+        DbContextOptionsBuilder<RequestsDbContext> optionsBuilder =
+            new DbContextOptionsBuilder<RequestsDbContext>().UseSqlServer(
+                databaseFixture.ConnectionString
+            );
 
         return new RequestsDbContext(optionsBuilder.Options);
     }

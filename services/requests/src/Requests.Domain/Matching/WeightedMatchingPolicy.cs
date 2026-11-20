@@ -24,33 +24,26 @@ public class WeightedMatchingPolicy(IMatchingProfileProvider profileProvider) : 
         MatchingWeightProfile profile = _profileProvider.GetProfile(request.Urgency);
 
         // 1. Initial categorization of compatibility and component
-        var (compatibleUnits, compatibilityError) = FilterCompatibleStock(
-            request,
-            candidateStock,
-            excludedUnitIds
-        );
+        (List<CandidateUnitSnapshot>? compatibleUnits, MatchResult? compatibilityError) =
+            FilterCompatibleStock(request, candidateStock, excludedUnitIds);
         if (compatibilityError != null)
         {
             return compatibilityError;
         }
 
         // 2. Hard filter: unit must survive travel time + arrival safety margin
-        var (viableUnits, viabilityError) = FilterViableTravelUnits(
-            request,
-            compatibleUnits,
-            now,
-            options
-        );
+        (List<CandidateUnitSnapshot>? viableUnits, MatchResult? viabilityError) =
+            FilterViableTravelUnits(request, compatibleUnits, now, options);
         if (viabilityError != null)
         {
             return viabilityError;
         }
 
         // 3. Single-bank MVP filter: Group by BankId
-        var (qualifyingBanks, bankStockError) = GetQualifyingBanks(
-            viableUnits,
-            request.UnitsNeeded
-        );
+        (
+            List<IGrouping<Guid, CandidateUnitSnapshot>>? qualifyingBanks,
+            MatchResult? bankStockError
+        ) = GetQualifyingBanks(viableUnits, request.UnitsNeeded);
         if (bankStockError != null)
         {
             return bankStockError;

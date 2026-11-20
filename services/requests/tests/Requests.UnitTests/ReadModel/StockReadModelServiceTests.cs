@@ -13,9 +13,10 @@ public class StockReadModelServiceTests
 {
     private static RequestsDbContext CreateInMemoryDbContext()
     {
-        var options = new DbContextOptionsBuilder<RequestsDbContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
+        DbContextOptions<RequestsDbContext> options =
+            new DbContextOptionsBuilder<RequestsDbContext>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .Options;
 
         return new RequestsDbContext(options);
     }
@@ -24,11 +25,11 @@ public class StockReadModelServiceTests
     public async Task ApplyUnitReceived_DuplicateEvent_IsIdempotentAndIgnored()
     {
         // Arrange
-        using var dbContext = CreateInMemoryDbContext();
+        using RequestsDbContext dbContext = CreateInMemoryDbContext();
         var service = new StockReadModelService(dbContext);
         var unitId = Guid.NewGuid();
         var bankId = Guid.NewGuid();
-        var now = DateTimeOffset.UtcNow;
+        DateTimeOffset now = DateTimeOffset.UtcNow;
 
         var initialEvent = new UnitReceivedIntegrationEvent(
             unitId,
@@ -51,7 +52,9 @@ public class StockReadModelServiceTests
         // Assert
         firstCount.ShouldBe(1);
         secondCount.ShouldBe(1);
-        var stored = await dbContext.StockReadModels.FirstAsync(u => u.UnitId == unitId);
+        StockItemReadModel stored = await dbContext.StockReadModels.FirstAsync(u =>
+            u.UnitId == unitId
+        );
         stored.Version.ShouldBe(1);
         stored.BloodType.ShouldBe("O+");
     }
@@ -60,11 +63,11 @@ public class StockReadModelServiceTests
     public async Task ApplyUnitStatusChanged_StaleEvent_IsIgnored()
     {
         // Arrange
-        using var dbContext = CreateInMemoryDbContext();
+        using RequestsDbContext dbContext = CreateInMemoryDbContext();
         var service = new StockReadModelService(dbContext);
         var unitId = Guid.NewGuid();
         var bankId = Guid.NewGuid();
-        var now = DateTimeOffset.UtcNow;
+        DateTimeOffset now = DateTimeOffset.UtcNow;
 
         // Unit received at version 2 with status Available
         var received = new UnitReceivedIntegrationEvent(
@@ -83,7 +86,9 @@ public class StockReadModelServiceTests
         await service.ApplyUnitStatusChangedAsync(staleEvent);
 
         // Assert: Stored unit status remains Available and version remains 2
-        var stored = await dbContext.StockReadModels.FirstAsync(u => u.UnitId == unitId);
+        StockItemReadModel stored = await dbContext.StockReadModels.FirstAsync(u =>
+            u.UnitId == unitId
+        );
         stored.Status.ShouldBe("Available");
         stored.Version.ShouldBe(2);
     }
@@ -92,18 +97,20 @@ public class StockReadModelServiceTests
     public async Task OutOfOrder_UnitStatusChangedBeforeUnitReceived_ParksIncompleteRowAndCompletesOnUnitReceived()
     {
         // Arrange
-        using var dbContext = CreateInMemoryDbContext();
+        using RequestsDbContext dbContext = CreateInMemoryDbContext();
         var service = new StockReadModelService(dbContext);
         var unitId = Guid.NewGuid();
         var bankId = Guid.NewGuid();
-        var now = DateTimeOffset.UtcNow;
+        DateTimeOffset now = DateTimeOffset.UtcNow;
 
         // Act 1: UnitStatusChanged arrives first (e.g. Reserved, version 2)
         var statusEvent = new UnitStatusChangedIntegrationEvent(unitId, "Reserved", Version: 2);
         await service.ApplyUnitStatusChangedAsync(statusEvent);
 
         // Assert 1: Parked incomplete row
-        var parked = await dbContext.StockReadModels.FirstAsync(u => u.UnitId == unitId);
+        StockItemReadModel parked = await dbContext.StockReadModels.FirstAsync(u =>
+            u.UnitId == unitId
+        );
         parked.Status.ShouldBe("Reserved");
         parked.Version.ShouldBe(2);
         parked.IsComplete.ShouldBeFalse();
@@ -122,7 +129,9 @@ public class StockReadModelServiceTests
         await service.ApplyUnitReceivedAsync(receivedEvent);
 
         // Assert 2: Row is completed with attributes, status remains Reserved
-        var completed = await dbContext.StockReadModels.FirstAsync(u => u.UnitId == unitId);
+        StockItemReadModel completed = await dbContext.StockReadModels.FirstAsync(u =>
+            u.UnitId == unitId
+        );
         completed.IsComplete.ShouldBeTrue();
         completed.BloodType.ShouldBe("B-");
         completed.Component.ShouldBe("Platelets");
@@ -134,11 +143,11 @@ public class StockReadModelServiceTests
     public async Task MergeSnapshot_ArrivingAfterNewerEvents_DoesNotOverwriteNewerEventData()
     {
         // Arrange
-        using var dbContext = CreateInMemoryDbContext();
+        using RequestsDbContext dbContext = CreateInMemoryDbContext();
         var service = new StockReadModelService(dbContext);
         var unitId = Guid.NewGuid();
         var bankId = Guid.NewGuid();
-        var now = DateTimeOffset.UtcNow;
+        DateTimeOffset now = DateTimeOffset.UtcNow;
 
         // Live event arrived first at version 3 with status "Delivered"
         var unitReceived = new UnitReceivedIntegrationEvent(
@@ -170,7 +179,9 @@ public class StockReadModelServiceTests
         await service.MergeSnapshotItemAsync(olderSnapshot);
 
         // Assert: Newer event data (Delivered, version 3) was NOT overwritten
-        var stored = await dbContext.StockReadModels.FirstAsync(u => u.UnitId == unitId);
+        StockItemReadModel stored = await dbContext.StockReadModels.FirstAsync(u =>
+            u.UnitId == unitId
+        );
         stored.Status.ShouldBe("Delivered");
         stored.Version.ShouldBe(3);
         stored.IsMatchCandidate.ShouldBeFalse();
@@ -180,11 +191,11 @@ public class StockReadModelServiceTests
     public async Task UnknownStatusString_IsNotMatchCandidate()
     {
         // Arrange
-        using var dbContext = CreateInMemoryDbContext();
+        using RequestsDbContext dbContext = CreateInMemoryDbContext();
         var service = new StockReadModelService(dbContext);
         var unitId = Guid.NewGuid();
         var bankId = Guid.NewGuid();
-        var now = DateTimeOffset.UtcNow;
+        DateTimeOffset now = DateTimeOffset.UtcNow;
 
         var snapshot = new StockSnapshotUnitDto(
             unitId,
@@ -202,7 +213,9 @@ public class StockReadModelServiceTests
         await service.MergeSnapshotItemAsync(snapshot);
 
         // Assert
-        var stored = await dbContext.StockReadModels.FirstAsync(u => u.UnitId == unitId);
+        StockItemReadModel stored = await dbContext.StockReadModels.FirstAsync(u =>
+            u.UnitId == unitId
+        );
         stored.IsComplete.ShouldBeTrue();
         stored.IsMatchCandidate.ShouldBeFalse();
 
@@ -215,11 +228,11 @@ public class StockReadModelServiceTests
     public async Task UnitReleased_AfterBeingReservedAtSnapshotTime_BecomesMatchCandidate()
     {
         // Arrange
-        using var dbContext = CreateInMemoryDbContext();
+        using RequestsDbContext dbContext = CreateInMemoryDbContext();
         var service = new StockReadModelService(dbContext);
         var unitId = Guid.NewGuid();
         var bankId = Guid.NewGuid();
-        var now = DateTimeOffset.UtcNow;
+        DateTimeOffset now = DateTimeOffset.UtcNow;
 
         // Snapshot has unit at Reserved with version 1
         var snapshot = new StockSnapshotUnitDto(
@@ -235,7 +248,9 @@ public class StockReadModelServiceTests
         );
         await service.MergeSnapshotItemAsync(snapshot);
 
-        var beforeRelease = await dbContext.StockReadModels.FirstAsync(u => u.UnitId == unitId);
+        StockItemReadModel beforeRelease = await dbContext.StockReadModels.FirstAsync(u =>
+            u.UnitId == unitId
+        );
         beforeRelease.IsMatchCandidate.ShouldBeFalse();
 
         // Act: UnitStatusChanged to Available with version 2 (released)
@@ -243,7 +258,9 @@ public class StockReadModelServiceTests
         await service.ApplyUnitStatusChangedAsync(releaseEvent);
 
         // Assert: Unit is now a match candidate
-        var afterRelease = await dbContext.StockReadModels.FirstAsync(u => u.UnitId == unitId);
+        StockItemReadModel afterRelease = await dbContext.StockReadModels.FirstAsync(u =>
+            u.UnitId == unitId
+        );
         afterRelease.Status.ShouldBe("Available");
         afterRelease.Version.ShouldBe(2);
         afterRelease.IsMatchCandidate.ShouldBeTrue();
