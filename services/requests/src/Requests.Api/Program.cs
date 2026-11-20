@@ -1,17 +1,3 @@
-using BloodLink.BuildingBlocks.Web;
-using BloodLink.Requests.Api.Features.Requests.CancelRequest;
-using BloodLink.Requests.Api.Features.Requests.GetRequestStatus;
-using BloodLink.Requests.Api.Features.Requests.ListRequests;
-using BloodLink.Requests.Api.Features.Requests.SubmitRequest;
-using BloodLink.Requests.Api.Infrastructure.Auth;
-using BloodLink.Requests.Api.Infrastructure.Clients;
-using BloodLink.Requests.Api.Infrastructure.Messaging;
-using BloodLink.Requests.Api.Infrastructure.Persistence;
-using BloodLink.Requests.Api.Infrastructure.Persistence.ReadModels;
-using BloodLink.ServiceDefaults;
-using FluentValidation;
-using Microsoft.EntityFrameworkCore;
-
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Service defaults (OpenTelemetry, HealthChecks, Resilience, Service Discovery)
@@ -45,10 +31,12 @@ builder.Services.AddDbContext<RequestsDbContext>(options =>
 builder.Services.AddRequestsMessaging(builder.Configuration);
 
 // HTTP Client for Inventory Snapshot Sync
-string inventoryBaseUrl = builder.Configuration["Inventory:BaseUrl"] ?? "http://localhost:5001";
+string inventoryBaseUrl = builder.Configuration["Inventory:BaseUrl"]
+    ?? throw new InvalidOperationException("Configuration value 'Inventory:BaseUrl' is required.");
+
 builder.Services.AddHttpClient<IStockSnapshotClient, StockSnapshotClient>(client =>
 {
-    client.BaseAddress = new Uri(inventoryBaseUrl);
+    client.BaseAddress = new Uri(inventoryBaseUrl, UriKind.Absolute);
 });
 builder.Services.AddHostedService<StockSnapshotBootstrapService>();
 
