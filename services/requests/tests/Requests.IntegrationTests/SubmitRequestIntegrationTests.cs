@@ -9,18 +9,25 @@ using Xunit;
 namespace BloodLink.Requests.IntegrationTests;
 
 [Collection("RequestsIntegration")]
-public class SubmitRequestIntegrationTests(
-    RequestsApiFactory factory,
-    DatabaseFixture databaseFixture
-) : IClassFixture<RequestsApiFactory>, IClassFixture<DatabaseFixture>, IAsyncLifetime
+public class SubmitRequestIntegrationTests : IAsyncLifetime
 {
-    private readonly HttpClient _client = factory.CreateClient();
+    private readonly DatabaseFixture _databaseFixture;
+    private readonly RequestsApiFactory _factory;
+    private readonly HttpClient _client;
 
-    public Task InitializeAsync() => Task.CompletedTask;
+    public SubmitRequestIntegrationTests(DatabaseFixture databaseFixture)
+    {
+        _databaseFixture = databaseFixture;
+        _factory = new RequestsApiFactory(databaseFixture);
+        _client = _factory.CreateClient();
+    }
+
+    public async Task InitializeAsync() => await _databaseFixture.ResetDatabaseAsync();
 
     public async Task DisposeAsync()
     {
-        await databaseFixture.ResetDatabaseAsync();
+        _client.Dispose();
+        await _factory.DisposeAsync();
     }
 
     [Fact]
@@ -32,7 +39,7 @@ public class SubmitRequestIntegrationTests(
             "RedCells",
             UnitsNeeded: 2,
             "Critical",
-            factory.TimeProvider.GetUtcNow().AddHours(2)
+            _factory.TimeProvider.GetUtcNow().AddHours(2)
         );
 
         var requestMessage = new HttpRequestMessage(HttpMethod.Post, "/api/v1/requests")
@@ -53,7 +60,7 @@ public class SubmitRequestIntegrationTests(
         body.UnitsNeeded.ShouldBe(2);
         body.Status.ShouldBe("Submitted");
 
-        await using RequestsDbContext dbContext = factory.CreateDbContext();
+        await using RequestsDbContext dbContext = _factory.CreateDbContext();
         BloodRequest? stored = await dbContext.BloodRequests.FindAsync(body.Id);
         stored.ShouldNotBeNull();
         stored.HospitalId.ShouldBe(SeededHospitals.StThomas.Id);
@@ -68,7 +75,7 @@ public class SubmitRequestIntegrationTests(
             "Platelets",
             UnitsNeeded: 1,
             "Routine",
-            factory.TimeProvider.GetUtcNow().AddHours(4)
+            _factory.TimeProvider.GetUtcNow().AddHours(4)
         );
 
         // Act: without Idempotency-Key header

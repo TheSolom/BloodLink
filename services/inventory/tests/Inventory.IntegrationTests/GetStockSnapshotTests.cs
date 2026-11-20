@@ -149,7 +149,7 @@ public class GetStockSnapshotTests : IAsyncLifetime
         {
             for (int i = 0; i < 5; i++)
             {
-                Guid id = Guid.NewGuid();
+                Guid id = Guid.Parse($"00000000-0000-0000-0000-00000000000{i}");
                 createdIds.Add(id);
                 var unit = BloodUnit.ReceiveDonation(
                     id,
@@ -197,7 +197,7 @@ public class GetStockSnapshotTests : IAsyncLifetime
         allFetchedIds.Count.ShouldBe(5);
         allFetchedIds.Distinct().Count().ShouldBe(5);
         allFetchedIds.ShouldBe(
-            createdIds.OrderBy(id => id).ToList(),
+            createdIds.OrderBy(id => new System.Data.SqlTypes.SqlGuid(id)).ToList(),
             "Items must be deterministically ordered by UnitId"
         );
     }
