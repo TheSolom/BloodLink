@@ -62,15 +62,19 @@ public class SubmitRequestHandler(
         BloodComponent component = Enum.Parse<BloodComponent>(command.Component, ignoreCase: true);
         RequestUrgency urgency = Enum.Parse<RequestUrgency>(command.Urgency, ignoreCase: true);
 
-        var request = BloodRequest.Submit(
-            Guid.NewGuid(),
-            hospitalId,
-            hospital.Location,
+        var details = new BloodRequestDetails(
             bloodType,
             component,
             command.UnitsNeeded,
             urgency,
-            command.NeededBy,
+            command.NeededBy
+        );
+
+        var request = BloodRequest.Submit(
+            Guid.NewGuid(),
+            hospitalId,
+            hospital.Location,
+            details,
             cleanKey,
             timeProvider
         );

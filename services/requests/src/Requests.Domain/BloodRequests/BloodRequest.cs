@@ -26,22 +26,18 @@ public class BloodRequest : AggregateRoot<Guid>
         Guid id,
         Guid hospitalId,
         GeoLocation hospitalLocation,
-        BloodType bloodType,
-        BloodComponent component,
-        int unitsNeeded,
-        RequestUrgency urgency,
-        DateTimeOffset neededBy,
+        BloodRequestDetails details,
         string idempotencyKey
     )
         : base(id)
     {
         HospitalId = hospitalId;
         HospitalLocation = hospitalLocation;
-        BloodType = bloodType;
-        Component = component;
-        UnitsNeeded = unitsNeeded;
-        Urgency = urgency;
-        NeededBy = neededBy;
+        BloodType = details.BloodType;
+        Component = details.Component;
+        UnitsNeeded = details.UnitsNeeded;
+        Urgency = details.Urgency;
+        NeededBy = details.NeededBy;
         Status = BloodRequestStatus.Submitted;
         IdempotencyKey = idempotencyKey;
     }
@@ -50,17 +46,14 @@ public class BloodRequest : AggregateRoot<Guid>
         Guid id,
         Guid hospitalId,
         GeoLocation hospitalLocation,
-        BloodType bloodType,
-        BloodComponent component,
-        int unitsNeeded,
-        RequestUrgency urgency,
-        DateTimeOffset neededBy,
+        BloodRequestDetails details,
         string idempotencyKey,
         TimeProvider timeProvider
     )
     {
         ArgumentNullException.ThrowIfNull(hospitalLocation);
-        ArgumentNullException.ThrowIfNull(bloodType);
+        ArgumentNullException.ThrowIfNull(details);
+        ArgumentNullException.ThrowIfNull(details.BloodType);
         ArgumentNullException.ThrowIfNull(timeProvider);
 
         if (id == Guid.Empty)
@@ -76,10 +69,10 @@ public class BloodRequest : AggregateRoot<Guid>
             );
         }
 
-        if (unitsNeeded is < 1 or > 20)
+        if (details.UnitsNeeded is < 1 or > 20)
         {
             throw new DomainException(
-                $"Units needed must be between 1 and 20. Received: {unitsNeeded}.",
+                $"Units needed must be between 1 and 20. Received: {details.UnitsNeeded}.",
                 "request.invalid_units_needed"
             );
         }
@@ -93,10 +86,10 @@ public class BloodRequest : AggregateRoot<Guid>
         }
 
         DateTimeOffset now = timeProvider.GetUtcNow();
-        if (neededBy <= now)
+        if (details.NeededBy <= now)
         {
             throw new DomainException(
-                $"Needed-by deadline must be strictly in the future. Now: {now:O}, NeededBy: {neededBy:O}.",
+                $"Needed-by deadline must be strictly in the future. Now: {now:O}, NeededBy: {details.NeededBy:O}.",
                 "request.needed_by_in_past"
             );
         }
@@ -105,11 +98,7 @@ public class BloodRequest : AggregateRoot<Guid>
             id,
             hospitalId,
             hospitalLocation,
-            bloodType,
-            component,
-            unitsNeeded,
-            urgency,
-            neededBy,
+            details,
             idempotencyKey.Trim()
         );
 
@@ -117,11 +106,11 @@ public class BloodRequest : AggregateRoot<Guid>
             new BloodRequestSubmittedDomainEvent(
                 id,
                 hospitalId,
-                bloodType,
-                component,
-                unitsNeeded,
-                urgency,
-                neededBy,
+                details.BloodType,
+                details.Component,
+                details.UnitsNeeded,
+                details.Urgency,
+                details.NeededBy,
                 request.IdempotencyKey
             )
         );

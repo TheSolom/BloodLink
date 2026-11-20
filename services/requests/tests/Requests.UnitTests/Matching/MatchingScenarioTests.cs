@@ -25,21 +25,41 @@ public class MatchingScenarioTests
         _matchingPolicy = new WeightedMatchingPolicy(_profileProvider);
     }
 
+    private BloodRequest CreateRequest(
+        BloodType bloodType,
+        BloodComponent component,
+        int unitsNeeded = 1,
+        RequestUrgency urgency = RequestUrgency.Routine,
+        DateTimeOffset? neededBy = null,
+        string? idempotencyKey = null
+    )
+    {
+        return BloodRequest.Submit(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            _hospitalLocation,
+            new BloodRequestDetails(
+                bloodType,
+                component,
+                unitsNeeded,
+                urgency,
+                neededBy ?? _now.AddHours(24)
+            ),
+            idempotencyKey ?? $"idem-{Guid.NewGuid():N}",
+            _timeProvider
+        );
+    }
+
     [Fact]
     public void Scenario1_ScarceONegative_NotWastedOnOPositive_WhenOPositiveExists_UnderRoutineUrgency()
     {
         // Hospital requests O+ RedCells with Routine urgency
-        var request = BloodRequest.Submit(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            _hospitalLocation,
+        var request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
-            RequestUrgency.Routine,
-            _now.AddHours(24),
-            "idem-scenario-1",
-            _timeProvider
+            urgency: RequestUrgency.Routine,
+            idempotencyKey: "idem-scenario-1"
         );
 
         var bankId = Guid.NewGuid();
@@ -85,17 +105,13 @@ public class MatchingScenarioTests
     public void Scenario2_SameStock_UnderCriticalUrgency_PicksNearestCompatibleBank()
     {
         // Hospital requests RedCells under Critical urgency
-        var request = BloodRequest.Submit(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            _hospitalLocation,
+        var request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
-            RequestUrgency.Critical,
-            _now.AddHours(4),
-            "idem-scenario-2",
-            _timeProvider
+            urgency: RequestUrgency.Critical,
+            neededBy: _now.AddHours(4),
+            idempotencyKey: "idem-scenario-2"
         );
 
         var nearBankId = Guid.NewGuid();
@@ -145,17 +161,13 @@ public class MatchingScenarioTests
     [Fact]
     public void Scenario3_NearExpiryUnit_ThatCannotSurviveTrip_IsFilteredOut()
     {
-        var request = BloodRequest.Submit(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            _hospitalLocation,
+        var request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
-            RequestUrgency.Routine,
-            _now.AddHours(12),
-            "idem-scenario-3",
-            _timeProvider
+            urgency: RequestUrgency.Routine,
+            neededBy: _now.AddHours(12),
+            idempotencyKey: "idem-scenario-3"
         );
 
         var bankId = Guid.NewGuid();
@@ -190,17 +202,12 @@ public class MatchingScenarioTests
     [Fact]
     public void Scenario4_ExcludedUnits_AreSkippedOnRematch()
     {
-        var request = BloodRequest.Submit(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            _hospitalLocation,
+        var request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
-            RequestUrgency.Routine,
-            _now.AddHours(24),
-            "idem-scenario-4",
-            _timeProvider
+            urgency: RequestUrgency.Routine,
+            idempotencyKey: "idem-scenario-4"
         );
 
         var bankId = Guid.NewGuid();
@@ -244,17 +251,12 @@ public class MatchingScenarioTests
     public void Scenario5_NoSingleBankCanFillEntireRequest_ReturnsNoMatch()
     {
         // Request needs 3 units
-        var request = BloodRequest.Submit(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            _hospitalLocation,
+        var request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 3,
-            RequestUrgency.Routine,
-            _now.AddHours(24),
-            "idem-scenario-5",
-            _timeProvider
+            urgency: RequestUrgency.Routine,
+            idempotencyKey: "idem-scenario-5"
         );
 
         var bankA = Guid.NewGuid();
@@ -305,17 +307,12 @@ public class MatchingScenarioTests
     [Fact]
     public void Scenario6_EqualScores_GiveDeterministicOrder()
     {
-        var request = BloodRequest.Submit(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            _hospitalLocation,
+        var request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
-            RequestUrgency.Routine,
-            _now.AddHours(24),
-            "idem-scenario-6",
-            _timeProvider
+            urgency: RequestUrgency.Routine,
+            idempotencyKey: "idem-scenario-6"
         );
 
         // Two identical units from the same bank
@@ -377,17 +374,13 @@ public class MatchingScenarioTests
         // Scenario 7: Expiry-approaching O- for an O+ patient.
         // We test whether a near-expiry O- (expiring in 2 days) beats a fresh O+ (expiring in 35 days)
         // under Routine urgency (weights: waste=0.50, expiry=0.40, dist=0.10).
-        var request = BloodRequest.Submit(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            _hospitalLocation,
+        var request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
-            RequestUrgency.Routine,
-            _now.AddDays(5),
-            "idem-scenario-7",
-            _timeProvider
+            urgency: RequestUrgency.Routine,
+            neededBy: _now.AddDays(5),
+            idempotencyKey: "idem-scenario-7"
         );
 
         var bankId = Guid.NewGuid();
@@ -445,17 +438,12 @@ public class MatchingScenarioTests
     [Fact]
     public void Scenario8_InsufficientTotalStock_ReturnsNoMatch()
     {
-        var request = BloodRequest.Submit(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            _hospitalLocation,
+        var request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 5,
-            RequestUrgency.Routine,
-            _now.AddHours(24),
-            "idem-scenario-8",
-            _timeProvider
+            urgency: RequestUrgency.Routine,
+            idempotencyKey: "idem-scenario-8"
         );
 
         var bankId = Guid.NewGuid();
@@ -495,17 +483,12 @@ public class MatchingScenarioTests
     public void Scenario9_PlateletRules_PrefersExactAboMatch()
     {
         // Patient is A+ requesting platelets
-        var request = BloodRequest.Submit(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            _hospitalLocation,
+        var request = CreateRequest(
             BloodType.APositive,
             BloodComponent.Platelets,
             unitsNeeded: 1,
-            RequestUrgency.Routine,
-            _now.AddHours(24),
-            "idem-scenario-9",
-            _timeProvider
+            urgency: RequestUrgency.Routine,
+            idempotencyKey: "idem-scenario-9"
         );
 
         var bankId = Guid.NewGuid();

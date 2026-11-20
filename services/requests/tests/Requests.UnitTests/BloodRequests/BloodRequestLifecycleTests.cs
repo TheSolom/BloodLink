@@ -31,11 +31,13 @@ public class BloodRequestLifecycleTests
             requestId,
             hospitalId,
             _hospitalLocation,
-            BloodType.OPositive,
-            BloodComponent.RedCells,
-            unitsNeeded: 3,
-            RequestUrgency.Urgent,
-            neededBy,
+            new BloodRequestDetails(
+                BloodType.OPositive,
+                BloodComponent.RedCells,
+                UnitsNeeded: 3,
+                RequestUrgency.Urgent,
+                neededBy
+            ),
             "idempotency-123",
             _timeProvider
         );
@@ -74,11 +76,13 @@ public class BloodRequestLifecycleTests
                     Guid.NewGuid(),
                     Guid.NewGuid(),
                     _hospitalLocation,
-                    BloodType.OPositive,
-                    BloodComponent.RedCells,
-                    unitsNeeded,
-                    RequestUrgency.Routine,
-                    _baseTime.AddHours(2),
+                    new BloodRequestDetails(
+                        BloodType.OPositive,
+                        BloodComponent.RedCells,
+                        unitsNeeded,
+                        RequestUrgency.Routine,
+                        _baseTime.AddHours(2)
+                    ),
                     "key-1",
                     _timeProvider
                 )
@@ -95,11 +99,13 @@ public class BloodRequestLifecycleTests
                     Guid.NewGuid(),
                     Guid.NewGuid(),
                     _hospitalLocation,
-                    BloodType.OPositive,
-                    BloodComponent.RedCells,
-                    unitsNeeded: 2,
-                    RequestUrgency.Routine,
-                    _baseTime, // same as now
+                    new BloodRequestDetails(
+                        BloodType.OPositive,
+                        BloodComponent.RedCells,
+                        UnitsNeeded: 2,
+                        RequestUrgency.Routine,
+                        _baseTime // same as now
+                    ),
                     "key-1",
                     _timeProvider
                 )
@@ -112,11 +118,13 @@ public class BloodRequestLifecycleTests
                     Guid.NewGuid(),
                     Guid.NewGuid(),
                     _hospitalLocation,
-                    BloodType.OPositive,
-                    BloodComponent.RedCells,
-                    unitsNeeded: 2,
-                    RequestUrgency.Routine,
-                    _baseTime.AddMinutes(-5), // in past
+                    new BloodRequestDetails(
+                        BloodType.OPositive,
+                        BloodComponent.RedCells,
+                        UnitsNeeded: 2,
+                        RequestUrgency.Routine,
+                        _baseTime.AddMinutes(-5) // in past
+                    ),
                     "key-1",
                     _timeProvider
                 )
@@ -135,11 +143,13 @@ public class BloodRequestLifecycleTests
                     Guid.NewGuid(),
                     Guid.NewGuid(),
                     _hospitalLocation,
-                    BloodType.OPositive,
-                    BloodComponent.RedCells,
-                    unitsNeeded: 2,
-                    RequestUrgency.Routine,
-                    _baseTime.AddHours(2),
+                    new BloodRequestDetails(
+                        BloodType.OPositive,
+                        BloodComponent.RedCells,
+                        UnitsNeeded: 2,
+                        RequestUrgency.Routine,
+                        _baseTime.AddHours(2)
+                    ),
                     key,
                     _timeProvider
                 )
@@ -284,11 +294,13 @@ public class BloodRequestLifecycleTests
             Guid.NewGuid(),
             Guid.NewGuid(),
             _hospitalLocation,
-            BloodType.OPositive,
-            BloodComponent.RedCells,
-            unitsNeeded,
-            RequestUrgency.Routine,
-            _baseTime.AddHours(5),
+            new BloodRequestDetails(
+                BloodType.OPositive,
+                BloodComponent.RedCells,
+                unitsNeeded,
+                RequestUrgency.Routine,
+                _baseTime.AddHours(5)
+            ),
             $"key-{Guid.NewGuid():N}",
             _timeProvider
         );

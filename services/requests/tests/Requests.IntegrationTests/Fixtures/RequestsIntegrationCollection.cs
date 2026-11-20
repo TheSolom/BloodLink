@@ -1,3 +1,5 @@
+using Xunit;
+
 namespace BloodLink.Requests.IntegrationTests.Fixtures;
 
 [CollectionDefinition("RequestsIntegration")]

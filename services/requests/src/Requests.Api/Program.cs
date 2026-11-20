@@ -1,3 +1,17 @@
+using BloodLink.BuildingBlocks.Web;
+using BloodLink.Requests.Api.Features.Requests.CancelRequest;
+using BloodLink.Requests.Api.Features.Requests.GetRequestStatus;
+using BloodLink.Requests.Api.Features.Requests.ListRequests;
+using BloodLink.Requests.Api.Features.Requests.SubmitRequest;
+using BloodLink.Requests.Api.Infrastructure.Auth;
+using BloodLink.Requests.Api.Infrastructure.Clients;
+using BloodLink.Requests.Api.Infrastructure.Messaging;
+using BloodLink.Requests.Api.Infrastructure.Persistence;
+using BloodLink.Requests.Api.Infrastructure.Persistence.ReadModels;
+using BloodLink.ServiceDefaults;
+using FluentValidation;
+using Microsoft.EntityFrameworkCore;
+
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
 // Service defaults (OpenTelemetry, HealthChecks, Resilience, Service Discovery)
@@ -20,7 +34,7 @@ builder.Services.AddCors(options =>
 
 // Database & Persistence
 string connectionString = builder.Configuration.GetConnectionString("RequestsConnection")
-    ?? "Server=localhost,1433;Database=BloodLink_Requests;User Id=sa;Password=BloodLink!Password2026;TrustServerCertificate=True;";
+    ?? throw new InvalidOperationException("Connection string 'RequestsConnection' not found.");
 
 builder.Services.AddDbContext<RequestsDbContext>(options =>
 {

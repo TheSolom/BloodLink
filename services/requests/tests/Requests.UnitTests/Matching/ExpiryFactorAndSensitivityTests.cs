@@ -20,6 +20,31 @@ public class ExpiryFactorAndSensitivityTests
         _matchingPolicy = new WeightedMatchingPolicy(new MatchingProfileProvider());
     }
 
+    private BloodRequest CreateRequest(
+        BloodType bloodType,
+        BloodComponent component,
+        int unitsNeeded = 1,
+        RequestUrgency urgency = RequestUrgency.Routine,
+        DateTimeOffset? neededBy = null,
+        string? idempotencyKey = null
+    )
+    {
+        return BloodRequest.Submit(
+            Guid.NewGuid(),
+            Guid.NewGuid(),
+            _hospitalLocation,
+            new BloodRequestDetails(
+                bloodType,
+                component,
+                unitsNeeded,
+                urgency,
+                neededBy ?? _now.AddDays(5)
+            ),
+            idempotencyKey ?? $"idem-{Guid.NewGuid():N}",
+            _timeProvider
+        );
+    }
+
     [Fact]
     public void TestA_Routine_FreshONegative_Vs_AvailableOPositive_ForOPositivePatient_OPositiveWins()
     {
@@ -27,17 +52,13 @@ public class ExpiryFactorAndSensitivityTests
         // Both units are fresh (outside the 20% window of 8.4 days).
         // O- expires in 20 days, O+ expires in 30 days. Both have expiryFactor = 0.
         // Waste penalty for O- (4/7) means O+ wins, preserving the universal O- donor.
-        var request = BloodRequest.Submit(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            _hospitalLocation,
+        var request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
-            RequestUrgency.Routine,
-            _now.AddDays(5),
-            "idem-test-a",
-            _timeProvider
+            urgency: RequestUrgency.Routine,
+            neededBy: _now.AddDays(5),
+            idempotencyKey: "idem-test-a"
         );
 
         var bankId = Guid.NewGuid();
@@ -87,17 +108,13 @@ public class ExpiryFactorAndSensitivityTests
         // O- expires in 2 days (inside window, expiryFactor ~0.76).
         // Fresh O+ expires in 30 days (outside window, expiryFactor = 0).
         // Expiry urgency on O- outweighs the waste penalty, preventing it from expiring on the shelf.
-        var request = BloodRequest.Submit(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            _hospitalLocation,
+        var request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
-            RequestUrgency.Routine,
-            _now.AddDays(5),
-            "idem-test-b",
-            _timeProvider
+            urgency: RequestUrgency.Routine,
+            neededBy: _now.AddDays(5),
+            idempotencyKey: "idem-test-b"
         );
 
         var bankId = Guid.NewGuid();
@@ -298,43 +315,31 @@ public class ExpiryFactorAndSensitivityTests
 
         var sharedStock = new List<CandidateUnitSnapshot> { unitA_ONeg, unitB_OPos };
 
-        var routineRequest = BloodRequest.Submit(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            _hospitalLocation,
+        var routineRequest = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
-            RequestUrgency.Routine,
-            _now.AddHours(24),
-            "idem-routine",
-            _timeProvider
+            urgency: RequestUrgency.Routine,
+            neededBy: _now.AddHours(24),
+            idempotencyKey: "idem-routine"
         );
 
-        var urgentRequest = BloodRequest.Submit(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            _hospitalLocation,
+        var urgentRequest = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
-            RequestUrgency.Urgent,
-            _now.AddHours(12),
-            "idem-urgent",
-            _timeProvider
+            urgency: RequestUrgency.Urgent,
+            neededBy: _now.AddHours(12),
+            idempotencyKey: "idem-urgent"
         );
 
-        var criticalRequest = BloodRequest.Submit(
-            Guid.NewGuid(),
-            Guid.NewGuid(),
-            _hospitalLocation,
+        var criticalRequest = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
-            RequestUrgency.Critical,
-            _now.AddHours(2),
-            "idem-critical",
-            _timeProvider
+            urgency: RequestUrgency.Critical,
+            neededBy: _now.AddHours(2),
+            idempotencyKey: "idem-critical"
         );
 
         MatchResult routineResult = _matchingPolicy.Match(
