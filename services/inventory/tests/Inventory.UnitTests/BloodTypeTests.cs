@@ -1,4 +1,5 @@
 using BloodLink.BuildingBlocks.Domain;
+using BloodLink.Inventory.Domain.Errors;
 using BloodLink.Inventory.Domain.ValueObjects;
 using Shouldly;
 using Xunit;
@@ -84,7 +85,7 @@ public class BloodTypeTests
     public void Parse_InvalidCode_ThrowsDomainException()
     {
         DomainException ex = Should.Throw<DomainException>(() => BloodType.Parse("XYZ"));
-        ex.Code.ShouldBe("blood_type.invalid");
+        ex.Code.ShouldBe(InventoryDomainErrors.BloodType.Invalid);
     }
 
     [Fact]

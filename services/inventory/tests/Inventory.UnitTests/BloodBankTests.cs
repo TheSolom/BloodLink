@@ -1,4 +1,5 @@
 using BloodLink.BuildingBlocks.Domain;
+using BloodLink.Inventory.Domain.Errors;
 using BloodLink.Inventory.Domain.Model.BloodBanks;
 using BloodLink.Inventory.Domain.Model.BloodBanks.Events;
 using BloodLink.Inventory.Domain.ValueObjects;
@@ -40,7 +41,7 @@ public class BloodBankTests
         DomainException ex = Should.Throw<DomainException>(() =>
             BloodBank.Register(Guid.NewGuid(), name!, GeoLocation.Create(0, 0))
         );
-        ex.Code.ShouldBe("blood_bank.name_required");
+        ex.Code.ShouldBe(InventoryDomainErrors.BloodBank.NameRequired);
     }
 
     [Fact]
@@ -50,6 +51,6 @@ public class BloodBankTests
         DomainException ex = Should.Throw<DomainException>(() =>
             BloodBank.Register(Guid.NewGuid(), longName, GeoLocation.Create(0, 0))
         );
-        ex.Code.ShouldBe("blood_bank.name_too_long");
+        ex.Code.ShouldBe(InventoryDomainErrors.BloodBank.NameTooLong);
     }
 }

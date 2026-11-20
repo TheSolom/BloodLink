@@ -1,4 +1,5 @@
 using BloodLink.BuildingBlocks.Domain;
+using BloodLink.Requests.Domain.Errors;
 using BloodLink.Requests.Domain.ValueObjects;
 
 namespace BloodLink.Requests.Domain.Hospitals;
@@ -15,12 +16,18 @@ public class Hospital : Entity<Guid>
     {
         if (id == Guid.Empty)
         {
-            throw new DomainException("Hospital ID cannot be empty.", "hospital.invalid_id");
+            throw new DomainException(
+                "Hospital ID cannot be empty.",
+                RequestsDomainErrors.Hospital.InvalidId
+            );
         }
 
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new DomainException("Hospital name is required.", "hospital.name_required");
+            throw new DomainException(
+                "Hospital name is required.",
+                RequestsDomainErrors.Hospital.NameRequired
+            );
         }
 
         ArgumentNullException.ThrowIfNull(location);

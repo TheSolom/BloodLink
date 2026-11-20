@@ -71,7 +71,7 @@ public sealed record BloodType
         {
             throw new DomainException(
                 $"'{input}' is not a valid blood type code.",
-                "blood_type.invalid"
+                Errors.InventoryDomainErrors.BloodType.Invalid
             );
         }
 

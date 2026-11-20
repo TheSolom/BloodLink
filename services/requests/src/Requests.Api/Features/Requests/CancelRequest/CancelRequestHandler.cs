@@ -2,6 +2,7 @@ using BloodLink.BuildingBlocks.Domain;
 using BloodLink.Requests.Api.Infrastructure.Auth;
 using BloodLink.Requests.Api.Infrastructure.Persistence;
 using BloodLink.Requests.Domain.BloodRequests;
+using BloodLink.Requests.Domain.Errors;
 using Microsoft.EntityFrameworkCore;
 
 namespace BloodLink.Requests.Api.Features.Requests.CancelRequest;
@@ -25,7 +26,7 @@ public class CancelRequestHandler(RequestsDbContext dbContext, IHospitalContext 
         {
             throw new DomainException(
                 $"Blood request '{requestId}' was not found.",
-                "request.not_found"
+                RequestsDomainErrors.BloodRequest.NotFound
             );
         }
 
@@ -33,7 +34,7 @@ public class CancelRequestHandler(RequestsDbContext dbContext, IHospitalContext 
         {
             throw new DomainException(
                 "You do not have permission to cancel this request.",
-                "request.forbidden"
+                RequestsDomainErrors.BloodRequest.Forbidden
             );
         }
 

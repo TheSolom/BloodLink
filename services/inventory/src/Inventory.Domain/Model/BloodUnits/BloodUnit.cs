@@ -1,4 +1,5 @@
 using BloodLink.BuildingBlocks.Domain;
+using BloodLink.Inventory.Domain.Errors;
 using BloodLink.Inventory.Domain.Model.BloodUnits.Events;
 using BloodLink.Inventory.Domain.ValueObjects;
 
@@ -57,7 +58,7 @@ public class BloodUnit : AggregateRoot<Guid>
         {
             throw new DomainException(
                 "Donation collection time cannot be in the future.",
-                "unit.collected_in_future"
+                InventoryDomainErrors.BloodUnit.CollectedInFuture
             );
         }
 
@@ -68,7 +69,7 @@ public class BloodUnit : AggregateRoot<Guid>
         {
             throw new DomainException(
                 "Donation is already expired based on shelf life.",
-                "unit.already_expired"
+                InventoryDomainErrors.BloodUnit.AlreadyExpired
             );
         }
 
@@ -105,13 +106,16 @@ public class BloodUnit : AggregateRoot<Guid>
         {
             throw new DomainException(
                 "Unit is not available for reservation.",
-                "unit.not_available"
+                InventoryDomainErrors.BloodUnit.NotAvailable
             );
         }
 
         if (now >= ExpiresAt)
         {
-            throw new DomainException("Cannot reserve an expired unit.", "unit.expired");
+            throw new DomainException(
+                "Cannot reserve an expired unit.",
+                InventoryDomainErrors.BloodUnit.Expired
+            );
         }
 
         Status = BloodUnitStatus.Reserved;
@@ -127,7 +131,7 @@ public class BloodUnit : AggregateRoot<Guid>
         {
             throw new DomainException(
                 "Unit is not reserved by this request.",
-                "unit.invalid_reservation"
+                InventoryDomainErrors.BloodUnit.InvalidReservation
             );
         }
 
@@ -144,7 +148,7 @@ public class BloodUnit : AggregateRoot<Guid>
         {
             throw new DomainException(
                 "Cannot expire unit in terminal state.",
-                "unit.cannot_expire_terminal"
+                InventoryDomainErrors.BloodUnit.CannotExpireTerminal
             );
         }
 
@@ -152,7 +156,7 @@ public class BloodUnit : AggregateRoot<Guid>
         {
             throw new DomainException(
                 "Cannot expire unit before its expiration timestamp.",
-                "unit.not_yet_expired"
+                InventoryDomainErrors.BloodUnit.NotYetExpired
             );
         }
 
@@ -168,7 +172,7 @@ public class BloodUnit : AggregateRoot<Guid>
         {
             throw new DomainException(
                 "Discard reason is required.",
-                "unit.discard_reason_required"
+                InventoryDomainErrors.BloodUnit.DiscardReasonRequired
             );
         }
 
@@ -182,7 +186,7 @@ public class BloodUnit : AggregateRoot<Guid>
         {
             throw new DomainException(
                 "Unit must be reserved by the request to mark in transit.",
-                "unit.not_reserved"
+                InventoryDomainErrors.BloodUnit.NotReserved
             );
         }
 
@@ -198,7 +202,7 @@ public class BloodUnit : AggregateRoot<Guid>
         {
             throw new DomainException(
                 "Unit must be in transit to mark delivered.",
-                "unit.not_in_transit"
+                InventoryDomainErrors.BloodUnit.NotInTransit
             );
         }
 

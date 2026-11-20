@@ -1,5 +1,6 @@
 using BloodLink.BuildingBlocks.Domain;
 using BloodLink.Requests.Domain.BloodRequests.Events;
+using BloodLink.Requests.Domain.Errors;
 using BloodLink.Requests.Domain.ValueObjects;
 
 namespace BloodLink.Requests.Domain.BloodRequests;
@@ -58,14 +59,17 @@ public class BloodRequest : AggregateRoot<Guid>
 
         if (id == Guid.Empty)
         {
-            throw new DomainException("Request ID cannot be empty.", "request.invalid_id");
+            throw new DomainException(
+                "Request ID cannot be empty.",
+                RequestsDomainErrors.BloodRequest.InvalidId
+            );
         }
 
         if (hospitalId == Guid.Empty)
         {
             throw new DomainException(
                 "Hospital ID cannot be empty.",
-                "request.invalid_hospital_id"
+                RequestsDomainErrors.BloodRequest.InvalidHospitalId
             );
         }
 
@@ -73,7 +77,7 @@ public class BloodRequest : AggregateRoot<Guid>
         {
             throw new DomainException(
                 $"Units needed must be between 1 and 20. Received: {details.UnitsNeeded}.",
-                "request.invalid_units_needed"
+                RequestsDomainErrors.BloodRequest.InvalidUnitsNeeded
             );
         }
 
@@ -83,7 +87,7 @@ public class BloodRequest : AggregateRoot<Guid>
         {
             throw new DomainException(
                 $"Undefined BloodComponent value: {details.Component}.",
-                "request.invalid_component"
+                RequestsDomainErrors.BloodRequest.InvalidComponent
             );
         }
 
@@ -91,7 +95,7 @@ public class BloodRequest : AggregateRoot<Guid>
         {
             throw new DomainException(
                 $"Undefined RequestUrgency value: {details.Urgency}.",
-                "request.invalid_urgency"
+                RequestsDomainErrors.BloodRequest.InvalidUrgency
             );
         }
 
@@ -100,7 +104,7 @@ public class BloodRequest : AggregateRoot<Guid>
         {
             throw new DomainException(
                 $"Needed-by deadline must be strictly in the future. Now: {now:O}, NeededBy: {details.NeededBy:O}.",
-                "request.needed_by_in_past"
+                RequestsDomainErrors.BloodRequest.NeededByInPast
             );
         }
 
@@ -128,7 +132,7 @@ public class BloodRequest : AggregateRoot<Guid>
         {
             throw new DomainException(
                 $"Cannot transition to Matching from status '{Status}'.",
-                "request.invalid_status_transition"
+                RequestsDomainErrors.BloodRequest.InvalidStatusTransition
             );
         }
 
@@ -144,7 +148,7 @@ public class BloodRequest : AggregateRoot<Guid>
         {
             throw new DomainException(
                 $"Cannot transition to Reserving from status '{Status}'.",
-                "request.invalid_status_transition"
+                RequestsDomainErrors.BloodRequest.InvalidStatusTransition
             );
         }
 
@@ -155,7 +159,7 @@ public class BloodRequest : AggregateRoot<Guid>
         {
             throw new DomainException(
                 $"Assigned units count ({candidateUnitIds.Count}) must match UnitsNeeded ({UnitsNeeded}) with distinct unit IDs.",
-                "request.unit_count_mismatch"
+                RequestsDomainErrors.BloodRequest.UnitCountMismatch
             );
         }
 
@@ -172,7 +176,7 @@ public class BloodRequest : AggregateRoot<Guid>
         {
             throw new DomainException(
                 $"Cannot transition to Dispatching from status '{Status}'.",
-                "request.invalid_status_transition"
+                RequestsDomainErrors.BloodRequest.InvalidStatusTransition
             );
         }
 
@@ -186,7 +190,7 @@ public class BloodRequest : AggregateRoot<Guid>
         {
             throw new DomainException(
                 $"Cannot transition to InTransit from status '{Status}'.",
-                "request.invalid_status_transition"
+                RequestsDomainErrors.BloodRequest.InvalidStatusTransition
             );
         }
 
@@ -200,7 +204,7 @@ public class BloodRequest : AggregateRoot<Guid>
         {
             throw new DomainException(
                 $"Cannot transition to Fulfilled from status '{Status}'.",
-                "request.invalid_status_transition"
+                RequestsDomainErrors.BloodRequest.InvalidStatusTransition
             );
         }
 
@@ -212,7 +216,10 @@ public class BloodRequest : AggregateRoot<Guid>
     {
         if (string.IsNullOrWhiteSpace(reason))
         {
-            throw new DomainException("Failure reason is required.", "request.reason_required");
+            throw new DomainException(
+                "Failure reason is required.",
+                RequestsDomainErrors.BloodRequest.ReasonRequired
+            );
         }
 
         if (
@@ -224,7 +231,7 @@ public class BloodRequest : AggregateRoot<Guid>
         {
             throw new DomainException(
                 $"Cannot fail request in terminal status '{Status}'.",
-                "request.terminal_state"
+                RequestsDomainErrors.BloodRequest.TerminalState
             );
         }
 
@@ -238,7 +245,7 @@ public class BloodRequest : AggregateRoot<Guid>
         {
             throw new DomainException(
                 "Cancellation reason is required.",
-                "request.reason_required"
+                RequestsDomainErrors.BloodRequest.ReasonRequired
             );
         }
 
@@ -246,7 +253,7 @@ public class BloodRequest : AggregateRoot<Guid>
         {
             throw new DomainException(
                 "Cannot cancel request once blood units are in transit.",
-                "request.cannot_cancel_in_transit"
+                RequestsDomainErrors.BloodRequest.CannotCancelInTransit
             );
         }
 
@@ -259,7 +266,7 @@ public class BloodRequest : AggregateRoot<Guid>
         {
             throw new DomainException(
                 $"Cannot cancel request in terminal status '{Status}'.",
-                "request.cannot_cancel_terminal"
+                RequestsDomainErrors.BloodRequest.CannotCancelTerminal
             );
         }
 

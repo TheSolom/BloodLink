@@ -1,4 +1,5 @@
 using BloodLink.BuildingBlocks.Domain;
+using BloodLink.Inventory.Domain.Errors;
 using BloodLink.Inventory.Domain.ValueObjects;
 using Shouldly;
 using Xunit;
@@ -28,7 +29,7 @@ public class GeoLocationTests
     public void Create_OutOfRangeCoordinates_ThrowsDomainException(double lat, double lon)
     {
         DomainException ex = Should.Throw<DomainException>(() => GeoLocation.Create(lat, lon));
-        ex.Code.ShouldBe("geo_location.out_of_range");
+        ex.Code.ShouldBe(InventoryDomainErrors.GeoLocation.OutOfRange);
     }
 
     [Fact]

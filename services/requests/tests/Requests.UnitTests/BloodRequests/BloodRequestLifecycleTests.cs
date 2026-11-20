@@ -1,6 +1,7 @@
 using BloodLink.BuildingBlocks.Domain;
 using BloodLink.Requests.Domain.BloodRequests;
 using BloodLink.Requests.Domain.BloodRequests.Events;
+using BloodLink.Requests.Domain.Errors;
 using BloodLink.Requests.Domain.ValueObjects;
 using BloodLink.Requests.UnitTests.Fixtures;
 using Shouldly;
@@ -87,7 +88,7 @@ public class BloodRequestLifecycleTests
                     _timeProvider
                 )
             )
-            .Code.ShouldBe("request.invalid_units_needed");
+            .Code.ShouldBe(RequestsDomainErrors.BloodRequest.InvalidUnitsNeeded);
     }
 
     [Fact]
@@ -110,7 +111,7 @@ public class BloodRequestLifecycleTests
                     _timeProvider
                 )
             )
-            .Code.ShouldBe("request.needed_by_in_past");
+            .Code.ShouldBe(RequestsDomainErrors.BloodRequest.NeededByInPast);
 
         Should
             .Throw<DomainException>(() =>
@@ -129,7 +130,7 @@ public class BloodRequestLifecycleTests
                     _timeProvider
                 )
             )
-            .Code.ShouldBe("request.needed_by_in_past");
+            .Code.ShouldBe(RequestsDomainErrors.BloodRequest.NeededByInPast);
     }
 
     [Theory]
@@ -154,7 +155,7 @@ public class BloodRequestLifecycleTests
                     _timeProvider
                 )
             )
-            .Code.ShouldBe("request.idempotency_key_required");
+            .Code.ShouldBe(DomainErrors.IdempotencyKeyRequired);
     }
 
     [Fact]
@@ -207,7 +208,7 @@ public class BloodRequestLifecycleTests
             .Throw<DomainException>(() =>
                 request.StartReserving([Guid.NewGuid()]) // only 1 unit provided, need 2
             )
-            .Code.ShouldBe("request.unit_count_mismatch");
+            .Code.ShouldBe(RequestsDomainErrors.BloodRequest.UnitCountMismatch);
     }
 
     [Fact]
@@ -252,27 +253,27 @@ public class BloodRequestLifecycleTests
 
         Should
             .Throw<DomainException>(() => reqInTransit.Cancel("Too late"))
-            .Code.ShouldBe("request.cannot_cancel_in_transit");
+            .Code.ShouldBe(RequestsDomainErrors.BloodRequest.CannotCancelInTransit);
 
         // When Fulfilled
         reqInTransit.MarkFulfilled();
         Should
             .Throw<DomainException>(() => reqInTransit.Cancel("Already fulfilled"))
-            .Code.ShouldBe("request.cannot_cancel_terminal");
+            .Code.ShouldBe(RequestsDomainErrors.BloodRequest.CannotCancelTerminal);
 
         // When Failed
         BloodRequest reqFailed = CreateValidRequest();
         reqFailed.MarkFailed("No stock");
         Should
             .Throw<DomainException>(() => reqFailed.Cancel("Already failed"))
-            .Code.ShouldBe("request.cannot_cancel_terminal");
+            .Code.ShouldBe(RequestsDomainErrors.BloodRequest.CannotCancelTerminal);
 
         // When Cancelled
         BloodRequest reqCancelled = CreateValidRequest();
         reqCancelled.Cancel("First cancel");
         Should
             .Throw<DomainException>(() => reqCancelled.Cancel("Second cancel"))
-            .Code.ShouldBe("request.cannot_cancel_terminal");
+            .Code.ShouldBe(RequestsDomainErrors.BloodRequest.CannotCancelTerminal);
     }
 
     [Fact]
@@ -295,7 +296,7 @@ public class BloodRequestLifecycleTests
                     _timeProvider
                 )
             )
-            .Code.ShouldBe("request.invalid_component");
+            .Code.ShouldBe(RequestsDomainErrors.BloodRequest.InvalidComponent);
 
         Should
             .Throw<DomainException>(() =>
@@ -314,7 +315,7 @@ public class BloodRequestLifecycleTests
                     _timeProvider
                 )
             )
-            .Code.ShouldBe("request.invalid_urgency");
+            .Code.ShouldBe(RequestsDomainErrors.BloodRequest.InvalidUrgency);
     }
 
     [Fact]
@@ -326,7 +327,7 @@ public class BloodRequestLifecycleTests
         var unitId = Guid.NewGuid();
         Should
             .Throw<DomainException>(() => request.StartReserving([unitId, unitId]))
-            .Code.ShouldBe("request.unit_count_mismatch");
+            .Code.ShouldBe(RequestsDomainErrors.BloodRequest.UnitCountMismatch);
     }
 
     [Fact]

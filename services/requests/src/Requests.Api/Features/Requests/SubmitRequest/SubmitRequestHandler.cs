@@ -2,6 +2,7 @@ using BloodLink.BuildingBlocks.Domain;
 using BloodLink.Requests.Api.Infrastructure.Auth;
 using BloodLink.Requests.Api.Infrastructure.Persistence;
 using BloodLink.Requests.Domain.BloodRequests;
+using BloodLink.Requests.Domain.Errors;
 using BloodLink.Requests.Domain.Hospitals;
 using BloodLink.Requests.Domain.ValueObjects;
 using Microsoft.Data.SqlClient;
@@ -47,7 +48,7 @@ public class SubmitRequestHandler(
         {
             throw new DomainException(
                 $"Hospital '{hospitalId}' was not found in reference data.",
-                "hospital.not_found"
+                RequestsDomainErrors.Hospital.NotFound
             );
         }
 

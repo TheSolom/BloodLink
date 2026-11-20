@@ -2,6 +2,7 @@ using BloodLink.BuildingBlocks.Domain;
 using BloodLink.Requests.Api.Infrastructure.Auth;
 using BloodLink.Requests.Api.Infrastructure.Persistence;
 using BloodLink.Requests.Domain.BloodRequests;
+using BloodLink.Requests.Domain.Errors;
 using Microsoft.EntityFrameworkCore;
 
 namespace BloodLink.Requests.Api.Features.Requests.GetRequestStatus;
@@ -28,7 +29,7 @@ public class GetRequestStatusHandler(RequestsDbContext dbContext, IHospitalConte
         {
             throw new DomainException(
                 "You do not have permission to view this request.",
-                "request.forbidden"
+                RequestsDomainErrors.BloodRequest.Forbidden
             );
         }
 

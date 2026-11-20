@@ -1,4 +1,5 @@
 using BloodLink.BuildingBlocks.Domain;
+using BloodLink.Inventory.Domain.Errors;
 using BloodLink.Inventory.Domain.ValueObjects;
 using Shouldly;
 using Xunit;
@@ -32,7 +33,7 @@ public class DonationNumberTests
     public void Create_InvalidFormat_ThrowsDomainException(string? input)
     {
         DomainException ex = Should.Throw<DomainException>(() => DonationNumber.Create(input!));
-        ex.Code.ShouldBe("donation_number.invalid");
+        ex.Code.ShouldBe(InventoryDomainErrors.DonationNumber.Invalid);
     }
 
     [Fact]

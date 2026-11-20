@@ -24,7 +24,7 @@ public sealed record GeoLocation
         {
             throw new DomainException(
                 $"Latitude {latitude} is outside valid range [{MinLatitude}, {MaxLatitude}].",
-                "geo_location.out_of_range"
+                Errors.InventoryDomainErrors.GeoLocation.OutOfRange
             );
         }
 
@@ -32,7 +32,7 @@ public sealed record GeoLocation
         {
             throw new DomainException(
                 $"Longitude {longitude} is outside valid range [{MinLongitude}, {MaxLongitude}].",
-                "geo_location.out_of_range"
+                Errors.InventoryDomainErrors.GeoLocation.OutOfRange
             );
         }
 

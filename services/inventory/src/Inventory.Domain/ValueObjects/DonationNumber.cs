@@ -45,7 +45,7 @@ public sealed partial record DonationNumber
         {
             throw new DomainException(
                 $"'{value}' is not a valid donation number. Must be 3-32 alphanumeric characters with optional hyphens.",
-                "donation_number.invalid"
+                Errors.InventoryDomainErrors.DonationNumber.Invalid
             );
         }
 

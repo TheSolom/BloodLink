@@ -20,7 +20,7 @@ public sealed record GeoLocation
         {
             throw new DomainException(
                 $"Latitude must be between {MinLatitude} and {MaxLatitude} degrees. Received: {latitude}.",
-                "geolocation.invalid_latitude"
+                Errors.RequestsDomainErrors.GeoLocation.InvalidLatitude
             );
         }
 
@@ -28,7 +28,7 @@ public sealed record GeoLocation
         {
             throw new DomainException(
                 $"Longitude must be between {MinLongitude} and {MaxLongitude} degrees. Received: {longitude}.",
-                "geolocation.invalid_longitude"
+                Errors.RequestsDomainErrors.GeoLocation.InvalidLongitude
             );
         }
 

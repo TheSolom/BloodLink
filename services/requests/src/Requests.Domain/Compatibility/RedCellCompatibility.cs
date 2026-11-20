@@ -1,4 +1,5 @@
 using BloodLink.BuildingBlocks.Domain;
+using BloodLink.Requests.Domain.Errors;
 using BloodLink.Requests.Domain.ValueObjects;
 
 namespace BloodLink.Requests.Domain.Compatibility;
@@ -75,7 +76,7 @@ public static class RedCellCompatibility
         {
             throw new DomainException(
                 $"Donor '{donor}' is incompatible with recipient '{recipient}' for red cells.",
-                "compatibility.incompatible"
+                RequestsDomainErrors.Compatibility.Incompatible
             );
         }
 
@@ -87,7 +88,7 @@ public static class RedCellCompatibility
         {
             throw new DomainException(
                 $"Serves count difference cannot be negative for compatible donor '{donor}' and recipient '{recipient}'.",
-                "compatibility.negative_waste"
+                RequestsDomainErrors.Compatibility.NegativeWaste
             );
         }
 

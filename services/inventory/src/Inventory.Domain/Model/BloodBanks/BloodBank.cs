@@ -1,4 +1,5 @@
 using BloodLink.BuildingBlocks.Domain;
+using BloodLink.Inventory.Domain.Errors;
 using BloodLink.Inventory.Domain.Model.BloodBanks.Events;
 using BloodLink.Inventory.Domain.ValueObjects;
 
@@ -24,7 +25,10 @@ public class BloodBank : AggregateRoot<Guid>
     {
         if (string.IsNullOrWhiteSpace(name))
         {
-            throw new DomainException("Blood bank name is required.", "blood_bank.name_required");
+            throw new DomainException(
+                "Blood bank name is required.",
+                InventoryDomainErrors.BloodBank.NameRequired
+            );
         }
 
         string trimmedName = name.Trim();
@@ -32,7 +36,7 @@ public class BloodBank : AggregateRoot<Guid>
         {
             throw new DomainException(
                 $"Blood bank name cannot exceed {NameMaxLength} characters.",
-                "blood_bank.name_too_long"
+                InventoryDomainErrors.BloodBank.NameTooLong
             );
         }
 

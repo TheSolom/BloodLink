@@ -1,4 +1,5 @@
 using BloodLink.BuildingBlocks.Domain;
+using BloodLink.Inventory.Domain.Errors;
 using BloodLink.Inventory.Domain.Model.BloodUnits;
 using BloodLink.Inventory.Domain.Model.BloodUnits.Events;
 using BloodLink.Inventory.Domain.ValueObjects;
@@ -104,7 +105,7 @@ public class BloodUnitTest
                 _now
             )
         );
-        ex.Code.ShouldBe("unit.collected_in_future");
+        ex.Code.ShouldBe(InventoryDomainErrors.BloodUnit.CollectedInFuture);
     }
 
     [Fact]
@@ -124,7 +125,7 @@ public class BloodUnitTest
                 _now
             )
         );
-        ex.Code.ShouldBe("unit.already_expired");
+        ex.Code.ShouldBe(InventoryDomainErrors.BloodUnit.AlreadyExpired);
     }
 
     [Fact]
@@ -171,7 +172,7 @@ public class BloodUnitTest
         DomainException ex = Should.Throw<DomainException>(() =>
             unit.Reserve(Guid.NewGuid(), _now)
         );
-        ex.Code.ShouldBe("unit.not_available");
+        ex.Code.ShouldBe(InventoryDomainErrors.BloodUnit.NotAvailable);
     }
 
     [Fact]
@@ -183,7 +184,7 @@ public class BloodUnitTest
         DomainException ex = Should.Throw<DomainException>(() =>
             unit.Reserve(Guid.NewGuid(), afterExpiry)
         );
-        ex.Code.ShouldBe("unit.expired");
+        ex.Code.ShouldBe(InventoryDomainErrors.BloodUnit.Expired);
     }
 
     [Fact]
@@ -214,7 +215,7 @@ public class BloodUnitTest
         DomainException ex = Should.Throw<DomainException>(() =>
             unit.ReleaseReservation(Guid.NewGuid())
         );
-        ex.Code.ShouldBe("unit.invalid_reservation");
+        ex.Code.ShouldBe(InventoryDomainErrors.BloodUnit.InvalidReservation);
     }
 
     [Fact]
@@ -226,7 +227,7 @@ public class BloodUnitTest
         DomainException ex = Should.Throw<DomainException>(() =>
             unit.ReleaseReservation(Guid.NewGuid())
         );
-        ex.Code.ShouldBe("unit.invalid_reservation");
+        ex.Code.ShouldBe(InventoryDomainErrors.BloodUnit.InvalidReservation);
     }
 
     [Fact]
@@ -250,7 +251,7 @@ public class BloodUnitTest
         BloodUnit unit = CreateAvailableUnit();
 
         DomainException ex = Should.Throw<DomainException>(() => unit.Expire(_now));
-        ex.Code.ShouldBe("unit.not_yet_expired");
+        ex.Code.ShouldBe(InventoryDomainErrors.BloodUnit.NotYetExpired);
     }
 
     [Fact]
@@ -265,7 +266,7 @@ public class BloodUnitTest
         DomainException ex = Should.Throw<DomainException>(() =>
             unit.Expire(unit.ExpiresAt.AddDays(1))
         );
-        ex.Code.ShouldBe("unit.cannot_expire_terminal");
+        ex.Code.ShouldBe(InventoryDomainErrors.BloodUnit.CannotExpireTerminal);
     }
 
     [Fact]
@@ -285,7 +286,7 @@ public class BloodUnitTest
         BloodUnit unit = CreateAvailableUnit();
 
         DomainException ex = Should.Throw<DomainException>(() => unit.Discard(" "));
-        ex.Code.ShouldBe("unit.discard_reason_required");
+        ex.Code.ShouldBe(InventoryDomainErrors.BloodUnit.DiscardReasonRequired);
     }
 
     [Fact]
@@ -315,7 +316,7 @@ public class BloodUnitTest
         DomainException ex = Should.Throw<DomainException>(() =>
             unit.MarkInTransit(Guid.NewGuid())
         );
-        ex.Code.ShouldBe("unit.not_reserved");
+        ex.Code.ShouldBe(InventoryDomainErrors.BloodUnit.NotReserved);
     }
 
     [Fact]
@@ -346,7 +347,7 @@ public class BloodUnitTest
         unit.Reserve(requestId, _now);
 
         DomainException ex = Should.Throw<DomainException>(() => unit.MarkDelivered(requestId));
-        ex.Code.ShouldBe("unit.not_in_transit");
+        ex.Code.ShouldBe(InventoryDomainErrors.BloodUnit.NotInTransit);
     }
 
     private BloodUnit CreateAvailableUnit() =>

@@ -65,7 +65,7 @@ public class GlobalExceptionHandler(
             return (
                 StatusCodes.Status422UnprocessableEntity,
                 "Domain Rule Violation",
-                domainException.Code ?? "domain.rule_violation"
+                domainException.Code ?? DomainErrors.RuleViolation
             );
         }
 

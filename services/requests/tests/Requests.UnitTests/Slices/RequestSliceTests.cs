@@ -6,6 +6,7 @@ using BloodLink.Requests.Api.Features.Requests.SubmitRequest;
 using BloodLink.Requests.Api.Infrastructure.Auth;
 using BloodLink.Requests.Api.Infrastructure.Persistence;
 using BloodLink.Requests.Domain.BloodRequests;
+using BloodLink.Requests.Domain.Errors;
 using BloodLink.Requests.UnitTests.Fixtures;
 using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
@@ -140,7 +141,7 @@ public class RequestSliceTests
             handler.HandleAsync(command, "", CancellationToken.None)
         );
 
-        ex.Code.ShouldBe("request.idempotency_key_required");
+        ex.Code.ShouldBe(DomainErrors.IdempotencyKeyRequired);
     }
 
     [Fact]
@@ -166,7 +167,7 @@ public class RequestSliceTests
             handler.HandleAsync(command, longKey, CancellationToken.None)
         );
 
-        ex.Code.ShouldBe("request.idempotency_key_too_long");
+        ex.Code.ShouldBe(DomainErrors.IdempotencyKeyTooLong);
     }
 
     [Fact]
@@ -269,7 +270,7 @@ public class RequestSliceTests
             )
         );
 
-        ex.Code.ShouldBe("request.cannot_cancel_in_transit");
+        ex.Code.ShouldBe(RequestsDomainErrors.BloodRequest.CannotCancelInTransit);
     }
 
     [Fact]
@@ -305,7 +306,7 @@ public class RequestSliceTests
             )
         );
 
-        ex.Code.ShouldBe("request.forbidden");
+        ex.Code.ShouldBe(RequestsDomainErrors.BloodRequest.Forbidden);
     }
 
     [Fact]
@@ -358,7 +359,7 @@ public class RequestSliceTests
             statusHandlerB.HandleAsync(submitted.Id, CancellationToken.None)
         );
 
-        ex.Code.ShouldBe("request.forbidden");
+        ex.Code.ShouldBe(RequestsDomainErrors.BloodRequest.Forbidden);
     }
 
     [Fact]
