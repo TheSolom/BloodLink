@@ -1,4 +1,5 @@
 using BloodLink.BuildingBlocks.Web;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace BloodLink.Inventory.Api.Features.Stock.GetAvailableStock;
 
@@ -9,7 +10,7 @@ public static class GetAvailableStockEndpoint
         endpoints
             .MapGet(
                 "/api/v1/stock",
-                async (
+                async Task<Ok<GetAvailableStockResponse>> (
                     [AsParameters] GetAvailableStockQuery query,
                     GetAvailableStockHandler handler,
                     CancellationToken cancellationToken
@@ -19,7 +20,7 @@ public static class GetAvailableStockEndpoint
                         query,
                         cancellationToken
                     );
-                    return Results.Ok(response);
+                    return TypedResults.Ok(response);
                 }
             )
             .AddEndpointFilter<ValidationFilter<GetAvailableStockQuery>>()

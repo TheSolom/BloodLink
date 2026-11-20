@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http.HttpResults;
+
 namespace BloodLink.Inventory.Api.Features.Stock.GetStockSnapshot;
 
 public static class GetStockSnapshotEndpoint
@@ -9,7 +11,7 @@ public static class GetStockSnapshotEndpoint
         endpoints
             .MapGet(
                 "/internal/stock-snapshot",
-                async (
+                async Task<Ok<GetStockSnapshotResponse>> (
                     [AsParameters] GetStockSnapshotQuery query,
                     GetStockSnapshotHandler handler,
                     CancellationToken cancellationToken
@@ -19,7 +21,7 @@ public static class GetStockSnapshotEndpoint
                         query,
                         cancellationToken
                     );
-                    return Results.Ok(response);
+                    return TypedResults.Ok(response);
                 }
             )
             .WithName("GetStockSnapshot")

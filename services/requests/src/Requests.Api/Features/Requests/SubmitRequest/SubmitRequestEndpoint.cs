@@ -1,5 +1,6 @@
 using BloodLink.BuildingBlocks.Domain;
 using BloodLink.BuildingBlocks.Web;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BloodLink.Requests.Api.Features.Requests.SubmitRequest;
@@ -11,7 +12,7 @@ public static class SubmitRequestEndpoint
         endpoints
             .MapPost(
                 "/api/v1/requests",
-                async (
+                async Task<Ok<SubmitRequestResponse>> (
                     [FromBody] SubmitRequestCommand command,
                     [FromHeader(Name = IdempotencyKey.HeaderName)] string? idempotencyKey,
                     SubmitRequestHandler handler,
@@ -24,7 +25,7 @@ public static class SubmitRequestEndpoint
                         cancellationToken
                     );
 
-                    return Results.Ok(response);
+                    return TypedResults.Ok(response);
                 }
             )
             .RequireIdempotencyKey()

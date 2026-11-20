@@ -37,7 +37,7 @@ public class ReleaseUnitsHandler(
                 );
             }
 
-            return Results.Problem(
+            return TypedResults.Problem(
                 statusCode: StatusCodes.Status404NotFound,
                 title: "Blood Units Not Found",
                 detail: $"One or more blood units were not found in inventory: {string.Join(", ", missingIds)}",
@@ -86,7 +86,7 @@ public class ReleaseUnitsHandler(
                     );
                 }
 
-                return Results.Problem(
+                return TypedResults.Problem(
                     statusCode: StatusCodes.Status409Conflict,
                     title: "Release Concurrency Conflict",
                     detail: "One or more blood units were modified concurrently by another transaction.",
@@ -108,6 +108,6 @@ public class ReleaseUnitsHandler(
         }
 
         var releasedResultIds = unitsToRelease.Select(u => u.Id).ToList();
-        return Results.Ok(new ReleaseUnitsResponse(request.RequestId, releasedResultIds));
+        return TypedResults.Ok(new ReleaseUnitsResponse(request.RequestId, releasedResultIds));
     }
 }

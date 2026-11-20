@@ -20,7 +20,7 @@ public class ReceiveDonationHandler(InventoryDbContext dbContext, TimeProvider t
         );
         if (bank is null)
         {
-            return Results.Problem(
+            return TypedResults.Problem(
                 statusCode: StatusCodes.Status404NotFound,
                 title: "Blood Bank Not Found",
                 detail: $"Blood bank with ID '{request.BloodBankId}' does not exist.",
@@ -32,7 +32,7 @@ public class ReceiveDonationHandler(InventoryDbContext dbContext, TimeProvider t
         var bloodType = BloodType.Parse(request.BloodType);
         if (!BloodComponentExtensions.TryParse(request.Component, out BloodComponent component))
         {
-            return Results.Problem(
+            return TypedResults.Problem(
                 statusCode: StatusCodes.Status400BadRequest,
                 title: "Invalid Component",
                 detail: $"Component '{request.Component}' is invalid.",
@@ -48,7 +48,7 @@ public class ReceiveDonationHandler(InventoryDbContext dbContext, TimeProvider t
 
         if (isDuplicate)
         {
-            return Results.Problem(
+            return TypedResults.Problem(
                 statusCode: StatusCodes.Status409Conflict,
                 title: "Duplicate Donation Number",
                 detail: $"Donation number '{donationNumber}' already exists for blood bank '{request.BloodBankId}'.",
@@ -75,7 +75,7 @@ public class ReceiveDonationHandler(InventoryDbContext dbContext, TimeProvider t
         }
         catch (DbUpdateException ex) when (GlobalExceptionHandler.IsUniqueConstraintViolation(ex))
         {
-            return Results.Problem(
+            return TypedResults.Problem(
                 statusCode: StatusCodes.Status409Conflict,
                 title: "Duplicate Donation Number",
                 detail: $"Donation number '{donationNumber}' already exists for blood bank '{request.BloodBankId}'.",
@@ -84,6 +84,6 @@ public class ReceiveDonationHandler(InventoryDbContext dbContext, TimeProvider t
         }
 
         ReceiveDonationResponse response = ReceiveDonationMapper.ToResponse(unit);
-        return Results.Created($"/api/v1/stock/{response.Id}", response);
+        return TypedResults.Created($"/api/v1/stock/{response.Id}", response);
     }
 }

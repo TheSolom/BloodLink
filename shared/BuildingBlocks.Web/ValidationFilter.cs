@@ -24,7 +24,7 @@ public class ValidationFilter<TRequest> : IEndpointFilter
         TRequest? request = context.Arguments.OfType<TRequest>().FirstOrDefault();
         if (request is null)
         {
-            return Results.Problem(
+            return TypedResults.Problem(
                 title: "Invalid Request Payload",
                 detail: "Request payload could not be deserialized or was null.",
                 statusCode: StatusCodes.Status400BadRequest,
@@ -47,7 +47,7 @@ public class ValidationFilter<TRequest> : IEndpointFilter
 
             problemDetails.Extensions["code"] = "validation.failed";
 
-            return Results.Problem(problemDetails);
+            return TypedResults.Problem(problemDetails);
         }
 
         return await next(context);

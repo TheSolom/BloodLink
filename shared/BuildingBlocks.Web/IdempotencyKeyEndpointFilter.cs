@@ -18,7 +18,7 @@ public class IdempotencyKeyEndpointFilter : IEndpointFilter
             ) || string.IsNullOrWhiteSpace(values)
         )
         {
-            return Results.Problem(
+            return TypedResults.Problem(
                 statusCode: StatusCodes.Status400BadRequest,
                 title: "Missing Idempotency-Key",
                 detail: "The 'Idempotency-Key' header is required for request submission.",
@@ -32,7 +32,7 @@ public class IdempotencyKeyEndpointFilter : IEndpointFilter
         string rawKey = values.ToString();
         if (!IdempotencyKey.TryCreate(rawKey, out _, out string? errorCode))
         {
-            return Results.Problem(
+            return TypedResults.Problem(
                 statusCode: StatusCodes.Status400BadRequest,
                 title: "Invalid Idempotency-Key",
                 detail: $"The 'Idempotency-Key' header must not exceed {IdempotencyKey.MaxLength} characters.",

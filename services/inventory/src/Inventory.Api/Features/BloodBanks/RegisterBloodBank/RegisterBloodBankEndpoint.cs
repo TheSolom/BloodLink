@@ -1,4 +1,5 @@
 using BloodLink.BuildingBlocks.Web;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace BloodLink.Inventory.Api.Features.BloodBanks.RegisterBloodBank;
 
@@ -9,7 +10,7 @@ public static class RegisterBloodBankEndpoint
         endpoints
             .MapPost(
                 "/api/v1/banks",
-                async (
+                async Task<Created<RegisterBloodBankResponse>> (
                     RegisterBloodBankRequest request,
                     RegisterBloodBankHandler handler,
                     CancellationToken cancellationToken
@@ -19,7 +20,7 @@ public static class RegisterBloodBankEndpoint
                         request,
                         cancellationToken
                     );
-                    return Results.Created($"/api/v1/banks/{response.Id}", response);
+                    return TypedResults.Created($"/api/v1/banks/{response.Id}", response);
                 }
             )
             .AddEndpointFilter<ValidationFilter<RegisterBloodBankRequest>>()

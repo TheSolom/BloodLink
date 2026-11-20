@@ -28,7 +28,7 @@ public class ReserveUnitsConsumerTests
         {
             HandledRequest = request;
             CallCount++;
-            return Task.FromResult(Results.Ok());
+            return Task.FromResult<IResult>(TypedResults.Ok());
         }
     }
 
@@ -123,7 +123,10 @@ public class ReserveUnitsConsumerTests
             harness.GetConsumerHarness<ReserveUnitsConsumer>();
 
         (await consumerHarness.Consumed.Any<ReserveUnitsCommand>()).ShouldBeTrue();
-        consumerHarness.Consumed.Select<ReserveUnitsCommand>().Any(x => x.Exception != null).ShouldBeTrue();
+        consumerHarness
+            .Consumed.Select<ReserveUnitsCommand>()
+            .Any(x => x.Exception != null)
+            .ShouldBeTrue();
         fakeHandler.CallCount.ShouldBe(0);
     }
 }

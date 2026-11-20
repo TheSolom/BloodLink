@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Routing;
 
@@ -12,7 +13,7 @@ public static class GetRequestStatusEndpoint
         endpoints
             .MapGet(
                 "/api/v1/requests/{id:guid}",
-                async (
+                async Task<Results<Ok<RequestStatusResponse>, NotFound>> (
                     [FromRoute] Guid id,
                     GetRequestStatusHandler handler,
                     CancellationToken cancellationToken
@@ -22,7 +23,9 @@ public static class GetRequestStatusEndpoint
                         id,
                         cancellationToken
                     );
-                    return response is not null ? Results.Ok(response) : Results.NotFound();
+                    return response is not null
+                        ? TypedResults.Ok(response)
+                        : TypedResults.NotFound();
                 }
             )
             .WithName("GetRequestStatus")

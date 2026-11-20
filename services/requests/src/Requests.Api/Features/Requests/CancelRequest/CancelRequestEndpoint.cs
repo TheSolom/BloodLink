@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BloodLink.Requests.Api.Features.Requests.CancelRequest;
@@ -9,7 +10,7 @@ public static class CancelRequestEndpoint
         endpoints
             .MapPost(
                 "/api/v1/requests/{id:guid}/cancel",
-                async (
+                async Task<Ok> (
                     [FromRoute] Guid id,
                     [FromBody] CancelRequestCommand command,
                     CancelRequestHandler handler,
@@ -17,7 +18,7 @@ public static class CancelRequestEndpoint
                 ) =>
                 {
                     await handler.HandleAsync(id, command, cancellationToken);
-                    return Results.Ok();
+                    return TypedResults.Ok();
                 }
             )
             .WithName("CancelRequest")

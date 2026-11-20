@@ -36,7 +36,7 @@ public class ReserveUnitsHandler(
         if (IsAlreadyReserved(units, request.RequestId))
         {
             LogIdempotentRetry(request.RequestId);
-            return Results.Ok(new ReserveUnitsResponse(request.RequestId, request.UnitIds));
+            return TypedResults.Ok(new ReserveUnitsResponse(request.RequestId, request.UnitIds));
         }
 
         // 4. Availability check (all-or-nothing: every unit must be Available and not expired)
@@ -68,7 +68,7 @@ public class ReserveUnitsHandler(
         }
 
         LogSuccess(units.Count, request.RequestId);
-        return Results.Ok(new ReserveUnitsResponse(request.RequestId, request.UnitIds));
+        return TypedResults.Ok(new ReserveUnitsResponse(request.RequestId, request.UnitIds));
     }
 
     private static bool IsAlreadyReserved(List<BloodUnit> units, Guid requestId) =>
@@ -122,7 +122,7 @@ public class ReserveUnitsHandler(
             throw;
         }
 
-        return Results.Problem(
+        return TypedResults.Problem(
             statusCode: StatusCodes.Status404NotFound,
             title: "Blood Units Not Found",
             detail: $"One or more blood units were not found in inventory: {string.Join(", ", missingIds)}",
@@ -171,7 +171,7 @@ public class ReserveUnitsHandler(
             throw;
         }
 
-        return Results.Problem(
+        return TypedResults.Problem(
             statusCode: StatusCodes.Status409Conflict,
             title: "Blood Units Unavailable",
             detail: "One or more requested blood units are no longer available for reservation.",
@@ -216,7 +216,9 @@ public class ReserveUnitsHandler(
                 )
             )
             {
-                return Results.Ok(new ReserveUnitsResponse(request.RequestId, request.UnitIds));
+                return TypedResults.Ok(
+                    new ReserveUnitsResponse(request.RequestId, request.UnitIds)
+                );
             }
 
             IEventPublisher scopePublisher =
@@ -241,7 +243,7 @@ public class ReserveUnitsHandler(
             throw;
         }
 
-        return Results.Problem(
+        return TypedResults.Problem(
             statusCode: StatusCodes.Status409Conflict,
             title: "Reservation Concurrency Conflict",
             detail: "One or more blood units were modified concurrently by another transaction.",

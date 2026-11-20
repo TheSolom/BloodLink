@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http.HttpResults;
+
 namespace BloodLink.Requests.Api.Features.Requests.ListRequests;
 
 public static class ListRequestsEndpoint
@@ -7,7 +9,7 @@ public static class ListRequestsEndpoint
         endpoints
             .MapGet(
                 "/api/v1/requests",
-                async (
+                async Task<Ok<ListRequestsResponse>> (
                     [AsParameters] ListRequestsQuery query,
                     ListRequestsHandler handler,
                     CancellationToken cancellationToken
@@ -17,7 +19,7 @@ public static class ListRequestsEndpoint
                         query,
                         cancellationToken
                     );
-                    return Results.Ok(response);
+                    return TypedResults.Ok(response);
                 }
             )
             .WithName("ListRequests")

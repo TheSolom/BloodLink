@@ -27,7 +27,7 @@ public class ReleaseUnitsConsumerTests
         {
             HandledRequest = request;
             CallCount++;
-            return Task.FromResult(Results.Ok());
+            return Task.FromResult<IResult>(TypedResults.Ok());
         }
     }
 
@@ -91,7 +91,10 @@ public class ReleaseUnitsConsumerTests
             harness.GetConsumerHarness<ReleaseUnitsConsumer>();
 
         (await consumerHarness.Consumed.Any<ReleaseUnitsCommand>()).ShouldBeTrue();
-        consumerHarness.Consumed.Select<ReleaseUnitsCommand>().Any(x => x.Exception != null).ShouldBeTrue();
+        consumerHarness
+            .Consumed.Select<ReleaseUnitsCommand>()
+            .Any(x => x.Exception != null)
+            .ShouldBeTrue();
         fakeHandler.CallCount.ShouldBe(1);
     }
 
@@ -108,7 +111,9 @@ public class ReleaseUnitsConsumerTests
         )
         {
             CallCount++;
-            return Task.FromResult(Results.Problem(statusCode: StatusCodes.Status404NotFound));
+            return Task.FromResult<IResult>(
+                TypedResults.Problem(statusCode: StatusCodes.Status404NotFound)
+            );
         }
     }
 }
