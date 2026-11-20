@@ -147,9 +147,9 @@ public class GetStockSnapshotTests : IAsyncLifetime
 
         await using (InventoryDbContext dbContext = _factory.CreateDbContext())
         {
-            for (int i = 0; i < 5; i++)
+            for (int i = 1; i <= 5; i++)
             {
-                Guid id = Guid.Parse($"00000000-0000-0000-0000-00000000000{i}");
+                Guid id = Guid.Parse($"10000000-0000-0000-0000-00000000000{i}");
                 createdIds.Add(id);
                 var unit = BloodUnit.ReceiveDonation(
                     id,

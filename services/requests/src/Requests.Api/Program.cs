@@ -53,6 +53,7 @@ builder.Services.AddHttpClient<IStockSnapshotClient, StockSnapshotClient>(client
 builder.Services.AddHostedService<StockSnapshotBootstrapService>();
 
 // TimeProvider & Plain Handlers & Contexts
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped<IHospitalContext, DevHospitalContext>();
 builder.Services.AddScoped<IStockReadModelService, StockReadModelService>();
