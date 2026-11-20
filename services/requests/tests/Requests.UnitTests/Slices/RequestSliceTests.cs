@@ -7,6 +7,7 @@ using BloodLink.Requests.Api.Infrastructure.Auth;
 using BloodLink.Requests.Api.Infrastructure.Persistence;
 using BloodLink.Requests.Domain.BloodRequests;
 using BloodLink.Requests.UnitTests.Fixtures;
+using FluentValidation.Results;
 using Microsoft.EntityFrameworkCore;
 using Shouldly;
 using Xunit;
@@ -181,7 +182,7 @@ public class RequestSliceTests
             NeededBy: DateTimeOffset.UtcNow.AddHours(2)
         );
 
-        var result = validator.Validate(invalidCommand);
+        ValidationResult result = validator.Validate(invalidCommand);
         result.IsValid.ShouldBeFalse();
         result
             .Errors.Any(e => e.PropertyName == nameof(SubmitRequestCommand.Component))

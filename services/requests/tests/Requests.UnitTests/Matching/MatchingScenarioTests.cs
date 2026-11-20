@@ -54,7 +54,7 @@ public class MatchingScenarioTests
     public void Scenario1_ScarceONegative_NotWastedOnOPositive_WhenOPositiveExists_UnderRoutineUrgency()
     {
         // Hospital requests O+ RedCells with Routine urgency
-        var request = CreateRequest(
+        BloodRequest request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
@@ -105,7 +105,7 @@ public class MatchingScenarioTests
     public void Scenario2_SameStock_UnderCriticalUrgency_PicksNearestCompatibleBank()
     {
         // Hospital requests RedCells under Critical urgency
-        var request = CreateRequest(
+        BloodRequest request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
@@ -161,7 +161,7 @@ public class MatchingScenarioTests
     [Fact]
     public void Scenario3_NearExpiryUnit_ThatCannotSurviveTrip_IsFilteredOut()
     {
-        var request = CreateRequest(
+        BloodRequest request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
@@ -202,7 +202,7 @@ public class MatchingScenarioTests
     [Fact]
     public void Scenario4_ExcludedUnits_AreSkippedOnRematch()
     {
-        var request = CreateRequest(
+        BloodRequest request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
@@ -251,7 +251,7 @@ public class MatchingScenarioTests
     public void Scenario5_NoSingleBankCanFillEntireRequest_ReturnsNoMatch()
     {
         // Request needs 3 units
-        var request = CreateRequest(
+        BloodRequest request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 3,
@@ -307,7 +307,7 @@ public class MatchingScenarioTests
     [Fact]
     public void Scenario6_EqualScores_GiveDeterministicOrder()
     {
-        var request = CreateRequest(
+        BloodRequest request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
@@ -374,7 +374,7 @@ public class MatchingScenarioTests
         // Scenario 7: Expiry-approaching O- for an O+ patient.
         // We test whether a near-expiry O- (expiring in 2 days) beats a fresh O+ (expiring in 35 days)
         // under Routine urgency (weights: waste=0.50, expiry=0.40, dist=0.10).
-        var request = CreateRequest(
+        BloodRequest request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
@@ -438,7 +438,7 @@ public class MatchingScenarioTests
     [Fact]
     public void Scenario8_InsufficientTotalStock_ReturnsNoMatch()
     {
-        var request = CreateRequest(
+        BloodRequest request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 5,
@@ -483,7 +483,7 @@ public class MatchingScenarioTests
     public void Scenario9_PlateletRules_PrefersExactAboMatch()
     {
         // Patient is A+ requesting platelets
-        var request = CreateRequest(
+        BloodRequest request = CreateRequest(
             BloodType.APositive,
             BloodComponent.Platelets,
             unitsNeeded: 1,

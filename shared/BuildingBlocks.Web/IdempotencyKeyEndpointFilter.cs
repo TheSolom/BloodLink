@@ -1,5 +1,6 @@
 using BloodLink.BuildingBlocks.Domain;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Primitives;
 
 namespace BloodLink.BuildingBlocks.Web;
 
@@ -13,7 +14,7 @@ public class IdempotencyKeyEndpointFilter : IEndpointFilter
         if (
             !context.HttpContext.Request.Headers.TryGetValue(
                 IdempotencyKey.HeaderName,
-                out var values
+                out StringValues values
             ) || string.IsNullOrWhiteSpace(values)
         )
         {

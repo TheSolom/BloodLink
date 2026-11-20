@@ -52,7 +52,7 @@ public class ExpiryFactorAndSensitivityTests
         // Both units are fresh (outside the 20% window of 8.4 days).
         // O- expires in 20 days, O+ expires in 30 days. Both have expiryFactor = 0.
         // Waste penalty for O- (4/7) means O+ wins, preserving the universal O- donor.
-        var request = CreateRequest(
+        BloodRequest request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
@@ -108,7 +108,7 @@ public class ExpiryFactorAndSensitivityTests
         // O- expires in 2 days (inside window, expiryFactor ~0.76).
         // Fresh O+ expires in 30 days (outside window, expiryFactor = 0).
         // Expiry urgency on O- outweighs the waste penalty, preventing it from expiring on the shelf.
-        var request = CreateRequest(
+        BloodRequest request = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
@@ -315,7 +315,7 @@ public class ExpiryFactorAndSensitivityTests
 
         var sharedStock = new List<CandidateUnitSnapshot> { unitA_ONeg, unitB_OPos };
 
-        var routineRequest = CreateRequest(
+        BloodRequest routineRequest = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
@@ -324,7 +324,7 @@ public class ExpiryFactorAndSensitivityTests
             idempotencyKey: "idem-routine"
         );
 
-        var urgentRequest = CreateRequest(
+        BloodRequest urgentRequest = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,
@@ -333,7 +333,7 @@ public class ExpiryFactorAndSensitivityTests
             idempotencyKey: "idem-urgent"
         );
 
-        var criticalRequest = CreateRequest(
+        BloodRequest criticalRequest = CreateRequest(
             BloodType.OPositive,
             BloodComponent.RedCells,
             unitsNeeded: 1,

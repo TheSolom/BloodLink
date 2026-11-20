@@ -22,7 +22,7 @@ public class IdempotencyKeyTests
     [InlineData("   ")]
     public void Create_NullOrWhiteSpace_ShouldThrowDomainException(string? invalidKey)
     {
-        var ex = Should.Throw<DomainException>(() => IdempotencyKey.Create(invalidKey));
+        DomainException ex = Should.Throw<DomainException>(() => IdempotencyKey.Create(invalidKey));
         ex.Code.ShouldBe(IdempotencyKey.RequiredErrorCode);
     }
 
@@ -30,7 +30,7 @@ public class IdempotencyKeyTests
     public void Create_KeyExceeding128Characters_ShouldThrowDomainException()
     {
         string tooLong = new('x', 129);
-        var ex = Should.Throw<DomainException>(() => IdempotencyKey.Create(tooLong));
+        DomainException ex = Should.Throw<DomainException>(() => IdempotencyKey.Create(tooLong));
         ex.Code.ShouldBe(IdempotencyKey.TooLongErrorCode);
     }
 
