@@ -26,8 +26,8 @@
         />
 
         <!-- Microsoft Extensions & Resilience -->
-        <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="11.0.0" />
-        <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="11.0.0" />
+        <PackageVersion Include="Microsoft.Extensions.Http.Resilience" Version="11.0.1" />
+        <PackageVersion Include="Microsoft.Extensions.ServiceDiscovery" Version="11.0.1" />
 
         <!-- OpenTelemetry & Observability -->
         <PackageVersion Include="OpenTelemetry" Version="1.21.0" />
