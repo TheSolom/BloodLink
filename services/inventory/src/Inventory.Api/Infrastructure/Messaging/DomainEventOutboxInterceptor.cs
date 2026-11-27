@@ -68,11 +68,12 @@ public class DomainEventOutboxInterceptor : SaveChangesInterceptor
         var entries = context
             .ChangeTracker.Entries<IHasDomainEvents>()
             .Where(e => e.Entity.DomainEvents.Count > 0)
+            .Select(e => e.Entity)
             .ToList();
 
         var integrationEvents = new List<object>();
 
-        foreach (IHasDomainEvents entity in entries.Select(entry => entry.Entity))
+        foreach (IHasDomainEvents entity in entries)
         {
             IReadOnlyCollection<IDomainEvent> domainEvents = entity.ClearDomainEvents();
             foreach (IDomainEvent domainEvent in domainEvents)
